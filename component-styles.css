@@ -194,7 +194,7 @@ a {
 }
 
 .overflow-auto {
-  overflow: auto;
+  overflow: auto !important;
 }
 
 .overflow-hidden {
@@ -244,11 +244,12 @@ a {
 
 .top-bar {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 12px 30px 6px;
   flex-shrink: 0;
   position: relative;
+  padding: 0 0 12px 0;;
 }
 
 .app-title {
@@ -317,13 +318,6 @@ a {
   margin: 4px 0 6px;
   font: 700 13px Arial, Helvetica, sans-serif;
   color: var(--accent);
-}
-
-.comp-wrap .content {
-  grid-area: content;
-  height: 100%;
-  overflow: auto;
-  padding: 10px 8px 10px;
 }
 
 .accordion {

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Componente – Texto Izquierda</title>
+  <link rel="stylesheet" href="../CSS/component-styles.css">
+  <style>
+    .highlight-box-accent {
+      border-left: 3px solid var(--accent);
+    }
+
+    /* Pequeñas “tarjetas” en grid (como herramientas, recursos, etc.) */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .tool-item {
+      padding: 8px;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-root overflow-auto">
+    <div class="frame ">
+      <!-- Cambia el id para identificar este HTML en tu orquestador -->
+      <section class="comp-wrap" data-component-id="txt-001">
+
+        <!-- NUEVO: títulos fuera del recuadro gris -->
+        <header class="comp-header">
+          <h1 class="template">Componente de Texto</h1>
+          <h2>Componente de texto pequeño</h2>
+        </header>
+
+        <!-- ====== EDITA SOLO EL CONTENIDO DE .text-card ====== -->
+        <article class="text-card" id="card">
+          <p>El componente de texto simple suele ser la mejor opción para transmitir información cuando no necesitas
+            elementos multimedia.</p>
+          <p>Este bloque aparece a la izquierda y deja espacio en blanco a la derecha. Reemplaza los párrafos por tu
+            propio contenido.</p>
+          <p>Tipografías/colores: títulos <strong>Arial 26 #434343</strong>, subtítulos <strong>Arial 20 bold
+              #5B00FF</strong>, párrafos <strong>Proxima Nova 14 #666666</strong>.</p>
+          <p>Haz scroll dentro de esta tarjeta para que la barra inferior complete el 100% y el progreso sea reportado
+            al orquestador.</p>
+
+          <div class="bg-template highlight-box highlight-box-accent">
+            <strong>💡 Tip para el docente:</strong>
+            <p>Pregunta, tip, consejo, dato curioso.</p>
+            <p>Usa este espacio para resaltar algo.</p>
+          </div>
+
+          <div class='bg-template highlight-box'>
+            <strong>📌 Pregunta para el cierre:</strong>
+            <p>Una pregunta para finalizar ¿Qué riesgos éticos plantea el uso de la inteligencia artificial en la vida
+              cotidiana?</p>
+          </div>
+
+          <p>Aquí cuatro elementos distintos en grid:</p>
+
+          <div class='tools-grid'>
+            <div class='tool-item bg-template'>Elemento 1</div>
+            <div class='tool-item bg-template'>Elemento 2</div>
+            <div class='tool-item bg-template'>Elemento 3</div>
+            <div class='tool-item bg-template'>Elemento 4</div>
+          </div>
+
+          <div style="height:15px"></div>
+          <p><strong>Numeración</strong></p>
+          <ol>
+            <li>Ítem 1</li>
+            <li>Ítem 2</li>
+            <li>Ítem 3</li>
+            <li>Ítem 4</li>
+          </ol>
+
+          <div style="height:30px"></div>
+          <p><em>Texto en cursiva.</em></p>
+
+        </article>
+
+
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // Embedded mode detection
+    (function () {
+      function setEmbedded() {
+        document.documentElement.classList.add('embedded-mode');
+        if (document.body) document.body.classList.add('embedded-mode');
+      }
+
+      try {
+        if (window.self !== window.top || window.parent !== window) {
+          setEmbedded();
+        }
+      } catch (e) {
+        setEmbedded();
+      }
+
+      window.addEventListener('DOMContentLoaded', function () {
+        try {
+          if (window.self !== window.top || window.parent !== window) {
+            setEmbedded();
+          }
+        } catch (e) {
+          setEmbedded();
+        }
+      });
+    })();
+  </script>
+
+</body>
+
+</html>
