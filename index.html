@@ -1,804 +1,799 @@
+<!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
-  <title>Juego de agilidad mental</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Juego de Categorización – Continentes</title>
   <link rel="stylesheet" href="component-styles.css">
   <style>
-    #screen {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
 
-    .top-bar-title {
-      font-size: var(--size-h3);
-      font-weight: 700;
-    }
+  .layout {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    min-height: 0;
+  }
 
-    .top-bar.has-title {
-      justify-content: center;
-    }
+  .stats {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+  }
 
-    .divider {
-      height: 1px;
-      width: 100%;
-      background: #d1d5db;
-      margin-bottom: 20px;
-      flex-shrink: 0;
-    }
+  .stat-pill {
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    background: #f3f4f6;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-main);
+  }
 
-    /* Pantallas y Animaciones */
-    .screen-body {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      overflow: hidden;
-      /* el contenido interno decide si hace scroll */
-    }
+  .legend {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+    font-size: 1rem;
+    color: var(--text-muted);
+  }
 
-    .screen {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      animation: fadeIn 0.35s ease-out;
-    }
+  .left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+  }
 
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
+  .left-card {
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  }
 
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+  .card-title{
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
 
-    /* Componentes: Intro */
-    .intro-title {
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
-      font-size: var(--size-h1);
-      line-height: 1.2;
-      margin: 8px 0 10px;
-      color: var(--accent);
-    }
+  .left-card-description {
+    font-size: 1rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
 
-    .intro-subtitle {
-      font-size: 0.96rem;
-      color: var(--text-muted);
-      max-width: 540px;
-      margin-bottom: 32px;
-    }
+  .pool {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 4px 0;
+  }
 
-    /* Componentes: Botones Principales */
-    .btn-main {
-      min-width: 210px;
-      padding: 12px 28px;
-      border-radius: 32px;
-      border: none;
-      background: var(--accent);
-      color: #ffffff;
-      font-weight: 600;
-      font-size: 1rem;
-      cursor: pointer;
-      box-shadow: var(--shadow-frame);
-      transition: transform 0.08s ease, box-shadow 0.1s ease, background 0.12s ease, border-color 0.12s ease;
-    }
+  .chip {
+    user-select: none;
+    cursor: grab;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    background: var(--fondo);
+    border: 1px solid var(--accent);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+    box-shadow: var(--shadow-chip);
+    transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+  }
 
-    .btn-main:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.28);
-      background: #803AFF;
-      border-color: #803AFF;
-    }
+  .chip:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(15, 23, 42, 0.15);
+    background: #f3e8ff;
+  }
 
-    .btn-main:active {
-      transform: translateY(0);
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
-      background: var(--brand);
-      border-color: var(--brand);
-    }
+  .chip:active {
+    cursor: grabbing;
+    transform: translateY(0);
+  }
 
-    /* Componentes: Countdown */
-    .countdown-number {
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
-      font-size: 3.4rem;
-      font-weight: 700;
-      margin-top: 10px;
-      animation: pop 0.6s ease-out;
-      color: var(--accent);
-    }
+  .chip.correct {
+    background: #ECFDF5;
+    border-color: var(--success);
+    color: #166534;
+    pointer-events: none;
+  }
 
-    @keyframes pop {
-      0% {
-        transform: scale(0.5);
-        opacity: 0;
-      }
+  .right-column {
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  }
 
-      40% {
-        transform: scale(1.1);
-        opacity: 1;
-      }
+  .right-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
 
-      100% {
-        transform: scale(1);
-        opacity: 1;
-      }
-    }
+  .boards-wrap {
+    flex: 1;
+    overflow-y: auto;
+    /* Fixed content, no scroll override from below */
+    overflow: hidden !important;
+  }
 
-    /* Componentes: Layout de Preguntas */
-    .question-layout {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-    }
+  .boards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* 3 columns to save vertical space */
+    gap: 6px;
+  }
 
-    .status-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 12px;
-      font-size: 0.82rem;
-      color: var(--text-muted);
-    }
+  .board {
+    background: var(--card-bg);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 5px;
+    /* Reduced padding */
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: all 0.2s ease;
+  }
 
-    .progress-label {
-      font-weight: 600;
-      color: var(--text-main);
-    }
+  .board-header {
+    display: flex;
+    justify-content: center;
+    /* Center the title */
+    align-items: center;
+    margin-bottom: 4px;
+  }
 
-    .progress-bar {
-      width: 100%;
-      height: 6px;
-      border-radius: var(--radius-pill);
-      background: #e5e7eb;
-      overflow: hidden;
-      margin-top: 4px;
-    }
+  .board-name {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--accent);
+    text-align: center;
+  }
 
-    .progress-fill {
-      height: 100%;
-      width: 0%;
-      background: #5B00FF;
-      transition: width 0.25s ease;
-    }
+  .dropzone {
+    flex: 1;
+    min-height: 40px;
+    /* Reduced min-height */
+    border-radius: 8px;
+    background: #ffffff;
+    border: 1px dashed #cbd5e1;
+    padding: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-content: flex-start;
+  }
 
-    .timer {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.82rem;
-    }
+  .controls {
+    display: flex;
+    gap: 8px;
+  }
 
-    .timer-number {
-      font-weight: 700;
-    }
+  .btn {
+    appearance: none;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-pill);
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: var(--fondo);
+    color: var(--text-main);
+    box-shadow: var(--shadow-chip);
+    transition: all 0.1s ease;
+  }
 
-    .timer-bar {
-      position: relative;
-      width: 110px;
-      height: 8px;
-      border-radius: 999px;
-      background: #e5e7eb;
-      overflow: hidden;
-    }
+  .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(15, 23, 42, 0.15);
+    background: #f3e8ff;
+  }
 
-    .timer-fill {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      background: #5B00FF;
-      transition: width 3s linear;
-    }
+  .btn:active {
+    transform: translateY(0);
+  }
 
-    .question-word-box {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 10px 0 20px;
-      overflow: hidden;
-    }
+  .btn.secondary {
+    background: #ffffff;
+    border-color: var(--border);
+    color: var(--text-muted);
+  }
 
-    .question-word {
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
-      font-size: 2.6rem;
-      font-weight: 700;
-      padding: 16px 40px;
-      border-radius: 18px;
-      background: #ffffff;
-      border: 1px solid #6E1EFF;
-      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.16);
-    }
+  .btn.secondary:hover {
+    background: #f9fafb;
+  }
 
-    .options-grid {
-      display: flex;
-      justify-content: center;
-      gap: 14px;
-      flex-wrap: wrap;
-      margin-bottom: 14px;
-    }
+  /* Hide Progress Bar */
+  .progress-wrap {
+    display: none !important;
+  }
 
-    .option-btn {
-      min-width: 110px;
-      padding: 9px 18px;
-      border-radius: 999px;
-      border: 1px solid var(--accent);
-      background: var(--fondo);
-      color: #4a2800;
-      font-weight: 600;
-      font-size: 0.95rem;
-      cursor: pointer;
-      transition: transform 0.08s ease, box-shadow 0.12s ease, background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
-    }
+  /* Toast */
+  .toast {
+    position: absolute;
+    left: 50%;
+    bottom: 20px;
+    transform: translateX(-50%);
+    padding: 8px 16px;
+    border-radius: var(--radius-pill);
+    background: rgba(17, 24, 39, 0.96);
+    color: #fff;
+    font-size: 0.85rem;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.35);
+    display: none;
+    z-index: 50;
+    white-space: nowrap;
+  }
 
-    .option-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.25);
-      background: #d4d4d4;
-      border-color: #803AFF;
-    }
+  .toast.show {
+    display: block;
+    animation: toast-pop 0.28s ease-out;
+  }
 
-    .option-btn.correct {
-      background: #ECFDF5;
-      border-color: var(--success);
-      color: #166534;
-    }
-
-    .option-btn.wrong {
-      background: #FEF2F2;
-      border-color: var(--error);
-      color: #b91c1c;
-    }
-
-    .question-footer {
-      display: flex;
-      justify-content: center;
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      margin-top: auto;
-    }
-
-    /* Componentes: Feedback (Toast) */
-    .feedback {
-      position: absolute;
-      left: 50%;
-      bottom: 20px;
-      transform: translateX(-50%);
-      padding: 6px 14px;
-      border-radius: 999px;
-      background: rgba(17, 24, 39, 0.96);
-      color: #f9fafb;
-      font-size: 0.78rem;
+  @keyframes toast-pop {
+    from {
       opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.18s ease;
-      white-space: nowrap;
+      transform: translate(-50%, 10px);
     }
-
-    .feedback.show {
+    to {
       opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }
+
+  /* Iframe / Embedded Mode */
+  html.embedded-mode,
+  html.embedded-mode body {
+    display: block !important;
+    padding: 0 !important;
+    background: transparent !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  html.embedded-mode .app-root {
+    max-width: none !important;
+    max-height: none !important;
+    padding: 0 !important;
+    height: 100vh !important;
+    width: 100vw !important;
+  }
+
+  html.embedded-mode .frame {
+    border-radius: var(--radius-frame) !important;
+    /* Restore exterior curves */
+    box-shadow: none !important;
+    padding: 10px !important;
+  }
+
+  @media screen and (max-width: 700px) {
+    .top-bar {
+      padding: 4px;
     }
 
-    .feedback.success {
-      background: var(--success);
+    .frame {
+      overflow: hidden !important;
+      display: flex !important;
+      flex-direction: column !important;
     }
 
-    .feedback.error {
-      background: var(--error);
+    .inner-card {
+      display: flex !important;
+      flex-direction: column !important;
+      overflow: hidden !important;
     }
 
-    .results-text {
-      font-size: 0.96rem;
-      color: var(--template);
-      max-width: 460px;
-      margin: 0 auto 20px;
+    .app-content {
+      flex: 1 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      overflow: hidden !important;
+      padding-bottom: 0 !important;
+      width: 100%;
+      padding: 0;
     }
 
-    .results-grid {
+    /* HUD: Hide text "Arrastra para jugar", Show Controls */
+    .legend-text {
+      display: none !important;
+    }
+
+    /* GRID LAYOUT: 2 columns, 2 rows */
+    .layout {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      grid-template-rows: auto auto !important;
+      gap: 8px !important;
+      flex: 1 !important;
+      overflow: hidden !important;
+    }
+
+    /* Left column (Countries) - Top Left (1,1) */
+    .left-column {
+      grid-column: 1 !important;
+      grid-row: 1 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 8px !important;
+      min-height: 0 !important;
+    }
+
+    /* Show controls card - Bottom Left (1,2) */
+    .original-controls {
+      display: flex !important;
+      flex-direction: column !important;
+      grid-column: 1 !important;
+      grid-row: 2 !important;
+    }
+
+    /* Pool card */
+    .left-column>.left-card:first-child {
+      flex: 1 !important;
       display: flex;
-      justify-content: center;
-      gap: 14px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 2px !important;
+      background: #fff !important;
+      border-radius: 12px !important;
+      overflow: hidden !important;
     }
 
-    .result-card {
-      min-width: 130px;
-      padding: 10px 16px;
-      border-radius: 14px;
-      background: #ffffff;
-      border: 1px solid var(--border);
-      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
-      text-align: center;
-      font-size: 0.86rem;
+    .left-card {
+      padding: 8px;
     }
 
-    .result-card strong {
-      display: block;
-      font-size: 1.1rem;
-      margin-bottom: 2px;
+    .left-card-description {
+      display: none !important;
     }
 
-    .btn-secondary {
-      min-width: 190px;
-      padding: 10px 24px;
-      border-radius: 26px;
-      border: none;
-      background: var(--accent);
-      color: #f9fafb;
-      font-weight: 600;
-      font-size: 0.95rem;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.18);
-      transition: transform 0.08s ease, box-shadow 0.12s ease, background 0.12s ease;
+    .left-card-title {
+      margin-bottom: 0 !important;
+      margin-right: 10px !important;
+      white-space: nowrap !important;
+      font-size: 0.9rem !important;
     }
 
-    .btn-secondary:hover {
-      background: #803AFF;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.24);
+    .pool {
+      width: 100% !important;
+      justify-content: flex-start !important;
+      padding: 0 !important;
+      flex-wrap: wrap !important;
+      overflow-x: visible !important;
+      white-space: normal !important;
     }
 
-    .btn-secondary:active {
-      transform: translateY(0);
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
-      background: var(--brand);
+    .chip {
+      flex-shrink: 0 !important;
     }
 
-    /* Modo Embebido (Configuración A) */
-
-    html.embedded-mode .inner-card {
-      border-radius: var(--radius-card);
+    /* Right column (Boards) - Entire right side, spanning both rows */
+    .right-column {
+      grid-column: 2 !important;
+      grid-row: 1 / 3 !important;
+      /* Span from row 1 to row 3 (2 rows) */
+      display: flex !important;
+      flex-direction: column !important;
+      min-height: 0 !important;
+      overflow: hidden !important;
     }
 
-    /* Responsive Principal (Configuración A) */
-    @media (max-width: 900px) {
-      .app-content {
-        padding: 16px 20px 22px;
+    .right-title {
+      flex-shrink: 0 !important;
+      margin-bottom: 6px !important;
+      font-size: 0.9rem !important;
+    }
+
+    .boards-wrap {
+      flex: 1 !important;
+      min-height: 0 !important;
+      overflow-y: auto !important;
+    }
+
+    .boards {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 4px !important;
+      padding-bottom: 6px;
+    }
+
+    .board {
+      padding: 4px !important;
+    }
+
+    .board-name {
+      font-size: 0.8rem !important;
+      margin-bottom: 2px !important;
+    }
+
+    .dropzone {
+      min-height: 50px !important;
+      padding: 3px !important;
+      gap: 3px !important;
+    }
+
+    /* Chips inside dropzones should be smaller to fit */
+    .dropzone .chip {
+      font-size: 0.7rem !important;
+      padding: 3px 8px !important;
+      max-width: 100% !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+  }
+</style>
+  <script>
+    (function () {
+      function setEmbedded() {
+        document.documentElement.classList.add('embedded-mode');
+        // Also add to body just in case CSS targets it
+        if (document.body) document.body.classList.add('embedded-mode');
       }
 
-      .question-word {
-        font-size: 2.1rem;
-        padding: 14px 26px;
-      }
-    }
-
-    /* Specific Layout for Mobile/Small Screens (< 760px) - Versión Clasificación */
-    @media screen and (max-width: 700px) {
-
-      .inner-card {
-        display: flex !important;
-        flex-direction: column !important;
+      try {
+        if (window.self !== window.top || window.parent !== window) {
+          setEmbedded();
+        }
+      } catch (e) {
+        setEmbedded();
       }
 
-      .app-content {
-        flex: 1 !important;
-        display: flex !important;
-        flex-direction: column !important;
-        padding-bottom: 0 !important;
-      }
-
-   }
-  </style>
+      // Re-check on load to be sure
+      window.addEventListener('DOMContentLoaded', function () {
+        try {
+          if (window.self !== window.top || window.parent !== window) {
+            setEmbedded();
+          }
+        } catch (e) {
+          setEmbedded();
+        }
+      });
+    })();
+  </script>
 </head>
 
 <body>
   <div class="app-root">
     <div class="frame">
       <div class="inner-card">
+
+        <!-- Top Bar -->
+        <header class="top-bar">
+          <h1 class="app-title">Juego de Categorización</h1>
+        </header>
+
+        <!-- Main Content -->
         <div class="app-content">
-          <div id="screen"></div>
-          <div id="feedback" class="feedback"></div>
+          <p class="app-subtitle">
+            Arrastra cada país al continente correcto.
+          </p>
+
+          <!-- HUD -->
+          <section class="hud" aria-label="Panel de progreso">
+            <div class="stats">
+              <div class="stat-pill">✅ <b id="hits">0</b></div>
+              <div class="stat-pill">❌ <b id="misses">0</b></div>
+              <div class="stat-pill">⭐ <b id="score">0</b></div>
+            </div>
+          </section>
+
+          <!-- Two Column Layout -->
+          <main class="layout">
+            <!-- Left: Pool & Controls -->
+            <aside class="left-column">
+              <div class="left-card">
+                <div class="card-title">Países</div>
+                <div class="left-card-description">
+                  Arrastra las etiquetas hacia su continente.
+                </div>
+                <div id="pool" class="pool" role="list"></div>
+              </div>
+              <div class="left-card">
+                <div class="card-title">Controles</div>
+                <div class="controls">
+                  <button class="btn" id="shuffleBtn">🔀 Reordenar</button>
+                  <button class="btn secondary" id="resetBtn">↺ Reiniciar</button>
+                </div>
+              </div>
+            </aside>
+
+            <!-- Right: Boards -->
+            <section class="right-column">
+              <div class="card-title">Tableros</div>
+              <div class="boards-wrap">
+                <div class="boards"><!-- generado por JS --></div>
+              </div>
+            </section>
+          </main>
         </div>
+
+        <!-- Feedback Toast -->
+        <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
       </div>
     </div>
   </div>
 
-
   <script>
-    // Marcar modo embebido si está dentro de un iframe
-    (function markEmbeddedMode() {
-      try {
-        if (window.self !== window.top) {
-          document.documentElement.classList.add("embedded-mode");
-        }
-      } catch (e) {
-        /* ignore */
-      }
-    })();
-
-    // ===============================
-    // CONFIGURACIÓN DEL LOGO
-    // ===============================
-    const LOGO_SRC = "../Nivel_A1/images/Logo_Arukay_Actualizado.png";
-    const LOGO_ALT = "LOGO";
-    const LOGO_HTML = `
-      <div class="logo">
-        <img src="${LOGO_SRC}" alt="${LOGO_ALT}" class="logo-img">
-      </div>
-    `;
-
-    // ===============================
-    // CONFIGURACIÓN DEL QUIZ
-    // ===============================
-    const QUESTION_TIME = 3; // segundos por pregunta
-
-    const QUESTIONS = [
-      {
-        word: "ROJO",
-        color: "#16a34a", // verde
-        options: ["Rojo", "Verde", "Azul"],
-        answer: "Verde"
-      },
-      {
-        word: "AZUL",
-        color: "#ea580c", // naranja
-        options: ["Amarillo", "Naranja", "Azul"],
-        answer: "Naranja"
-      },
-      {
-        word: "VERDE",
-        color: "#ef4444", // rojo
-        options: ["Rojo", "Morado", "Verde"],
-        answer: "Rojo"
-      },
-      {
-        word: "AMARILLO",
-        color: "#4f46e5", // morado/azul
-        options: ["Violeta", "Negro", "Blanco"],
-        answer: "Violeta"
-      },
-      {
-        word: "NEGRO",
-        color: "#facc15", // amarillo
-        options: ["Amarillo", "Gris", "Negro"],
-        answer: "Amarillo"
-      }
+    // ==============================
+    // CONFIGURACIÓN DEL JUEGO
+    // ==============================
+    const CATEGORIES = [
+      { key: "america", label: "América", hint: "Norte, Centro y Sur" },
+      { key: "europa", label: "Europa", hint: "UE, Mediterráneo" },
+      { key: "oceania", label: "Oceanía", hint: "Australia, Islas" },
+      { key: "asia", label: "Asia", hint: "Oriente" },
+      { key: "africa", label: "África", hint: "Continente madre" },
     ];
 
-    // Estado
-    let currentQuestionIndex = 0;
-    let questionTimeoutId = null;
-    let questionTimerIntervalId = null;
-    let preCountdownIntervalId = null;
-    let questionStartedAt = null;
-    let questionFinished = false;
+    const ITEMS = [
+      { name: "Colombia", category: "america" },
+      { name: "Canadá", category: "america" },
+      { name: "Francia", category: "europa" },
+      { name: "Alemania", category: "europa" },
+      { name: "Japón", category: "asia" },
+      { name: "China", category: "asia" },
+      { name: "Australia", category: "oceania" },
+      { name: "Nueva Zelanda", category: "oceania" },
+      { name: "Egipto", category: "africa" },
+      { name: "Nigeria", category: "africa" },
+    ];
 
-    const stats = {
-      correct: 0,
-      wrong: 0,
-      timeouts: 0,
-      answered: 0,
-      totalTime: 0
+    const MESSAGES = {
+      ok: [
+        "¡Excelente! ⭐",
+        "¡Buenísimo! 🚀",
+        "¡Lo clavaste! 🎯",
+        "¡Gran acierto! 💪",
+        "¡Perfecto! 🌟",
+      ],
+      no: [
+        "Casi… 😅",
+        "Inténtalo de nuevo 🙌",
+        "Revisa el continente 😉",
+        "¡Sigue intentando! 💡",
+        "¡Tú puedes! 🔁",
+      ],
     };
 
-    const screen = document.getElementById("screen");
-    const feedbackToast = document.getElementById("feedback");
+    const $pool = document.getElementById("pool");
+    const $boards = document.querySelector(".boards");
+    const $toast = document.getElementById("toast");
+    const $bar = document.getElementById("progressBar");
+    const $hits = document.getElementById("hits");
+    const $misses = document.getElementById("misses");
+    const $score = document.getElementById("score");
 
-    // ===============================
-    // UTILIDADES
-    // ===============================
-    function clearAllTimers() {
-      if (questionTimeoutId) clearTimeout(questionTimeoutId);
-      if (questionTimerIntervalId) clearInterval(questionTimerIntervalId);
-      if (preCountdownIntervalId) clearInterval(preCountdownIntervalId);
-      questionTimeoutId = questionTimerIntervalId = preCountdownIntervalId = null;
+    let state = { correct: 0, wrong: 0, placed: 0 };
+
+    function randomOf(a) {
+      return a[Math.floor(Math.random() * a.length)];
     }
 
-    function showFeedback(message, type = "default") {
-      feedbackToast.textContent = message;
-      feedbackToast.className = "feedback show";
-      if (type === "success") feedbackToast.classList.add("success");
-      if (type === "error") feedbackToast.classList.add("error");
-      clearTimeout(showFeedback._t);
-      showFeedback._t = setTimeout(() => {
-        feedbackToast.className = "feedback";
-      }, 1200);
+    function toast(msg) {
+      $toast.textContent = msg;
+      $toast.classList.add("show");
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => $toast.classList.remove("show"), 1500);
     }
 
-    function formatSeconds(sec) {
-      return sec.toFixed(2).replace(".", ",");
+    function updateHUD() {
+      $hits.textContent = state.correct;
+      $misses.textContent = state.wrong;
+      const wrong = state.wrong;
+      const computed = Math.max(0, 10 - wrong * 0.5);
+      $score.textContent = computed.toFixed(2);
+      const pct = Math.round((state.placed / ITEMS.length) * 100);
+      $bar.style.width = pct + "%";
     }
 
-    // ===============================
-    // RENDERIZADO DE PANTALLAS
-    // ===============================
-    function renderIntro() {
-      clearAllTimers();
-      const wrapper = document.createElement("div");
-      wrapper.className = "screen";
+    function handleDrop(el, board, dropzone) {
+      if (!el) return;
+      const expected = board.dataset.key;
+      const given = el.dataset.category;
 
-      wrapper.innerHTML = `
-        <header class="top-bar">
-        </header>
-        <section class="screen-body">
-          <h1 class="template">Juego de agilidad mental</h1>
-          <p style="margin: 18px 10px;">
-            Selecciona el <strong>color correcto de la palabra</strong> antes de que se acabe el tiempo.
-            Solo tienes <strong>3 segundos</strong> para responder cada pregunta.
-          </p>
-          <button class="btn-main" id="btnStart">Iniciar</button>
-        </section>
-      `;
-      screen.innerHTML = "";
-      screen.appendChild(wrapper);
+      if (expected === given) {
+        el.classList.add("correct");
+        el.draggable = false;
+        // Remove touch listeners if placed correctly to prevent re-dragging
+        el.ontouchstart = null;
+        el.ontouchmove = null;
+        el.ontouchend = null;
 
-      document.getElementById("btnStart").addEventListener("click", () => {
-        renderPreCountdown();
-      });
-    }
-
-    function renderPreCountdown() {
-      clearAllTimers();
-      const wrapper = document.createElement("div");
-      wrapper.className = "screen";
-
-      wrapper.innerHTML = `
-        <header class="top-bar">
-        </header>
-        <section class="screen-body">
-          <h2 class="intro-title">¡Prepárate!</h2>
-          <p class="intro-subtitle">
-            El juego comenzará en unos segundos. Concéntrate y elige el color correcto de cada palabra.
-          </p>
-          <div class="countdown-number" id="preCount">3</div>
-        </section>
-      `;
-      screen.innerHTML = "";
-      screen.appendChild(wrapper);
-
-      let remaining = 3;
-      const preCountEl = document.getElementById("preCount");
-      preCountdownIntervalId = setInterval(() => {
-        remaining--;
-        if (remaining <= 0) {
-          clearInterval(preCountdownIntervalId);
-          preCountdownIntervalId = null;
-          startQuiz();
-        } else {
-          preCountEl.textContent = String(remaining);
-          preCountEl.classList.remove("animate");
-          void preCountEl.offsetWidth; // reflow
-          preCountEl.classList.add("animate");
-        }
-      }, 1000);
-    }
-
-    function startQuiz() {
-      currentQuestionIndex = 0;
-      stats.correct = stats.wrong = stats.timeouts = stats.answered = stats.totalTime = 0;
-      renderQuestion();
-    }
-
-    function renderQuestion() {
-      clearAllTimers();
-      questionFinished = false;
-
-      const q = QUESTIONS[currentQuestionIndex];
-      const total = QUESTIONS.length;
-      const current = currentQuestionIndex + 1;
-
-      const wrapper = document.createElement("div");
-      wrapper.className = "screen";
-
-      wrapper.innerHTML = `
-        <header class="top-bar has-title">
-        <div class="top-bar-title template">Juego de agilidad mental</div>
-        </header>
-        <div class="divider"></div>
-        <section class="screen-body question-layout">
-          <div class="status-bar">
-            <div>
-              <div class="progress-label">Pregunta ${current} de ${total}</div>
-              <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
-              </div>
-            </div>
-            <div class="timer">
-              <span>Tiempo:</span>
-              <span class="timer-number" id="timerNumber">${QUESTION_TIME}</span>s
-              <div class="timer-bar">
-                <div class="timer-fill" id="timerFill"></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="question-word-box">
-            <div class="question-word" id="questionWord">${q.word}</div>
-          </div>
-
-          <div class="options-grid" id="optionsGrid"></div>
-
-          <div class="question-footer">
-            Responde antes de que la barra llegue a cero.
-          </div>
-        </section>
-      `;
-      screen.innerHTML = "";
-      screen.appendChild(wrapper);
-
-      // Colorear palabra
-      const wordEl = document.getElementById("questionWord");
-      wordEl.style.color = q.color;
-
-      // Progreso general
-      const progressFill = document.getElementById("progressFill");
-      const progressPct = (current / total) * 100;
-      progressFill.style.width = progressPct + "%";
-
-      // Opciones
-      const optionsGrid = document.getElementById("optionsGrid");
-      q.options.forEach((opt) => {
-        const btn = document.createElement("button");
-        btn.className = "option-btn";
-        btn.textContent = opt;
-        btn.addEventListener("click", () => handleAnswer(btn, opt));
-        optionsGrid.appendChild(btn);
-      });
-
-      // Temporizador visual + numérico
-      const timerNumberEl = document.getElementById("timerNumber");
-      const timerFillEl = document.getElementById("timerFill");
-
-      // animación de barra
-      timerFillEl.style.width = "100%";
-      setTimeout(() => {
-        timerFillEl.style.width = "0%";
-      }, 40);
-
-      let remaining = QUESTION_TIME;
-      timerNumberEl.textContent = remaining;
-
-      questionStartedAt = Date.now();
-
-      questionTimerIntervalId = setInterval(() => {
-        remaining -= 1;
-        if (remaining <= 0) {
-          clearInterval(questionTimerIntervalId);
-          questionTimerIntervalId = null;
-        }
-        timerNumberEl.textContent = Math.max(remaining, 0);
-      }, 1000);
-
-      // Tiempo límite lógico
-      questionTimeoutId = setTimeout(() => {
-        if (!questionFinished) {
-          handleTimeout();
-        }
-      }, QUESTION_TIME * 1000);
-    }
-
-    function handleAnswer(buttonEl, chosen) {
-      if (questionFinished) return;
-      questionFinished = true;
-      clearAllTimers();
-
-      const q = QUESTIONS[currentQuestionIndex];
-      const buttons = Array.from(document.querySelectorAll(".option-btn"));
-
-      const isCorrect = chosen === q.answer;
-
-      const elapsed = (Date.now() - questionStartedAt) / 1000;
-      stats.answered++;
-      stats.totalTime += elapsed;
-
-      if (isCorrect) {
-        stats.correct++;
+        dropzone.appendChild(el);
+        state.correct++;
+        state.placed++;
+        toast(randomOf(MESSAGES.ok));
       } else {
-        stats.wrong++;
+        state.wrong++;
+        el.classList.remove("correct");
+        el.animate(
+          [
+            { transform: "translateX(0)" },
+            { transform: "translateX(-3px)" },
+            { transform: "translateX(3px)" },
+            { transform: "translateX(0)" },
+          ],
+          { duration: 180 }
+        );
+        toast(randomOf(MESSAGES.no));
       }
-
-      buttons.forEach((btn) => {
-        const value = btn.textContent.trim();
-        if (value === q.answer) {
-          btn.classList.add("correct");
-        }
-        if (btn === buttonEl && !isCorrect) {
-          btn.classList.add("wrong");
-        }
-        btn.disabled = true;
-      });
-
-      showFeedback(
-        isCorrect ? "¡Correcto!" : "Respuesta incorrecta",
-        isCorrect ? "success" : "error"
-      );
-
-      setTimeout(nextStep, 900);
+      updateHUD();
+      checkWin();
     }
 
-    function handleTimeout() {
-      if (questionFinished) return;
-      questionFinished = true;
+    function buildBoards() {
+      $boards.innerHTML = "";
+      CATEGORIES.forEach((cat) => {
+        const board = document.createElement("div");
+        board.className = "board";
+        board.dataset.key = cat.key;
+        board.innerHTML = `
+          <div class="board-header">
+            <span class="board-name">${cat.label}</span>
+          </div>
+          <div class="dropzone" role="list" aria-label="${cat.label}"></div>
+        `;
+        $boards.appendChild(board);
 
-      stats.timeouts++;
-      stats.wrong++;
-
-      const q = QUESTIONS[currentQuestionIndex];
-      const buttons = Array.from(document.querySelectorAll(".option-btn"));
-
-      buttons.forEach((btn) => {
-        const value = btn.textContent.trim();
-        if (value === q.answer) {
-          btn.classList.add("correct");
-        }
-        btn.disabled = true;
+        const dropzone = board.querySelector(".dropzone");
+        dropzone.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          board.classList.add("highlight");
+        });
+        dropzone.addEventListener("dragleave", () =>
+          board.classList.remove("highlight")
+        );
+        dropzone.addEventListener("drop", (e) => {
+          e.preventDefault();
+          board.classList.remove("highlight");
+          const id = e.dataTransfer.getData("text/plain");
+          const el = document.getElementById(id);
+          handleDrop(el, board, dropzone);
+        });
       });
-
-      showFeedback("¡Tiempo agotado!", "error");
-      setTimeout(nextStep, 900);
     }
 
-    function nextStep() {
-      currentQuestionIndex++;
-      if (currentQuestionIndex >= QUESTIONS.length) {
-        renderResults();
-      } else {
-        renderQuestion();
+    // Touch support variables
+    let draggedItem = null;
+    let touchClone = null;
+
+    function buildPool() {
+      $pool.innerHTML = "";
+      const shuffled = [...ITEMS].sort(() => Math.random() - 0.5);
+      shuffled.forEach((item, i) => {
+        const chip = document.createElement("div");
+        chip.className = "chip";
+        chip.textContent = item.name;
+        chip.draggable = true;
+        const id = "chip-" + i;
+        chip.id = id;
+        chip.dataset.category = item.category;
+
+        // Desktop Drag Events
+        chip.addEventListener("dragstart", (e) => {
+          e.dataTransfer.setData("text/plain", id);
+          document
+            .querySelectorAll(".board")
+            .forEach((b) =>
+              b.classList.toggle("highlight", b.dataset.key === item.category)
+            );
+        });
+
+        chip.addEventListener("dragend", () =>
+          document
+            .querySelectorAll(".board")
+            .forEach((b) => b.classList.remove("highlight"))
+        );
+
+        // Touch Events for Tablets/Mobile
+        chip.addEventListener("touchstart", (e) => {
+          draggedItem = chip;
+          const touch = e.touches[0];
+
+          // Create a visual clone
+          touchClone = chip.cloneNode(true);
+          touchClone.style.position = "fixed";
+          touchClone.style.left = touch.clientX + "px";
+          touchClone.style.top = touch.clientY + "px";
+          touchClone.style.zIndex = "9999";
+          touchClone.style.opacity = "0.8";
+          touchClone.style.pointerEvents = "none"; // Allow touch to pass through to check elements below
+          touchClone.style.width = chip.offsetWidth + "px";
+          document.body.appendChild(touchClone);
+
+          chip.style.opacity = "0.5";
+          e.preventDefault(); // Prevent scrolling while dragging
+        }, { passive: false });
+
+        chip.addEventListener("touchmove", (e) => {
+          if (!touchClone) return;
+          const touch = e.touches[0];
+          touchClone.style.left = touch.clientX + "px";
+          touchClone.style.top = touch.clientY + "px";
+          e.preventDefault();
+        }, { passive: false });
+
+        chip.addEventListener("touchend", (e) => {
+          if (!draggedItem) return;
+
+          // Clean up visual effects
+          if (touchClone) {
+            touchClone.remove();
+            touchClone = null;
+          }
+          draggedItem.style.opacity = "1";
+
+          // Find drop target
+          const touch = e.changedTouches[0];
+          // Temporarily hide clone if it existed to find element below, but we used pointer-events: none so it's fine
+          const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+
+          if (elementBelow) {
+            const dropzone = elementBelow.closest(".dropzone");
+            if (dropzone) {
+              const board = dropzone.closest(".board");
+              if (board) {
+                handleDrop(draggedItem, board, dropzone);
+              }
+            }
+          }
+          draggedItem = null;
+        });
+
+        $pool.appendChild(chip);
+      });
+    }
+
+    function reset() {
+      state = { correct: 0, wrong: 0, placed: 0 };
+      buildBoards();
+      buildPool();
+      updateHUD();
+    }
+
+    function shufflePool() {
+      const chips = Array.from($pool.children);
+      chips.sort(() => Math.random() - 0.5).forEach((c) => $pool.appendChild(c));
+    }
+
+    function checkWin() {
+      if (state.placed === ITEMS.length) {
+        setTimeout(() => {
+          toast(
+            `🎉 ¡Completado! Aciertos: ${state.correct} · Errores: ${state.wrong}`
+          );
+        }, 220);
       }
     }
 
-    function renderResults() {
-      clearAllTimers();
+    document
+      .getElementById("shuffleBtn")
+      .addEventListener("click", shufflePool);
+    document.getElementById("resetBtn").addEventListener("click", reset);
 
-      const total = QUESTIONS.length;
-      const { correct, wrong, timeouts, answered, totalTime } = stats;
-      const avgTime = answered > 0 ? totalTime / answered : 0;
-
-      const wrapper = document.createElement("div");
-      wrapper.className = "screen";
-
-      wrapper.innerHTML = `
-        <header class="top-bar">
-        </header>
-        <section class="screen-body">
-          <h1 class="template">Resultados del juego</h1>
-          <p class="results-text">
-            Has completado el juego de agilidad mental.
-            Revisa tus resultados y vuelve a intentarlo para mejorar tu tiempo y precisión.
-          </p>
-
-          <div class="results-grid">
-            <div class="result-card">
-              <strong>${correct}/${total}</strong>
-              Aciertos
-            </div>
-            <div class="result-card">
-              <strong>${wrong}</strong>
-              Respuestas incorrectas
-            </div>
-            <div class="result-card">
-              <strong>${timeouts}</strong>
-              Veces sin responder a tiempo
-            </div>
-            <div class="result-card">
-              <strong>${answered > 0 ? formatSeconds(avgTime) + " s" : "-"}</strong>
-              Tiempo medio por respuesta
-            </div>
-          </div>
-
-          <button class="btn-secondary" id="btnRestart">Volver a jugar</button>
-        </section>
-      `;
-      screen.innerHTML = "";
-      screen.appendChild(wrapper);
-
-      document.getElementById("btnRestart").addEventListener("click", () => {
-        currentQuestionIndex = 0;
-        startQuiz();
-      });
-    }
-
-    renderIntro();
+    // Init
+    reset();
   </script>
 </body>
 
