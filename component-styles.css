@@ -367,6 +367,7 @@ html.embedded-mode .frame {
   border-radius: var(--radius-frame) !important;
   box-shadow: none !important;
   padding: 10px !important;
+  overflow-y: auto !important;
 }
 
 @media screen and (max-width: 700px) {
