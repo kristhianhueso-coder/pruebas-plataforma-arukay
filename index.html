@@ -5,240 +5,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Componente – Texto Izquierda</title>
+  <link rel="stylesheet" href="component-styles.css">
   <style>
-    :root {
-      --brand: #5B00FF;
-      --brand-700: #c54b00;
-      --bg: #ffffff;
-      --border: #312929;
-
-      /* Escala tipográfica */
-      --size-h1: 26px;
-      --size-h2: 20px;
-      --size-h3: 16px;
-      --size-body: 14px;
-
-      --accent: #5B00FFff;
-      --ink: #434343;
-      /* Títulos */
-      --muted: #666666;
-      /* Párrafos */
-      --bar-bg: #eeeeee;
-      --radius-frame: 18px;
-      --radius-card: 14px;
-      --shadow-frame: 0 12px 30px rgba(15, 23, 42, 0.25);
-    }
-/* Comentario de prueba*/
-    * {
-      box-sizing: border-box;
-      /* Scrollbar: thin and light for modern browsers */
-      /* Firefox */
-      scrollbar-width: thin;
-      scrollbar-color: rgba(0, 0, 0, 0.14) transparent;
-    }
-
-    /* WebKit-based browsers (Chrome, Edge, Safari) */
-    *::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-      background: transparent;
-    }
-
-    *::-webkit-scrollbar-track {
-      background: transparent;
-      border-radius: 999px;
-    }
-
-    *::-webkit-scrollbar-thumb {
-      background: rgba(0, 0, 0, 0.12);
-      border-radius: 999px;
-      border: 2px solid transparent;
-      /* creates padding effect */
-      background-clip: padding-box;
-    }
-
-    *::-webkit-scrollbar-thumb:hover {
-      background: rgba(0, 0, 0, 0.18);
-    }
-
-    html,
-    body {
-      height: 100%;
-      margin: 0;
-      background: var(--bg);
-      color: var(--ink);
-    }
-
-    body {
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
-      font-size: var(--size-body);
-      line-height: 1.6;
-    }
-
-    h1,
-    h2,
-    h3 {
-      line-height: 1.25;
-      margin: 0 0 .5em;
-      font-weight: 700;
-      color: var(--ink);
-    }
-
-    h1 {
-      font-size: var(--size-h1);
-    }
-
-    h2 {
-      font-size: var(--size-h2);
-    }
-
-    h3 {
-      font-size: var(--size-h3);
-    }
-
-    p {
-      margin: 0 0 1em;
-      color: var(--muted);
-    }
-
-    a {
-      color: var(--brand);
-      text-decoration: underline;
-      text-underline-offset: 2px;
-    }
-
-    p,
-    li {
-      font-size: 14px !important;
-    }
-
-    /* Frame wrapper */
-    .app-root {
-      width: 100%;
-      height: 100%;
-      max-height: 540px;
-      padding: 10px 14px;
-      overflow: auto;
-    }
-
-    /* ---- Contenedor requerido ---- */
-    .comp-wrap {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      border: none;
-      border-radius: var(--radius-card);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      background: #fff;
-      box-shadow: none;
-      z-index: 1;
-    }
-
-    /* Lienzo interno con mucho espacio a la derecha (look del ejemplo) */
-    .canvas {
-      flex: 1;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      /* para poner el header arriba y la tarjeta debajo */
-      align-items: stretch;
-      justify-content: flex-start;
-      padding: 24px;
-      overflow: hidden;
-    }
-
-    /* NUEVO: encabezado de títulos fuera del recuadro gris */
-    .comp-header {
-      text-align: center;
-      margin-bottom: 16px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    .comp-header h1 {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--brand);
-      /* morado del título */
-    }
-
-    .comp-header h2 {
-      margin: 4px 0 0;
-      font-size: 12px;
-      font-weight: 400;
-      color: #666666;
-      /* texto de instrucción gris */
-    }
-
-    /* Tarjeta de texto a la izquierda */
-    .text-card {
-      width: 100%;
-      height: 100%;
-      background: #eeeeee;
-      border: 1px solid #e3e3e3;
-      border-radius: 4px;
-      padding: 22px 24px 20px;
-      overflow-y: auto;
-      /* scroll interno */
-      overflow-x: hidden;
-      color: var(--muted);
-    }
-
-    .text-card h1 {
-      margin: 0 0 10px;
-      font: 700 26px Arial, Helvetica, sans-serif;
-      color: var(--ink);
-    }
-
-    .text-card h2 {
-      margin: 4px 0 12px;
-      color: var(--accent);
-    }
-
-    .text-card p {
-      margin: 0 0 12px;
-    }
-
-    /* Embedded Mode */
-    html.embedded-mode,
-    html.embedded-mode body {
-      display: block !important;
-      padding: 0 !important;
-      background: transparent !important;
-      width: 100% !important;
-      height: 100% !important;
-      overflow: hidden !important;
-    }
-
-    html.embedded-mode .app-root {
-      padding: 0 !important;
-      height: 100vh !important;
-      width: 100vw !important;
-    }
-
-    /* Caja genérica para resaltar texto (fondo suave) */
-    .highlight-box {
-      background: rgba(91, 0, 255, 0.08);
-      /* equivalente a #5B00FF14 */
-      padding: 10px 12px;
-      border-radius: 6px;
-      margin: 26px 0 8px 0;
-    }
-
-    /* Variante con borde/acento a la izquierda */
-    .highlight-box--accent {
-      border-left: 3px solid var(--brand);
-    }
-
-    /* Texto dentro de la caja: afinamos espaciado */
-    .highlight-box p {
-      margin: 4px 0;
-    }
-
     /* Pequeñas “tarjetas” en grid (como herramientas, recursos, etc.) */
     .tools-grid {
       display: grid;
@@ -248,107 +16,73 @@
     }
 
     .tool-item {
-      background: rgba(91, 0, 255, 0.08);
       padding: 8px;
       border-radius: 6px;
       text-align: center;
       font-weight: 600;
       font-size: 12px;
     }
-
-    /* Responsive */
-    @media screen and (max-width:700px) {
-      .app-root {
-        max-width: 100% !important;
-        max-height: 100% !important;
-        padding: 6px !important;
-      }
-
-      .frame {
-        padding: 8px !important;
-        max-height: 540px;
-        overflow: auto;
-      }
-
-      .canvas {
-        padding: 12px;
-      }
-
-      .comp-header h1 {
-        font-size: 20px !important;
-      }
-
-      .comp-header h2 {
-        font-size: 16px !important;
-      }
-
-      .text-card {
-        width: 100%;
-        border-radius: 8px;
-        padding: 16px 18px;
-        font-size: 13px;
-      }
-    }
   </style>
 </head>
 
 <body>
-  <div class="app-root">
-    <div class="frame">
+  <div class="app-root overflow-auto">
+    <div class="frame ">
       <!-- Cambia el id para identificar este HTML en tu orquestador -->
       <section class="comp-wrap" data-component-id="txt-001">
-        <div class="canvas">
-          <!-- NUEVO: títulos fuera del recuadro gris -->
-          <header class="comp-header">
-            <h1>Componente de Texto</h1>
-            <h2>Componente de texto pequeño</h2>
-          </header>
 
-          <!-- ====== EDITA SOLO EL CONTENIDO DE .text-card ====== -->
-          <article class="text-card" id="card">
-            <p>El componente de texto simple suele ser la mejor opción para transmitir información cuando no necesitas
-              elementos multimedia.</p>
-            <p>Este bloque aparece a la izquierda y deja espacio en blanco a la derecha. Reemplaza los párrafos por tu
-              propio contenido.</p>
-            <p>Tipografías/colores: títulos <strong>Arial 26 #434343</strong>, subtítulos <strong>Arial 20 bold
-                #5B00FF</strong>, párrafos <strong>Proxima Nova 14 #666666</strong>.</p>
-            <p>Haz scroll dentro de esta tarjeta para que la barra inferior complete el 100% y el progreso sea reportado
-              al orquestador.</p>
+        <!-- NUEVO: títulos fuera del recuadro gris -->
+        <header class="comp-header">
+          <h1 class="template">Componente de Texto</h1>
+          <h2>Componente de texto pequeño</h2>
+        </header>
 
-            <div class="highlight-box highlight-box--accent">
-              <strong>💡 Tip para el docente:</strong>
-              <p>Pregunta, tip, consejo, dato curioso.</p>
-              <p>Usa este espacio para resaltar algo.</p>
-            </div>
+        <!-- ====== EDITA SOLO EL CONTENIDO DE .text-card ====== -->
+        <article class="text-card" id="card">
+          <p>El componente de texto simple suele ser la mejor opción para transmitir información cuando no necesitas
+            elementos multimedia.</p>
+          <p>Este bloque aparece a la izquierda y deja espacio en blanco a la derecha. Reemplaza los párrafos por tu
+            propio contenido.</p>
+          <p>Tipografías/colores: títulos <strong>Arial 26 #434343</strong>, subtítulos <strong>Arial 20 bold
+              #5B00FF</strong>, párrafos <strong>Proxima Nova 14 #666666</strong>.</p>
+          <p>Haz scroll dentro de esta tarjeta para que la barra inferior complete el 100% y el progreso sea reportado
+            al orquestador.</p>
 
-            <div class='highlight-box'>
-              <strong>📌 Pregunta para el cierre:</strong>
-              <p>Una pregunta para finalizar  ¿Qué riesgos éticos plantea el uso de la inteligencia artificial en la vida cotidiana?</p>
-            </div>
+          <div class="bg-template highlight-box ">
+            <strong>💡 Tip para el docente:</strong>
+            <p>Pregunta, tip, consejo, dato curioso.</p>
+            <p>Usa este espacio para resaltar algo.</p>
+          </div>
 
-            <p>Aquí cuatro elementos distintos en grid:</p>
+          <div class='bg-template highlight-box'>
+            <strong>📌 Pregunta para el cierre:</strong>
+            <p>Una pregunta para finalizar ¿Qué riesgos éticos plantea el uso de la inteligencia artificial en la vida
+              cotidiana?</p>
+          </div>
 
-            <div class='tools-grid'>
-              <div class='tool-item'>Elemento 1</div>
-              <div class='tool-item'>Elemento 2</div>
-              <div class='tool-item'>Elemento 3</div>
-              <div class='tool-item'>Elemento 4</div>
-            </div>
+          <p>Aquí cuatro elementos distintos en grid:</p>
 
-            <div style="height:15px"></div>
-            <p><strong>Numeración</strong></p>
-            <ol>
-              <li>Ítem 1</li>
-              <li>Ítem 2</li>
-              <li>Ítem 3</li>
-              <li>Ítem 4</li>
-            </ol>
+          <div class='tools-grid'>
+            <div class='tool-item bg-template'>Elemento 1</div>
+            <div class='tool-item bg-template'>Elemento 2</div>
+            <div class='tool-item bg-template'>Elemento 3</div>
+            <div class='tool-item bg-template'>Elemento 4</div>
+          </div>
 
-            <div style="height:30px"></div>
-            <p><em>Texto en cursiva.</em></p>
+          <div style="height:15px"></div>
+          <p><strong>Numeración</strong></p>
+          <ol>
+            <li>Ítem 1</li>
+            <li>Ítem 2</li>
+            <li>Ítem 3</li>
+            <li>Ítem 4</li>
+          </ol>
 
-          </article>
-        </div>
+          <div style="height:30px"></div>
+          <p><em>Texto en cursiva.</em></p>
+
+        </article>
+
 
       </section>
     </div>
