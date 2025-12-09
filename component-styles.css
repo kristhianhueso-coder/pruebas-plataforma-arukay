@@ -352,7 +352,6 @@ html.embedded-mode body {
   background: transparent !important;
   width: 100% !important;
   height: 100% !important;
-  overflow: hidden !important;
 }
 
 html.embedded-mode .app-root {
@@ -361,6 +360,7 @@ html.embedded-mode .app-root {
   padding: 0 !important;
   height: 100vh !important;
   width: 100vw !important;
+  overflow-y: auto !important;
 }
 
 html.embedded-mode .frame {
