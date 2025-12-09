@@ -8,6 +8,8 @@
   --nivel-6: #2F9638;
 
   --accent: #5B00FF;
+  --success: #10B981;
+  --error: #EF4444;
 
   --fondo: #f7f7f7;
   --border: #e7e7e7;
@@ -21,7 +23,7 @@
   --size-h1: 1.625rem;
   --size-h2: 1.25rem;
   --size-h3: 1.05rem;
-  --size-body: 0.875rem;
+  --size-body: 14px;
 
   --radius-frame: 1.125rem;
   --radius-card: 0.875rem;
@@ -137,7 +139,7 @@ h1 {
 
 h2 {
   font-size: var(--size-h2);
-  font-weight: 600;
+  font-weight: 500;
   margin: 0;
 }
 
@@ -236,7 +238,6 @@ a {
   flex: 1;
   background: var(--card-bg);
   border-radius: var(--radius-card);
-  overflow: hidden;
   z-index: 1;
   display: flex;
   flex-direction: column;
@@ -249,7 +250,8 @@ a {
   justify-content: center;
   flex-shrink: 0;
   position: relative;
-  padding: 0 0 12px 0;;
+  padding: 0 0 12px 0;
+  ;
 }
 
 .app-title {
@@ -264,10 +266,11 @@ a {
 .divider {
   height: 1px;
   width: 100%;
-  background: #d1d5db;
+  background: var(--border);
   margin-bottom: 10px;
   flex-shrink: 0;
 }
+
 
 .app-content {
   flex: 1;
@@ -307,18 +310,20 @@ a {
   background: #ffffff;
 }
 
-.comp-wrap p.intro {
-  margin: 0 0 6px;
-  font: 400 12px "Proxima Nova", "ProximaNova", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  color: var(--muted);
-  line-height: 1.6;
+.comp-wrap .content {
+  grid-area: content;
+  height: 100%;
+  padding: 10px 8px 10px;
 }
+
 
 .comp-wrap p.callout {
   margin: 4px 0 6px;
   font: 700 13px Arial, Helvetica, sans-serif;
   color: var(--accent);
 }
+
+
 
 .accordion {
   background: #ffffff;
