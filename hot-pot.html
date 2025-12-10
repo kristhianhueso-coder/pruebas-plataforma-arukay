@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Componente – Gráfico caliente</title>
+  <link rel="stylesheet" href="component-styles.css" />
+  <style>
+    .comp-wrap .content {
+      flex: 1; /* Ocupa todo el alto disponible */
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      height: 100%;
+    }
+
+    /* Escenario de la imagen (El área interactiva) */
+    .hotspot-stage {
+      position: relative;
+      flex: 1; /* CLAVE: Esto hace que la imagen crezca para llenar el espacio vertical */
+      width: 100%;
+      background: #c5c7cc;
+      border: 1px solid #e1e1e1;
+      border-radius: var(--radius-sm);
+      overflow: hidden; /* Recorta la imagen si se sale por bordes redondeados */
+    }
+
+    /* La Imagen */
+    .hotspot-stage img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* CLAVE: Mantiene la proporción y rellena el contenedor */
+      object-position: center;
+      display: block;
+    }
+
+    /* Mini dots indicadores */
+    .comp-wrap .mini-progress {
+      flex-shrink: 0;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      padding-top: 4px;
+    }
+
+    .comp-wrap .mini-progress .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #cfd3d8;
+    }
+
+    .comp-wrap .mini-progress .dot.done {
+      background: var(--color-accent);
+    }
+
+    .comp-wrap .pin {
+      position: absolute;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #fff;
+      border: 0;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, .18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transform: translate(-50%, -50%); /* Centrado exacto en las coordenadas */
+      z-index: 10;
+      transition: transform 0.2s ease;
+    }
+
+    .comp-wrap .pin:hover, 
+    .comp-wrap .pin:focus {
+      transform: translate(-50%, -50%) scale(1.1);
+      outline: none;
+    }
+
+    .comp-wrap .pin::after {
+      content: '';
+      display: block;
+      width: 18px;
+      height: 18px;
+      background: var(--nivel-1);
+      border-radius: 50%;
+    }
+
+    .comp-wrap .pin.visited {
+      border: 2px solid var(--color-accent);
+    }
+
+    .comp-wrap .popover {
+      position: fixed; /* Fixed para salir del overflow:hidden del padre */
+      width: 260px;
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .14);
+      padding: 16px;
+      z-index: 9999;
+      transform: translateX(-50%);
+    }
+
+    /* Flecha del popover */
+    .comp-wrap .popover::after {
+      content: "";
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-width: 10px 8px 0 8px;
+      border-style: solid;
+      border-color: #ffffff transparent transparent transparent;
+    }
+
+    .comp-wrap .popover h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--nivel-1);
+      margin: 0 0 6px;
+      padding-right: 15px; /* Espacio para la X */
+    }
+
+    .comp-wrap .popover p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .comp-wrap .close-x {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      color: #999;
+      padding: 4px;
+    }
+    
+    .comp-wrap .close-x:hover {
+      color: var(--color-ink);
+    }
+
+    @media screen and (max-width: 700px) {
+
+      .inner-card {
+        border-radius: 0;
+      }
+
+      .app-content {
+        padding: 0 20px 20px;
+      }
+
+      .comp-wrap .popover {
+        width: auto;
+        max-width: 200px; /* Popover más ancho en móvil */
+      }
+    }
+  </style>
+
+  <script>
+    // Script para detectar modo iframe/embebido
+    (function () {
+      function setEmbedded() {
+        document.documentElement.classList.add('embedded-mode');
+        if (document.body) document.body.classList.add('embedded-mode');
+      }
+      try {
+        if (window.self !== window.top || window.parent !== window) setEmbedded();
+      } catch (e) { setEmbedded(); }
+    })();
+  </script>
+</head>
+
+<body>
+  <div class="app-root">
+    <div class="frame">
+      <div class="inner-card">
+        
+        <header class="top-bar">
+          <h1 class="template">Gráfico caliente</h1>
+        </header>
+        <div class="divider"></div>
+
+        <div class="app-content">
+          <p class="app-subtitle">
+            Selecciona cada punto para ver la información relacionada.
+          </p>
+
+          <section class="comp-wrap" data-component-id="hot-001">
+            <div class="content">
+              
+              <div class="hotspot-stage" id="stage" aria-label="Imagen interactiva">
+                <img src="https://visme.co/blog/wp-content/uploads/2020/06/animated-interactive-infographics-header.gif"
+                  alt="Gráfico interactivo" />
+
+                <button class="pin" style="left:40%; top:10%" data-title="Punto A" data-body="Docente"></button>
+
+                <button class="pin" style="left:30%; top:78%" data-title="Punto B"
+                  data-body="Recurso tecnológico"></button>
+
+                <button class="pin" style="left:70%; top:60%" data-title="Carrito verde"
+                  data-body="Los carros verdes llaman la atención por su estilo distintivo y su asociación con lo ecológico."></button>
+                  
+                <div id="pop"></div>
+              </div>
+
+              <div class="mini-progress" id="mp"></div>
+            </div>
+
+           </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+    (function () {
+      const wrap = document.querySelector('.comp-wrap');
+      if (!wrap) return;
+
+      const id = wrap.getAttribute('data-component-id') || 'hotspots-component';
+      const pins = Array.from(wrap.querySelectorAll('.pin'));
+      const popContainer = wrap.querySelector('#pop');
+      const mp = wrap.querySelector('#mp');
+      
+      // Eliminada referencia a '#bar' porque no existe en el HTML
+      
+      let visited = new Set();
+
+      function renderMini() {
+        if (!mp) return;
+        mp.innerHTML = '';
+        pins.forEach((_, i) => {
+          const d = document.createElement('div');
+          d.className = 'dot' + (visited.has(i) ? ' done' : '');
+          mp.appendChild(d);
+        });
+      }
+
+      function openPop(idx) {
+        const pin = pins[idx];
+        if (!pin || !popContainer) return;
+
+        const title = pin.dataset.title || 'Detalle';
+        const body = pin.dataset.body || '';
+
+        popContainer.innerHTML = '';
+        const p = document.createElement('div');
+        p.className = 'popover';
+        p.innerHTML = '<button class="close-x" aria-label="Cerrar">&times;</button>' +
+          '<h3>' + title + '</h3><p>' + body + '</p>';
+        popContainer.appendChild(p);
+
+        // Posicionamiento
+        const rect = pin.getBoundingClientRect();
+        const popRect = p.getBoundingClientRect();
+
+        // Centrar respecto al pin
+        const left = rect.left + rect.width / 2;
+        let top = rect.top - popRect.height - 12; // 12px de margen arriba
+
+        // Evitar que se salga por arriba de la pantalla
+        if (top < 10) top = 10;
+
+        p.style.left = left + 'px';
+        p.style.top = top + 'px';
+
+        // Evento cerrar
+        const closeBtn = p.querySelector('.close-x');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            popContainer.innerHTML = '';
+          });
+        }
+
+        visited.add(idx);
+        pin.classList.add('visited');
+        tick();
+        renderMini();
+      }
+
+      function tick() {
+        const pct = pins.length ? Math.round((visited.size / pins.length) * 100) : 0;
+        
+        // Eliminada lógica de bar.style.width
+
+        try {
+          window.parent && window.parent.postMessage({
+            type: 'componentProgress',
+            componentId: id,
+            progress: pct,
+            completed: pct >= 95
+          }, '*');
+        } catch (e) { }
+      }
+
+      pins.forEach((pin, idx) => {
+        pin.addEventListener('click', () => openPop(idx));
+        pin.tabIndex = 0;
+        pin.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openPop(idx);
+          }
+        });
+        pin.setAttribute('aria-label', pin.dataset.title || 'Punto interactivo');
+      });
+
+      // Cerrar popup al hacer click fuera
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.pin') && !e.target.closest('.popover')) {
+          if (popContainer) popContainer.innerHTML = '';
+        }
+      });
+
+      renderMini();
+      tick();
+    })();
+  </script>
+</body>
+</html>

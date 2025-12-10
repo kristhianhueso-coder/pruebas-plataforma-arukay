@@ -21,7 +21,7 @@
   --panel-ink: #434343;
 
   --size-h1: 1.625rem;
-  --size-h2: 1.25rem;
+  --size-h2: 1.20rem;
   --size-h3: 1.05rem;
   --size-body: 14px;
 
@@ -71,7 +71,7 @@ body {
   padding: 0;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
   font-size: var(--size-body);
-  line-height: 1.6;
+  line-height: 1.4;
   color: var(--ink);
   overflow: hidden;
 }
@@ -160,6 +160,9 @@ a {
   text-underline-offset: 2px;
 }
 
+.centerd-text {
+  text-align: center;
+}
 .comp-header {
   text-align: center;
   margin-bottom: 16px;
@@ -257,7 +260,6 @@ a {
 }
 
 .app-title {
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
   font-size: 18px;
   font-weight: 700;
   color: var(--accent);
@@ -273,7 +275,9 @@ a {
   flex-shrink: 0;
 }
 
-
+.small-container{
+  padding: 10px 0 0 0;
+}
 .app-content {
   flex: 1;
   padding: 0 18px 12px;
@@ -284,7 +288,6 @@ a {
 }
 
 .app-subtitle {
-  color: var(--muted);
   margin: 0;
   text-align: center;
 }
@@ -324,19 +327,11 @@ a {
   color: var(--accent);
 }
 
-
-
 .accordion {
   background: #ffffff;
   border-radius: 12px;
   padding: 10px;
   border: 1px solid #e5e7eb;
-}
-
-.accordion h2 {
-  margin: 0 0 4px;
-  font: 600 16px system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  color: var(--ink);
 }
 
 .sr-only {

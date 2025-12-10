@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Componente – Pregunta de Opción Múltiple</title>
+  <link rel="stylesheet" href="component-styles.css" />
+  <style>
+    .intro {
+      margin: 0;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .callout {
+      margin: 0 0 10px;
+      font-weight: 700;
+      color: var(--accent);
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .stage {
+      display: grid;
+      grid-template-columns: 1.2fr .9fr;
+      gap: 22px;
+      height: 100%;
+      align-items: stretch;
+      min-height: 0;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .panel-left {
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #e5e7eb;
+    }
+
+    .prompt {
+      font: 700 14px system-ui, sans-serif;
+      color: var(--accent);
+      margin: 0 0 10px;
+    }
+
+    /* Updated Question Text Color */
+    #question-text {
+      color: var(--muted);
+    }
+
+    .panel-right {
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 18px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      min-height: 0;
+      border: 1px solid #e5e7eb;
+    }
+
+    /* Options */
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 10px 0 12px;
+    }
+
+    .opt {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: #ffffff;
+      color: var(--muted);
+      border-radius: 10px;
+      padding: 10px 8px;
+      /* Compact padding */
+      cursor: pointer;
+      border: 1px solid #E5E7EB;
+      text-align: center;
+      font: 700 13px system-ui, sans-serif;
+      /* Slightly smaller font */
+      transition: all 0.18s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
+
+    .opt:hover {
+      background: #f3e8ff;
+      border-color: var(--accent);
+      box-shadow: 0 4px 12px rgba(91, 0, 255, 0.1);
+      color: var(--accent);
+    }
+
+    .opt.selected {
+      border-color: var(--accent);
+      background: #f3e8ff;
+      box-shadow: 0 0 0 1px var(--accent);
+      color: var(--accent);
+    }
+
+    .opt .ring {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      display: inline-block;
+      flex: 0 0 16px;
+      background: transparent;
+      transition: all 0.2s;
+    }
+
+    .opt.selected .ring {
+      background: var(--accent);
+      box-shadow: inset 0 0 0 3px #fff;
+    }
+
+    .opt.correct {
+      border-color: var(--success) !important;
+      background: #ECFDF5 !important;
+      color: #065f46 !important;
+    }
+
+    .opt.incorrect {
+      border-color: var(--error) !important;
+      background: #FEF2F2 !important;
+      color: #991b1b !important;
+    }
+
+    .opt.correct-answer {
+      border-color: var(--success) !important;
+      background: #ECFDF5 !important;
+      animation: pulse-correct 1.5s ease-in-out;
+    }
+
+    @keyframes pulse-correct {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.02);
+      }
+    }
+
+    /* Buttons */
+    .actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: auto;
+      padding-top: 8px;
+      width: 100%;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 8px 24px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #fff;
+      background: var(--accent);
+      transition: all 0.2s;
+      font-size: 14px;
+    }
+
+    .btn:hover {
+      background: #4a00d4;
+      transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: #9ca3af;
+    }
+
+    /* Media */
+    .media {
+      width: 100%;
+      height: 100%;
+      background: #e5e7eb;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      /* CLAVE: Mantiene la proporción y rellena el contenedor */
+      object-position: center;
+      display: block;
+    }
+
+    /* Carousel Controls */
+    .carousel-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 8px;
+      width: 100%;
+    }
+
+    .dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #d1d5db;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    .dot.active {
+      background: var(--accent);
+      transform: scale(1.2);
+    }
+
+    .dot.answered {
+      background: #9ca3af;
+    }
+
+    /* Results */
+    .results-container {
+      text-align: center;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+
+    .score-display {
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 20px 0;
+    }
+
+    .score-text {
+      font-size: 24px;
+      color: var(--accent);
+      margin-bottom: 30px;
+    }
+
+    /* Specific Layout for Mobile/Small Screens (< 760px) */
+    @media screen and (max-width: 700px) {
+
+      .stage {
+        /* Force side-by-side layout */
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        /* Slightly more space for text */
+        gap: 10px;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .panel-left {
+        order: 1;
+        min-height: 0;
+        overflow-y: auto;
+        /* Allow scrolling within the text panel */
+        padding: 12px;
+      }
+
+      .panel-right {
+        order: 2;
+        height: 100%;
+        min-height: 0;
+        padding: 12px;
+      }
+
+      .options {
+        grid-template-columns: 1fr 1fr;
+        /* 2x2 grid */
+      }
+
+      .intro,
+      .callout {
+        font-size: 1rem;
+        margin: px;
+      }
+
+      h2 {
+        font-size: 1rem;
+      }
+    }
+  </style>
+  <script>
+    (function () {
+      function setEmbedded() {
+        document.documentElement.classList.add('embedded-mode');
+        // Also add to body just in case CSS targets it
+        if (document.body) document.body.classList.add('embedded-mode');
+      }
+
+      try {
+        if (window.self !== window.top || window.parent !== window) {
+          setEmbedded();
+        }
+      } catch (e) {
+        setEmbedded();
+      }
+
+      // Re-check on load to be sure
+      window.addEventListener('DOMContentLoaded', function () {
+        try {
+          if (window.self !== window.top || window.parent !== window) {
+            setEmbedded();
+          }
+        } catch (e) {
+          setEmbedded();
+        }
+      });
+    })();
+  </script>
+</head>
+
+<body>
+  <div class="app-root">
+    <div class="frame">
+      <div class="inner-card">
+
+        <!-- Top Bar -->
+        <header class="top-bar">
+          <h1 class="app-title">Preguntas de Opción Múltiple</h1>
+        </header>
+        <div class="divider"></div>
+
+        <!-- Main Content -->
+        <div class="app-content">
+          <p class="intro">Este componente presenta una serie de preguntas con opciones de respuesta.</p>
+          <p class="callout">Seleccione una opción y envíe su respuesta para avanzar.</p>
+
+          <div class="stage">
+            <!-- Panel izquierdo con la pregunta y opciones -->
+            <div class="panel-left">
+              <div id="question-content">
+                <h2 id="question-title">Pregunta 1</h2>
+                <p id="question-text">¿En qué año se registró por primera vez una evaluación a gran escala que consiste
+                  únicamente en preguntas de opción múltiple?</p>
+
+                <div class="prompt">Elige una opción y selecciona Enviar.</div>
+
+                <div class="options" id="options">
+                  <!-- Generated by JS -->
+                </div>
+
+                <div class="actions">
+                  <button class="btn" id="submit">Enviar</button>
+                </div>
+              </div>
+
+              <!-- Controles de navegación (Dots only) -->
+              <div class="carousel-controls">
+                <div class="dots" id="dots">
+                  <!-- Generated by JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel derecho con la imagen/GIF -->
+            <div class="panel-right">
+              <div class="media" id="media">
+                <img src="" alt="Imagen relacionada con la pregunta" id="question-image">
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      let opts = [];
+      const questionTitle = document.getElementById('question-title');
+      const questionText = document.getElementById('question-text');
+      const questionImage = document.getElementById('question-image');
+      const questionContent = document.getElementById('question-content');
+      const submit = document.getElementById('submit');
+      const dotsContainer = document.getElementById('dots');
+      const panelRight = document.querySelector('.panel-right');
+
+
+      // Datos de las preguntas
+      const questions = [
+        {
+          title: "Pregunta 1",
+          text: "¿En qué año se registró por primera vez una evaluación a gran escala que consiste únicamente en preguntas de opción múltiple?",
+          image: "https://images.unsplash.com/photo-1580894894513-541e068a3e2b?w=400&h=300&fit=crop",
+          options: [
+            { text: "1917", correct: false },
+            { text: "1953", correct: false },
+            { text: "1977", correct: false },
+            { text: "1888", correct: true }
+          ]
+        },
+        {
+          title: "Pregunta 2",
+          text: "¿Qué teórico de la educación está más asociado con el desarrollo de las pruebas de opción múltiple?",
+          image: "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExenRqcGxld3hyMGY5NGNrbWVmcWRreGZtOG9kbnVmNmxvNXlreTdzdSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/uOFCju3KRFxwxScVfm/giphy.gif",
+          options: [
+            { text: "John Dewey", correct: false },
+            { text: "Benjamin Bloom", correct: true },
+            { text: "Maria Montessori", correct: false },
+            { text: "Jean Piaget", correct: false }
+          ]
+        },
+        {
+          title: "Pregunta 3",
+          text: "¿Cuál es la principal ventaja de las preguntas de opción múltiple en las evaluaciones a gran escala?",
+          image: "https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=400&h=300&fit=crop",
+          options: [
+            { text: "Permiten la expresión creativa", correct: false },
+            { text: "Son fáciles de calificar objetivamente", correct: true },
+            { text: "Evalúan habilidades de pensamiento de orden superior", correct: false },
+            { text: "Eliminan las adivinanzas", correct: false }
+          ]
+        }
+      ];
+
+      let currentQuestion = 0;
+      let selected = new Set();
+      let userAnswers = Array(questions.length).fill(null);
+      let isResultsScreen = false;
+
+      function toggleOption(btn) {
+        if (btn.getAttribute('aria-disabled') === 'true') return;
+
+        selected.forEach(b => b.classList.remove('selected'));
+        selected.clear();
+        selected.add(btn);
+        btn.classList.add('selected');
+      }
+
+      function calculateScore() {
+        const correctAnswers = userAnswers.filter(answer => answer && answer.isCorrect).length;
+        const totalQuestions = questions.length;
+        const percentage = Math.round((correctAnswers / totalQuestions) * 100);
+
+        return {
+          correct: correctAnswers,
+          total: totalQuestions,
+          percentage: percentage
+        };
+      }
+
+      function showResults() {
+        isResultsScreen = true;
+        const score = calculateScore();
+
+        // Ocultar el panel derecho con la imagen
+        panelRight.style.display = 'none';
+
+        // Ocultar los puntos de navegación (dots)
+        if (dotsContainer && dotsContainer.parentElement) {
+          dotsContainer.parentElement.style.display = 'none';
+        }
+
+        // Expandir el panel izquierdo para ocupar todo el espacio
+        document.querySelector('.panel-left').style.gridColumn = '1 / -1';
+
+        const resultsHTML = `
+      <div class="results-container">
+        <h2>¡Prueba Completada!</h2>
+        <div class="score-display">${score.percentage}%</div>
+        <div class="score-text">Respuestas correctas: ${score.correct} de ${score.total}</div>
+        <button class="btn" onclick="location.reload()">Reiniciar</button>
+      </div>
+    `;
+
+        questionContent.innerHTML = resultsHTML;
+      }
+
+      function grade() {
+        if (selected.size === 0) return;
+
+        const selectedOption = Array.from(selected)[0];
+
+        userAnswers[currentQuestion] = {
+          option: selectedOption,
+          isCorrect: selectedOption.dataset.correct === "true"
+        };
+
+        opts.forEach(o => o.setAttribute("aria-disabled", "true"));
+
+        opts.forEach(o => {
+          const correct = o.dataset.correct === "true";
+          const chosen = selected.has(o);
+
+          if (correct && chosen) o.classList.add("correct");
+          else if (correct) o.classList.add("correct-answer");
+          else if (chosen) o.classList.add("incorrect");
+        });
+
+        // Enable submit button for next step
+        submit.disabled = false;
+
+        if (currentQuestion === questions.length - 1) {
+          submit.textContent = "Ver Resultados";
+          submit.onclick = showResults;
+        } else {
+          submit.textContent = "Siguiente";
+          submit.onclick = nextQuestion;
+        }
+
+        // Update dots
+        const dots = Array.from(document.querySelectorAll('.dot'));
+        dots[currentQuestion].classList.add('answered');
+      }
+
+      function loadQuestion(index) {
+        currentQuestion = index;
+        const currentSubmit = document.getElementById('submit');
+        currentSubmit.onclick = grade;
+        currentSubmit.textContent = 'Enviar';
+        currentSubmit.disabled = false;
+
+        const question = questions[index];
+
+        questionTitle.textContent = question.title;
+        questionText.textContent = question.text;
+
+        questionImage.src = question.image;
+        questionImage.alt = `Imagen relacionada con ${question.title}`;
+
+        questionImage.onerror = function () {
+          questionImage.src = 'https://via.placeholder.com/400x300/5B00FF/FFFFFF?text=Imagen+' + (index + 1);
+        };
+
+        const optionsContainer = document.getElementById('options');
+        optionsContainer.innerHTML = '';
+
+        // Crear opciones
+        question.options.forEach((option, i) => {
+          const btn = document.createElement('button');
+          btn.className = 'opt';
+
+          // Ajuste dinámico de fuente para textos largos
+          if (option.text.length > 38) {
+            btn.style.fontSize = "11px";
+            btn.style.lineHeight = "1.25";
+            btn.style.padding = "8px 6px";
+          }
+
+          btn.dataset.id = String.fromCharCode(97 + i);
+          btn.dataset.correct = option.correct ? 'true' : 'false';
+          btn.innerHTML = `<span class="ring" aria-hidden="true"></span> ${option.text}`;
+          btn.addEventListener('click', () => toggleOption(btn));
+          optionsContainer.appendChild(btn);
+        });
+
+        opts = Array.from(document.querySelectorAll("#options .opt"));
+
+        selected.clear();
+
+        // Render dots if first load or update active
+        if (dotsContainer.children.length === 0) {
+          questions.forEach((_, i) => {
+            const dot = document.createElement('button');
+            dot.className = 'dot';
+            dot.dataset.i = i;
+            dot.addEventListener('click', () => {
+              const idx = parseInt(dot.dataset.i, 10);
+              loadQuestion(idx);
+            });
+            dotsContainer.appendChild(dot);
+          });
+        }
+
+        const dots = Array.from(document.querySelectorAll('.dot'));
+        dots.forEach((dot, idx) => {
+          dot.classList.toggle('active', idx === index);
+          if (userAnswers[idx] !== null) dot.classList.add('answered');
+        });
+
+        // Check if already answered
+        if (userAnswers[index]) {
+          // Restore state
+          const ans = userAnswers[index];
+          opts.forEach(o => {
+            o.setAttribute("aria-disabled", "true");
+            const correct = o.dataset.correct === "true";
+            if (o.innerText.trim() === ans.option.innerText.trim()) {
+              if (ans.isCorrect) o.classList.add("correct");
+              else o.classList.add("incorrect");
+            } else if (correct) {
+              o.classList.add("correct-answer");
+            }
+          });
+
+          currentSubmit.disabled = false;
+          if (index < questions.length - 1) {
+            currentSubmit.textContent = "Siguiente";
+            currentSubmit.onclick = nextQuestion;
+          } else {
+            currentSubmit.textContent = "Ver Resultados";
+            currentSubmit.onclick = showResults;
+          }
+        }
+      }
+
+      function nextQuestion() {
+        if (currentQuestion < questions.length - 1) {
+          loadQuestion(currentQuestion + 1);
+        }
+      }
+
+      // Inicializar
+      loadQuestion(0);
+    })();
+  </script>
+</body>
+
+</html>

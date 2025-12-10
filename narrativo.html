@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Componente – Narrativo</title>
+<link rel="stylesheet" href="component-styles.css
+">
+<style>
+
+.divider{
+  height:1px;
+  width:100%;
+  background:#d1d5db;
+  margin-bottom:8px;
+  flex-shrink:0;
+}
+
+/* ===== Contenido interno del componente ===== */
+.app-content{
+  flex:1;
+  padding:12px 20px 16px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+/* Header interno: sólo textos, sin título principal (éste está arriba en .app-title) */
+header{
+  grid-area:head;
+  padding:8px 16px 0;
+}
+
+p.intro{margin:0 0 10px;color:var(--muted);}
+p.callout{margin:4px 0 12px;font-weight:700;color:var(--brand);}
+
+/* Contenido principal (carrusel + panel) */
+
+.content{
+  grid-area:content;
+  padding:0 16px 12px;
+  height:100%;
+}
+
+.stage{
+  display:grid;
+  grid-template-columns:1.2fr .9fr;
+  gap:22px;
+  height:100%;
+  align-items:stretch;
+}
+
+/* Carrusel */
+
+.carousel{
+  position:relative;
+  background:#fff;
+  width:100%;
+  height:360px;
+  max-width:100%;
+  border-radius:20px;
+  border:1px solid #e1e1e1;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.slide{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:stretch;
+  justify-content:stretch;
+  opacity:0;
+  transition:opacity .25s;
+  pointer-events:none;
+  z-index:1;
+}
+.slide.active{
+  opacity:1;
+  pointer-events:auto;
+  z-index:2;
+}
+
+.slide img,
+.slide video{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  background:#000;
+  border:0;
+}
+
+.slide iframe{
+  width:100%;
+  height:100%;
+  border:0;
+  display:block;
+}
+
+.nav-btn{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:48px;
+  height:56px;
+  background:var(--brand);
+  border-radius:4px;
+  border:none;
+  color:#ffffff;
+  font:700 20px Arial;
+  cursor:pointer;
+  opacity:.95;
+  z-index:3;
+}
+.nav-btn.prev{left:10px;}
+.nav-btn.next{right:10px;}
+
+.dots{
+  position:absolute;
+  bottom:10px;
+  left:0;
+  right:0;
+  display:flex;
+  gap:8px;
+  justify-content:center;
+  z-index:3;
+}
+.dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:#cfd3d8;
+  border:0;
+  cursor:pointer;
+}
+.dot.active{background:var(--accent);}
+
+/* Panel narrativo */
+
+.panel{
+  background:#eeeeee;
+  border-radius:6px;
+  padding:18px;
+  overflow-y:auto;
+}
+.panel h2{
+  margin:0 0 8px;
+  font-size:18px;
+}
+.panel p{
+  margin:0 0 10px;
+}
+/* Cajas resaltadas y grid de elementos (estilo original) */
+.highlight-box--accent{
+  border-left:3px solid var(--accent);
+}
+.highlight-box p{margin:4px 0;}
+
+.tools-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:8px;
+}
+.tool-item{
+  background:rgba(91, 0, 255, 0.08);
+  padding:8px;
+  border-radius:6px;
+  text-align:center;
+  font-weight:600;
+  font-size:12px;
+}
+
+/* ===== Responsive ===== */
+
+@media(max-width:700px){
+  .app-content{
+    padding:10px 14px 12px;
+    overflow-y: scroll;
+  }
+  .stage{
+    grid-template-columns:2fr 3fr;
+  }
+  .panel{
+    height:400px;
+  }
+
+  .app-title{
+    font-size:16px;
+  }
+
+  .carousel{
+    height:260px;
+  }
+}
+
+
+</style>
+</head>
+<body>
+<div class="app-root">
+  <div class="frame">
+    <div class="inner-card">
+      <!-- Título principal centrado + línea divisoria -->
+      <header class="top-bar">
+        <h1 class="template">Narrativo</h1>
+      </header>
+      <div class="divider"></div>
+
+      <div class="app-content overflow-auto">
+        <section class="comp-wrap" data-component-id="narr-001">
+
+          <header>
+            <p class="intro">El componente narrativo permite desplazarse por una serie de imágenes, cada una acompañada de texto.</p>
+            <p class="intro">Este componente siempre está distribuido.</p>
+            <p class="callout">Seleccione las flechas siguiente y atrás para obtener más información.</p>
+          </header>
+
+          <div class="content">
+            <div class="stage">
+
+              <div class="carousel" id="carousel" aria-live="polite">
+                <!-- Slide 1: video -->
+                <div class="slide active">
+                  <video id="mediaEl" controls preload="metadata" poster="">
+                    <source src="video.mp4" type="video/mp4" />
+                  </video>
+                </div>
+
+                <!-- Slide 2: imagen -->
+                <div class="slide">
+                  <img src="../Nivel_A1/images/A1_C3_narrativo_a.png" alt="Texto descriptivo de la imagen">
+                </div>
+
+                <!-- Slide 3: iframe -->
+                <div class="slide">
+                  <iframe width="560" height="315"
+                    src="https://www.youtube.com/embed/NEVG_nFfJAE?si=gp2FlniLW4ckMyPf"
+                    title="YouTube video player"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    allowfullscreen>
+                  </iframe>
+                </div>
+
+                <button class="nav-btn prev" aria-label="Anterior">&#10094;</button>
+                <button class="nav-btn next" aria-label="Siguiente">&#10095;</button>
+
+                <div class="dots" id="dots">
+                  <button class="dot active" data-i="0"></button>
+                  <button class="dot" data-i="1"></button>
+                  <button class="dot" data-i="2"></button>
+                </div>
+              </div>
+
+              <aside class="panel" id="panel"></aside>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Ajuste de altura del stage (se mantiene la lógica original)
+  function adjustStageHeight() {
+    const activeImg = document.querySelector('.slide.active img');
+    const stage = document.querySelector('.stage');
+    if (stage) {
+      if (activeImg && activeImg.complete) {
+        stage.style.height = activeImg.offsetHeight + 'px';
+      } else if (activeImg) {
+        activeImg.onload = () => {
+          stage.style.height = activeImg.offsetHeight + 'px';
+        };
+      } else {
+        // si no hay imagen activa (video/iframe), usamos la altura del carrusel
+        const carousel = document.getElementById('carousel');
+        if (carousel) {
+          stage.style.height = carousel.offsetHeight + 'px';
+        }
+      }
+    }
+  }
+  window.addEventListener('load', adjustStageHeight);
+  window.addEventListener('resize', adjustStageHeight);
+  setInterval(adjustStageHeight, 400);
+
+  (function(){
+    const wrap=document.querySelector('.comp-wrap');
+    const id=wrap.getAttribute('data-component-id')||'narrative-component';
+    const carousel=document.getElementById('carousel');
+    const slides=Array.from(carousel.querySelectorAll('.slide'));
+    const dots=Array.from(document.querySelectorAll('.dot'));
+    const prev=carousel.querySelector('.prev');
+    const next=carousel.querySelector('.next');
+    const panel=document.getElementById('panel');
+
+    const captions=[
+      {title:'Elemento narrativo 1',body:[
+        'Las narrativas son adecuadas para mostrar diálogos y secuencias.',
+        'Usa cada paso para avanzar la historia con una imagen.',
+        "<div class='highlight-box highlight-box--accent bg-template' >" +
+          "<strong>💡 Tip para el docente:</strong>" +
+          "<p>Pregunta, tip, consejo, dato curioso.</p>" +
+        "</div>",
+        'Numeración',
+        "<ol>" +
+          "<li>Ítem 1</li>" +
+          "<li>Ítem 2</li>" +
+          "<li>Ítem 3</li>" +
+          "<li>Ítem 4</li>" +
+        "</ol>",
+        "<em>Texto en cursiva.</em>"
+      ]},
+      {title:'Elemento narrativo 2',body:[
+        'Puedes usar fotos, ilustraciones o iframes de mini apps.',
+        'Mantén los textos breves para favorecer el ritmo.',
+        "<div class='highlight-box bg-template'>" +
+          "<strong>🔎 Observa:</strong>" +
+          "<p>Observación sobre la imagen del slide.</p>" +
+        "</div>",
+        'Aquí cuatro elementos distintos en grid',
+        "<div class='tools-grid'>" +
+          "<div class='tool-item'>Elemento 1</div>" +
+          "<div class='tool-item'>Elemento 2</div>" +
+          "<div class='tool-item'>Elemento 3</div>" +
+          "<div class='tool-item'>Elemento 4</div>" +
+        "</div>"
+      ]},
+      {title:'Elemento narrativo 3',body:[
+        'Cierra con una reflexión o una pregunta.',
+        'Esto ayuda a consolidar el aprendizaje.',
+        "<div class='highlight-box highlight-box--accent bg-template'>" +
+          "<strong>🧠 Reflexión final:</strong>" +
+          "<p>Reflexión, conclusión, invitación a seguir de manera autónoma.</p>" +
+        "</div>",
+        "<div class='highlight-box bg-template'>" +
+          "<strong>📌 Pregunta para el cierre:</strong>" +
+          "<p>Una pregunta para finalizar ¿ -------- ?</p>" +
+        "</div>",
+        'Aquí tres elementos distintos en grid',
+        "<div class='tools-grid'>" +
+          "<div class='tool-item'>Elemento 1</div>" +
+          "<div class='tool-item'>Elemento 2</div>" +
+          "<div class='tool-item'>Elemento 3</div>" +
+        "</div>",
+        'Itemización',
+        "<ul>" +
+          "<li>Ítem 1</li>" +
+          "<li>Ítem 2</li>" +
+          "<li>Ítem 3</li>" +
+          "<li>Ítem 4</li>" +
+        "</ul>"
+      ]}
+    ];
+
+    let i=0;
+    function render(){
+      slides.forEach((s,idx)=>s.classList.toggle('active',idx===i));
+      dots.forEach((d,idx)=>d.classList.toggle('active',idx===i));
+      const data=captions[i]||{title:'',body:[]};
+      panel.innerHTML='<h2>'+data.title+'</h2>'+data.body.map(p=>'<p>'+p+'</p>').join('');
+      const pct=Math.round(((i+1)/slides.length)*100);
+      adjustStageHeight();
+    }
+
+    prev.addEventListener('click',()=>{i=(i-1+slides.length)%slides.length;render();});
+    next.addEventListener('click',()=>{i=(i+1)%slides.length;render();});
+    dots.forEach(d=>d.addEventListener('click',()=>{i=parseInt(d.dataset.i,10)||0;render();}));
+
+    render();
+  })();
+</script>
+</body>
+</html>

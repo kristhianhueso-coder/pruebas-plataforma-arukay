@@ -1,0 +1,865 @@
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Mapa Mental Interactivo: Educación</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="component-styles.css">
+  <style>
+    :root {
+      /* Colores Principales */
+      --brand-hover: #803AFF;
+      /* Bordes y Estados */
+      --accent-border: #5B00FF;
+      --success-border: #10B981;
+      /* Sombras */
+      --shadow-hover: 0 6px 14px rgba(91, 0, 255, 0.2);
+ }
+
+   /* --- Barra Superior --- */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 20px;
+      background: var(--fondo);
+      z-index: 10;
+      border-bottom: 1px solid #e5e7eb;
+      flex-shrink: 0;
+    }
+
+    .top-bar-title {
+      font-size: var(--size-h2);
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    /* --- Controles de Zoom --- */
+    .controls {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      gap: 8px;
+      z-index: 100;
+    }
+
+    .control-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-chip);
+      font-size: 18px;
+      transition: transform 0.1s, background 0.1s;
+    }
+
+    .control-btn:hover {
+      background: var(--brand-hover);
+      transform: scale(1.05);
+    }
+
+    .control-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* --- Viewport del Mapa --- */
+    .mindmap-viewport {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+      background-color: #f8fafc;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    .mindmap-viewport:active {
+      cursor: grabbing;
+    }
+
+    .mindmap-content {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: 0 0;
+    }
+
+    /* --- Estructura del Árbol --- */
+    .tree-branch {
+      display: flex;
+      align-items: center;
+    }
+
+    .sub-branches {
+      display: flex;
+      flex-direction: column;
+      margin-left: 24px;
+      position: relative;
+    }
+
+    /* Líneas conectoras verticales */
+    .branch-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      padding: 12px 0;
+    }
+
+    .branch-wrapper::after {
+      content: '';
+      position: absolute;
+      left: -25px;
+      width: 2px;
+      background-color: #cbd5e1;
+      top: 0;
+      bottom: 0;
+    }
+
+    .branch-wrapper:first-child::after {
+      top: 50%;
+    }
+
+    .branch-wrapper:last-child::after {
+      bottom: 50%;
+    }
+
+    .branch-wrapper:only-child::after {
+      display: none;
+    }
+
+    /* Conector horizontal al hijo */
+    .branch-wrapper::before {
+      content: '';
+      position: absolute;
+      left: -25px;
+      top: 50%;
+      width: 25px;
+      height: 2px;
+      background-color: #cbd5e1;
+    }
+
+    /* Conector del padre al grupo de hijos */
+    .node-connector {
+      width: 25px;
+      height: 2px;
+      background-color: #cbd5e1;
+      transition: opacity 0.2s;
+    }
+
+    /* --- Nodos del Mapa --- */
+    .mindmap-node {
+      position: relative;
+      z-index: 2;
+      padding: 12px 20px;
+      border-radius: 16px;
+      background: var(--fondo);
+      border: 2px solid var(--accent-border);
+      color: var(--accent);
+      font-weight: 500;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-shadow: var(--shadow-chip);
+      transition: all 0.2s ease;
+
+      /* Layout interno del nodo */
+      display: flex;
+      flex-direction: row;
+      /* Texto a la izq, icono a la derecha */
+      justify-content: space-between;
+      align-items: center;
+      text-align: left;
+      user-select: none;
+      max-width: 240px;
+      gap: 12px;
+    }
+
+    .mindmap-node-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .mindmap-node strong {
+      font-weight: 700;
+      display: block;
+      line-height: 1.2;
+    }
+
+    .mindmap-node small {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.3;
+      display: block;
+    }
+
+    .mindmap-node:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+      background: #f5f3ff;
+    }
+
+    /* Nodo Raíz */
+    .mindmap-node.root {
+      justify-content: center;
+      text-align: center;
+      flex-direction: column;
+      font-size: 1.1rem;
+      padding: 16px 32px;
+      border-radius: 24px;
+      max-width: 300px;
+      border-width: 3px;
+      border-color: var(--accent);
+    }
+
+    /* Estado Expandido */
+    .mindmap-node.expanded {
+      border-color: var(--success-border);
+      color: var(--success);
+    }
+
+    .mindmap-node.expanded small {
+      color: #14532d;
+    }
+
+    /* Icono de Toggle */
+    .toggle-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.06);
+      font-size: 10px;
+      transition: transform 0.3s ease;
+      flex-shrink: 0;
+    }
+
+    .expanded .toggle-icon {
+      transform: rotate(90deg);
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    /* Utilidad para ocultar ramas */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Niveles de color */
+    .level-1 .mindmap-node {
+      border-color: #818cf8;
+      color: #312e81;
+    }
+
+    .level-2 .mindmap-node {
+      border-color: #fbbf24;
+      color: #78350f;
+      font-size: 0.85rem;
+    }
+
+    .level-3 .mindmap-node {
+      border-color: #34d399;
+      color: #064e3b;
+      font-size: 0.8rem;
+      padding: 6px 14px;
+    }
+
+    .level-4 .mindmap-node {
+      border-color: #f472b6;
+      color: #831843;
+      font-size: 0.75rem;
+      padding: 4px 12px;
+    }
+
+    /* --- Responsive Móvil --- */
+    @media screen and (max-width: 700px) {
+
+     .top-bar {
+        padding: 8px 12px;
+      }
+
+      .top-bar-title {
+        font-size: 1rem;
+      }
+
+      .controls {
+        bottom: 10px;
+        right: 10px;
+      }
+
+      .control-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+      }
+    }
+  </style>
+  <script>
+    (function () {
+      function setEmbedded() {
+        document.documentElement.classList.add('embedded-mode');
+        // Also add to body just in case CSS targets it
+        if (document.body) document.body.classList.add('embedded-mode');
+      }
+
+      try {
+        if (window.self !== window.top || window.parent !== window) {
+          setEmbedded();
+        }
+      } catch (e) {
+        setEmbedded();
+      }
+
+      // Re-check on load to be sure
+      window.addEventListener('DOMContentLoaded', function () {
+        try {
+          if (window.self !== window.top || window.parent !== window) {
+            setEmbedded();
+          }
+        } catch (e) {
+          setEmbedded();
+        }
+      });
+    })();
+  </script>
+</head>
+
+<body>
+  <div class="app-root">
+    <div class="frame">
+      <div class="inner-card">
+        <header class="top-bar">
+          <div class="top-bar-title">Mapa Mental: Educación</div>
+        </header>
+
+        <div class="mindmap-viewport" id="viewport">
+          <div class="mindmap-content" id="content">
+
+            <!-- Root -->
+            <div class="tree-branch">
+              <div class="mindmap-node root expanded" id="rootNode">
+                Educación
+                <span class="toggle-icon">▶</span>
+              </div>
+              <div class="node-connector"></div>
+
+              <!-- Level 1 Container -->
+              <div class="sub-branches" id="rootChildren">
+
+                <!-- Branch 1: Metodologías -->
+                <div class="branch-wrapper">
+                  <div class="tree-branch level-1">
+                    <div class="mindmap-node collapsed">
+                      <div class="mindmap-node-content">
+                        <strong>Metodologías</strong>
+                        <small>Estrategias de enseñanza</small>
+                      </div>
+                      <span class="toggle-icon">▶</span>
+                    </div>
+                    <div class="node-connector hidden"></div>
+                    <div class="sub-branches hidden">
+                      <!-- Level 2 -->
+                      <div class="branch-wrapper">
+                        <div class="tree-branch level-2">
+                          <div class="mindmap-node collapsed">
+                            <div class="mindmap-node-content">
+                              <strong>Activas</strong>
+                              <small>Participación total</small>
+                            </div>
+                            <span class="toggle-icon">▶</span>
+                          </div>
+                          <div class="node-connector hidden"></div>
+                          <div class="sub-branches hidden">
+                            <!-- Level 3 -->
+                            <div class="branch-wrapper">
+                              <div class="tree-branch level-3">
+                                <div class="mindmap-node collapsed">
+                                  <div class="mindmap-node-content">
+                                    <strong>ABP</strong>
+                                    <small>Basado en Proyectos</small>
+                                  </div>
+                                  <span class="toggle-icon">▶</span>
+                                </div>
+                                <div class="node-connector hidden"></div>
+                                <div class="sub-branches hidden">
+                                  <!-- Level 4 -->
+                                  <div class="branch-wrapper">
+                                    <div class="mindmap-node level-4">Proyectos Reales</div>
+                                  </div>
+                                  <div class="branch-wrapper">
+                                    <div class="mindmap-node level-4">Colaboración</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="branch-wrapper">
+                              <div class="tree-branch level-3">
+                                <div class="mindmap-node collapsed">Gamificación <span class="toggle-icon">▶</span>
+                                </div>
+                                <div class="node-connector hidden"></div>
+                                <div class="sub-branches hidden">
+                                  <div class="branch-wrapper">
+                                    <div class="mindmap-node level-4">Recompensas</div>
+                                  </div>
+                                  <div class="branch-wrapper">
+                                    <div class="mindmap-node level-4">Niveles</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="branch-wrapper">
+                        <div class="tree-branch level-2">
+                          <div class="mindmap-node collapsed">
+                            <div class="mindmap-node-content">
+                              <strong>Tradicionales</strong>
+                              <small>Clase magistral</small>
+                            </div>
+                            <span class="toggle-icon">▶</span>
+                          </div>
+                          <div class="node-connector hidden"></div>
+                          <div class="sub-branches hidden">
+                            <div class="branch-wrapper">
+                              <div class="tree-branch level-3">
+                                <div class="mindmap-node collapsed">Magistral <span class="toggle-icon">▶</span></div>
+                                <div class="node-connector hidden"></div>
+                                <div class="sub-branches hidden">
+                                  <div class="branch-wrapper">
+                                    <div class="mindmap-node level-4">Expositiva</div>
+                                  </div>
+                                  <div class="branch-wrapper">
+                                    <div class="mindmap-node level-4">Unidireccional</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Branch 2: Tecnología -->
+                <div class="branch-wrapper">
+                  <div class="tree-branch level-1">
+                    <div class="mindmap-node collapsed">Tecnología <span class="toggle-icon">▶</span></div>
+                    <div class="node-connector hidden"></div>
+                    <div class="sub-branches hidden">
+                      <div class="branch-wrapper">
+                        <div class="tree-branch level-2">
+                          <div class="mindmap-node collapsed">Hardware <span class="toggle-icon">▶</span></div>
+                          <div class="node-connector hidden"></div>
+                          <div class="sub-branches hidden">
+                            <div class="branch-wrapper">
+                              <div class="tree-branch level-3">
+                                <div class="mindmap-node collapsed">Dispositivos <span class="toggle-icon">▶</span>
+                                </div>
+                                <div class="node-connector hidden"></div>
+                                <div class="sub-branches hidden">
+                                  <div class="branch-wrapper">
+                                    <div class="mindmap-node level-4">Tablets</div>
+                                  </div>
+                                  <div class="branch-wrapper">
+                                    <div class="mindmap-node level-4">Pizarras Digitales</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="branch-wrapper">
+                        <div class="tree-branch level-2">
+                          <div class="mindmap-node collapsed">
+                            <div class="mindmap-node-content">
+                              <strong>Software</strong>
+                              <small>Herramientas digitales y plataformas para la gestión del aprendizaje.</small>
+                            </div>
+                            <span class="toggle-icon">▶</span>
+                          </div>
+                          <div class="node-connector hidden"></div>
+                          <div class="sub-branches hidden">
+                            <div class="branch-wrapper">
+                              <div class="tree-branch level-3">
+                                <div class="mindmap-node collapsed">
+                                  <div class="mindmap-node-content">
+                                    <strong>LMS</strong>
+                                    <small>Sistemas de Gestión de Aprendizaje como Moodle o Canvas.</small>
+                                  </div>
+                                  <span class="toggle-icon">▶</span>
+                                </div>
+                                <div class="node-connector hidden"></div>
+                                <div class="sub-branches hidden">
+                                  <div class="branch-wrapper">
+                                    <div class="mindmap-node level-4">Moodle</div>
+                                  </div>
+                                  <div class="branch-wrapper">
+                                    <div class="mindmap-node level-4">Canvas</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Branch 3: Inclusión -->
+                <div class="branch-wrapper">
+                  <div class="tree-branch level-1">
+                    <div class="mindmap-node collapsed">Inclusión <span class="toggle-icon">▶</span></div>
+                    <div class="node-connector hidden"></div>
+                    <div class="sub-branches hidden">
+                      <div class="branch-wrapper">
+                        <div class="tree-branch level-2">
+                          <div class="mindmap-node collapsed">Diversidad <span class="toggle-icon">▶</span></div>
+                          <div class="node-connector hidden"></div>
+                          <div class="sub-branches hidden">
+                            <div class="branch-wrapper">
+                              <div class="tree-branch level-3">
+                                <div class="mindmap-node collapsed">Cultural <span class="toggle-icon">▶</span></div>
+                                <div class="node-connector hidden"></div>
+                                <div class="sub-branches hidden">
+                                  <div class="branch-wrapper">
+                                    <div class="mindmap-node level-4">Multilingüismo</div>
+                                  </div>
+                                  <div class="branch-wrapper">
+                                    <div class="mindmap-node level-4">Tradiciones</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="branch-wrapper">
+                        <div class="tree-branch level-2">
+                          <div class="mindmap-node collapsed">Accesibilidad <span class="toggle-icon">▶</span></div>
+                          <div class="node-connector hidden"></div>
+                          <div class="sub-branches hidden">
+                            <div class="branch-wrapper">
+                              <div class="tree-branch level-3">
+                                <div class="mindmap-node collapsed">Adaptaciones <span class="toggle-icon">▶</span>
+                                </div>
+                                <div class="node-connector hidden"></div>
+                                <div class="sub-branches hidden">
+                                  <div class="branch-wrapper">
+                                    <div class="mindmap-node level-4">Curriculares</div>
+                                  </div>
+                                  <div class="branch-wrapper">
+                                    <div class="mindmap-node level-4">Físicas</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Branch 4: Evaluación -->
+                <div class="branch-wrapper">
+                  <div class="tree-branch level-1">
+                    <div class="mindmap-node collapsed">
+                      <div class="mindmap-node-content">
+                        <strong>Evaluación</strong>
+                        <small>Proceso continuo para medir el aprendizaje.</small>
+                      </div>
+                      <span class="toggle-icon">▶</span>
+                    </div>
+                    <div class="node-connector hidden"></div>
+                    <div class="sub-branches hidden">
+                      <div class="branch-wrapper">
+                        <div class="tree-branch level-2">
+                          <div class="mindmap-node collapsed">
+                            <div class="mindmap-node-content">
+                              <strong>Formativa</strong>
+                              <small>Evaluación durante el proceso para mejorar el aprendizaje, no solo para
+                                calificar.</small>
+                            </div>
+                            <span class="toggle-icon">▶</span>
+                          </div>
+                          <div class="node-connector hidden"></div>
+                          <div class="sub-branches hidden">
+                            <div class="branch-wrapper">
+                              <div class="tree-branch level-3">
+                                <div class="mindmap-node collapsed">Feedback <span class="toggle-icon">▶</span></div>
+                                <div class="node-connector hidden"></div>
+                                <div class="sub-branches hidden">
+                                  <div class="branch-wrapper">
+                                    <div class="mindmap-node level-4">Continuo</div>
+                                  </div>
+                                  <div class="branch-wrapper">
+                                    <div class="mindmap-node level-4">Constructivo</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="branch-wrapper">
+                        <div class="tree-branch level-2">
+                          <div class="mindmap-node collapsed">Sumativa <span class="toggle-icon">▶</span></div>
+                          <div class="node-connector hidden"></div>
+                          <div class="sub-branches hidden">
+                            <div class="branch-wrapper">
+                              <div class="tree-branch level-3">
+                                <div class="mindmap-node collapsed">Pruebas <span class="toggle-icon">▶</span></div>
+                                <div class="node-connector hidden"></div>
+                                <div class="sub-branches hidden">
+                                  <div class="branch-wrapper">
+                                    <div class="mindmap-node level-4">Exámenes</div>
+                                  </div>
+                                  <div class="branch-wrapper">
+                                    <div class="mindmap-node level-4">Proyectos Finales</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="control-btn" id="btnZoomIn" title="Acercar">+</button>
+          <button class="control-btn" id="btnZoomOut" title="Alejar">-</button>
+          <button class="control-btn" id="btnFit" title="Ajustar a pantalla">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="16" />
+              <line x1="8" y1="12" x2="16" y2="12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const viewport = document.getElementById('viewport');
+      const content = document.getElementById('content');
+
+      // State for Pan/Zoom
+      let scale = 1;
+      let panning = false;
+      let pointX = 0;
+      let pointY = 0;
+      let startX = 0;
+      let startY = 0;
+
+      // Initialize view
+      fitToScreen();
+
+      // Toggle Logic
+      const nodes = document.querySelectorAll('.mindmap-node');
+      nodes.forEach(node => {
+        // Only add click listener if it has a toggle icon (implies children)
+        if (node.querySelector('.toggle-icon')) {
+          node.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent panning when clicking node
+            toggleNode(node);
+          });
+        }
+      });
+
+      function toggleNode(node) {
+        const parentBranch = node.closest('.tree-branch');
+        if (!parentBranch) return;
+
+        const subBranches = parentBranch.querySelector('.sub-branches');
+        const connector = parentBranch.querySelector('.node-connector');
+
+        if (subBranches) {
+          const isHidden = subBranches.classList.contains('hidden');
+
+          if (isHidden) {
+            subBranches.classList.remove('hidden');
+            if (connector) connector.classList.remove('hidden');
+            node.classList.add('expanded');
+            node.classList.remove('collapsed');
+          } else {
+            subBranches.classList.add('hidden');
+            if (connector) connector.classList.add('hidden');
+            node.classList.remove('expanded');
+            node.classList.add('collapsed');
+          }
+
+          // Optional: Auto-fit after toggle? 
+          // Let's not auto-fit every time as it might be jarring. 
+          // User can use the button.
+        }
+      }
+
+      // Pan/Zoom Logic
+      viewport.addEventListener('mousedown', (e) => {
+        if (e.target.closest('.mindmap-node')) return;
+        e.preventDefault();
+        startPanning(e.clientX, e.clientY);
+      });
+
+      viewport.addEventListener('mousemove', (e) => {
+        if (!panning) return;
+        e.preventDefault();
+        pan(e.clientX, e.clientY);
+      });
+
+      document.addEventListener('mouseup', () => {
+        panning = false;
+        viewport.style.cursor = 'grab';
+      });
+
+      // Touch Events for Tablets/Mobile
+      viewport.addEventListener('touchstart', (e) => {
+        // Allow interacting with nodes (e.g. toggling)
+        if (e.target.closest('.mindmap-node')) return;
+
+        if (e.touches.length === 1) {
+          e.preventDefault(); // Prevent default browser scrolling/zooming
+          startPanning(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      }, { passive: false });
+
+      viewport.addEventListener('touchmove', (e) => {
+        if (!panning) return;
+        if (e.touches.length === 1) {
+          e.preventDefault();
+          pan(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      }, { passive: false });
+
+      document.addEventListener('touchend', () => {
+        panning = false;
+        viewport.style.cursor = 'grab';
+      });
+
+      viewport.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const xs = (e.clientX - pointX) / scale;
+        const ys = (e.clientY - pointY) / scale;
+        const delta = -e.deltaY;
+
+        const factor = delta > 0 ? 1.1 : 0.9;
+        let newScale = scale * factor;
+        newScale = Math.min(Math.max(0.1, newScale), 5); // Limits
+
+        pointX = e.clientX - xs * newScale;
+        pointY = e.clientY - ys * newScale;
+        scale = newScale;
+
+        updateTransform();
+      });
+
+      function startPanning(x, y) {
+        panning = true;
+        startX = x;
+        startY = y;
+        viewport.style.cursor = 'grabbing';
+      }
+
+      function pan(x, y) {
+        const dx = x - startX;
+        const dy = y - startY;
+
+        pointX += dx;
+        pointY += dy;
+
+        startX = x;
+        startY = y;
+
+        updateTransform();
+      }
+
+      function updateTransform() {
+        content.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`;
+      }
+
+      // Controls
+      document.getElementById('btnZoomIn').addEventListener('click', () => {
+        scale *= 1.2;
+        updateTransform();
+      });
+
+      document.getElementById('btnZoomOut').addEventListener('click', () => {
+        scale /= 1.2;
+        updateTransform();
+      });
+
+      document.getElementById('btnFit').addEventListener('click', fitToScreen);
+
+      function fitToScreen() {
+        // Reset to initial state to measure
+        content.style.transform = 'none';
+
+        const vRect = viewport.getBoundingClientRect();
+        const cRect = content.getBoundingClientRect();
+
+        // Calculate scale to fit
+        const padding = 40;
+        const scaleX = (vRect.width - padding) / cRect.width;
+        const scaleY = (vRect.height - padding) / cRect.height;
+        scale = Math.min(scaleX, scaleY, 1); // Don't zoom in more than 100% initially
+
+        // Center
+        pointX = (vRect.width - cRect.width * scale) / 2;
+        pointY = (vRect.height - cRect.height * scale) / 2;
+
+        // Adjust for the fact that content is top-left aligned in transform-origin 0 0
+        // Actually, we set transform-origin: 0 0 in CSS, so we need to calculate position relative to viewport 0,0
+
+        // Let's refine centering logic:
+        // The content rect is relative to viewport. 
+        // We want to move the top-left of content to a position such that the center of content aligns with center of viewport.
+
+        // But since we use translate + scale with origin 0 0:
+        // The visual width is cRect.width * scale.
+        // We want (vRect.width - cRect.width * scale) / 2 margin on left.
+        // But cRect already includes the current scale if we measured it after transform. 
+        // We reset transform to none, so cRect.width is the unscaled width.
+
+        pointX = (vRect.width - cRect.width * scale) / 2 - (cRect.left - vRect.left) * scale;
+        // Wait, simpler:
+        // Just place the top-left corner of content at the calculated offset.
+        // Since content is absolutely positioned at 50% 50% in CSS, we need to offset that.
+
+        // Let's change CSS to top:0 left:0 to make math easier.
+        content.style.top = '0';
+        content.style.left = '0';
+
+        pointX = (vRect.width - cRect.width * scale) / 2;
+        pointY = (vRect.height - cRect.height * scale) / 2;
+
+        updateTransform();
+      }
+    });
+  </script>
+</body>
+
+</html>

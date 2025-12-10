@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Componente – Gráfico</title>
+  <link rel="stylesheet" href="component-styles.css" />
+
+  <style>
+    /* Main Content */
+    .app-content {
+      width: 100%;
+      padding: 10px 30px 20px;
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      flex-direction: row;
+      gap: 12px;
+    }
+
+    /* ========= Estilos específicos del gráfico ========= */
+
+    .chart-layout {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .chart-card {
+      background: #ffffff;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 0;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+      flex: 1;
+    }
+
+    .chart-wrap {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .media {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: #f2f2f2;
+      border-radius: 8px;
+      min-height: 0;
+    }
+
+    .media img,
+    .media video,
+    .media iframe {
+      object-fit: cover;
+      object-position: bottom;
+      width: 100%;
+      height: 300px;
+      border: 0;
+    }
+
+    /* Mobile / Small screens */
+    @media screen and (max-width: 700px) {
+
+      .chart-card {
+        padding: 10px 10px !important;
+      }
+
+      .chart-title {
+        font-size: 0.9rem !important;
+      }
+    }
+  </style>
+
+  <script>
+    /* Modo embebido (mismo patrón que component_classification) */
+    (function () {
+      function setEmbedded() {
+        document.documentElement.classList.add('embedded-mode');
+        if (document.body) document.body.classList.add('embedded-mode');
+      }
+
+      try {
+        if (window.self !== window.top || window.parent !== window) {
+          setEmbedded();
+        }
+      } catch (e) {
+        setEmbedded();
+      }
+
+      window.addEventListener('DOMContentLoaded', function () {
+        try {
+          if (window.self !== window.top || window.parent !== window) {
+            setEmbedded();
+          }
+        } catch (e) {
+          setEmbedded();
+        }
+      });
+    })();
+  </script>
+</head>
+
+<body>
+  <!-- Usamos app-root + comp-wrap para heredar el estilo de classification y mantener el data-component-id -->
+  <div class="app-root comp-wrap" data-component-id="chart-001">
+    <div class="frame">
+      <div class="inner-card">
+        <!-- Top Bar -->
+        <header class="top-bar">
+          <h1 class="template">Gráfico</h1>
+        </header>
+
+        <!-- Contenido principal con scroll -->
+        <div class="app-content" id="scroll">
+          <div class="small-container">
+            <p>
+              Este es el cuerpo del componente gráfico. Puedes introducir tu gráfico
+              o simplemente dejar que hable por sí solo.
+            </p>
+          </div>
+
+
+          <main class="chart-layout">
+            <section class="chart-card">
+              <h2 class="template">Visualización</h2>
+              <div class="chart-wrap">
+                <div class="media" id="media">
+                  <!-- Aquí se inyecta img / video / iframe por JS -->
+                </div>
+              </div>
+            </section>
+
+            <!-- Espaciador ligero al final -->
+            <div style="height:16px"></div>
+          </main>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* Configurar el medio (misma lógica original de component_grafico) */
+    const mediaSrc = "../Nivel_A1/images/A1_C3_narrativo_a.png"; // cambia por la ruta correspondiente
+    const mediaType = "img"; // opciones: "img", "video", "iframe"
+
+    const mediaContainer = document.getElementById("media");
+    if (mediaType === "img") {
+      const el = document.createElement("img");
+      el.src = mediaSrc;
+      el.alt = "Imagen del contenido";
+      mediaContainer.appendChild(el);
+    } else if (mediaType === "video") {
+      const el = document.createElement("video");
+      el.src = mediaSrc;
+      el.controls = true;
+      mediaContainer.appendChild(el);
+    } else if (mediaType === "iframe") {
+      const el = document.createElement("iframe");
+      el.src = mediaSrc;
+      el.allowFullscreen = true;
+      mediaContainer.appendChild(el);
+    }
+  </script>
+</body>
+
+</html>

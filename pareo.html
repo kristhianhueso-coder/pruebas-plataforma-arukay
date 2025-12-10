@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Componente – Pareo (listas desplegables)</title>
+  <link rel="stylesheet" href="component-styles.css" />
+
+  <style>
+    
+
+   /* Subtítulo y texto de instrucción usan el estilo del layout pero conservan clases originales */
+    .desc.app-subtitle {
+      margin-bottom: 4px;
+    }
+
+    .content {
+      height: 100%;
+      overflow: auto;
+      padding: 8px 18px 12px;
+    }
+
+    /* Bloques de pareo */
+    .pair {
+      background: #F9FAFB;
+      border: 1px solid #E5E7EB;
+      border-radius: 10px;
+      padding: 10px 18px;
+      margin: 8px 0;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+
+    .pair:hover {
+      background: #ffffff;
+      border-color: #D1D5DB;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, .08);
+      transform: none;
+    }
+
+    .pair.correct {
+      border-color: #10b981;
+      background: #ecfdf5;
+    }
+
+    .pair.incorrect {
+      border-color: #ef4444;
+      background: #fef2f2;
+    }
+
+    .pair .q {
+      margin: 0;
+      font: 500 14px "Proxima Nova", "ProximaNova", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      color: var(--ink);
+    }
+
+    .select-wrap {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #ffffff;
+      border: 1px solid #E5E7EB;
+      flex-shrink: 0;
+      min-width: 170px;
+      max-width: 260px;
+      transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+    }
+
+    .pair:hover .select-wrap {
+      border-color: rgba(91, 0, 255, .6);
+      box-shadow: 0 0 0 1px rgba(91, 0, 255, .25);
+      background: #ffffff;
+    }
+
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      width: 100%;
+      padding: 8px 40px 8px 14px;
+      font: 700 14px Arial, Helvetica, sans-serif;
+      border: 0;
+      outline: none;
+      background: transparent;
+      color: #2c3e50;
+      cursor: pointer;
+    }
+
+    select option {
+      color: var(--ink);
+      background-color: #fff;
+      font-weight: 600;
+    }
+
+    select option:checked,
+    select option:hover,
+    select option:focus {
+      background-color: var(--teal);
+      color: #5b00ff;
+    }
+
+    .caret {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #5B00FF;
+      transition: transform .18s ease;
+    }
+
+    .caret::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-right: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: rotate(45deg);
+      display: block;
+    }
+
+    .select-wrap:focus-within .caret {
+      transform: translateY(-50%) rotate(90deg);
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      justify-content: flex-start;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 8px 20px;
+      font: 700 14px Arial, Helvetica, sans-serif;
+      cursor: pointer;
+      color: #fff;
+      background: var(--accent);
+    }
+
+    .feedback {
+      margin: 0 0 10px;
+      display: none;
+      border-radius: 6px;
+      border: 1px solid #5B00FF;
+      background: #5B00FF;
+      padding: 8px 10px;
+      font: 400 12px "Proxima Nova", "ProximaNova", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      color: #ffffff;
+      line-height: 1.6;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .feedback::before {
+      content: "⚠️";
+      display: inline-block;
+      margin-right: 6px;
+    }
+
+    .feedback.correct {
+      border-color: #5B00FF;
+      box-shadow: inset 0 0 0 2px #ffffff33;
+      background: #5B00FF;
+    }
+
+    .feedback.incorrect {
+      border-color: #5B00FF;
+      box-shadow: inset 0 0 0 2px #ffffff33;
+      background: #5B00FF;
+    }
+
+    /* Mobile: ajustar pares en columna */
+    @media screen and (max-width: 700px) {
+      .content {
+        padding: 6px 10px 10px;
+      }
+
+      .pair {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 8px 10px;
+      }
+
+      .select-wrap {
+        width: 100%;
+        max-width: none;
+      }
+
+      .actions {
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+
+
+      .app-subtitle {
+        font-size: 0.85rem;
+        padding: 0 8px;
+      }
+    }
+  </style>
+
+  <!-- Script de modo embebido igual al del componente de clasificación -->
+  <script>
+    (function () {
+      function setEmbedded() {
+        document.documentElement.classList.add('embedded-mode');
+        if (document.body) document.body.classList.add('embedded-mode');
+      }
+
+      try {
+        if (window.self !== window.top || window.parent !== window) {
+          setEmbedded();
+        }
+      } catch (e) {
+        setEmbedded();
+      }
+
+      window.addEventListener('DOMContentLoaded', function () {
+        try {
+          if (window.self !== window.top || window.parent !== window) {
+            setEmbedded();
+          }
+        } catch (e) {
+          setEmbedded();
+        }
+      });
+    })();
+  </script>
+</head>
+
+<body>
+  <div class="app-root">
+    <div class="frame">
+      <div class="inner-card">
+
+        <!-- Top Bar unificada -->
+        <header class="top-bar">
+          <h1 class="template">Pareo</h1>
+        </header>
+        <div class="divider"></div>
+
+        <!-- Contenido principal -->
+        <div class="app-content">
+          <!-- Texto descriptivo original usando el estilo de subtítulo -->
+          <p class="desc app-subtitle">
+            ¿Puedes identificar algunos de los hechos y cifras clave? Elige una opción de cada lista y
+            selecciona <strong>Entregar</strong>.
+          </p>
+          <h2 class="app-subtitle template">Elija una opción de cada lista desplegable y seleccione Enviar.</h2>
+
+          <!-- Componente de pareo conservando estructura y funcionalidad -->
+          <section class="comp-wrap" data-component-id="match-001">
+            <div class="content" id="content">
+              <div class="feedback" id="feedback"></div>
+
+              <div class="pair" data-id="p1" data-answer="2014">
+                <div class="q">El proyecto Adapt Open Source se formó en:</div>
+                <div class="select-wrap">
+                  <select>
+                    <option value="" selected disabled>Seleccione una opción</option>
+                    <option>2010</option>
+                    <option>2012</option>
+                    <option>2014</option>
+                    <option>2016</option>
+                  </select>
+                  <div class="caret" aria-hidden="true"></div>
+                </div>
+              </div>
+
+              <div class="pair" data-id="p2" data-answer="2008">
+                <div class="q">Adapt se adhiere al nivel 'AA' de WCAG v2, publicadas en:</div>
+                <div class="select-wrap">
+                  <select>
+                    <option value="" selected disabled>Seleccione una opción</option>
+                    <option>1999</option>
+                    <option>2008</option>
+                    <option>2018</option>
+                  </select>
+                  <div class="caret" aria-hidden="true"></div>
+                </div>
+              </div>
+
+              <div class="pair" data-id="p3" data-answer="Árabe">
+                <div class="q">¿Cuál de estos idiomas se beneficia del soporte RTL?</div>
+                <div class="select-wrap">
+                  <select>
+                    <option value="" selected disabled>Seleccione una opción</option>
+                    <option>Español</option>
+                    <option>Árabe</option>
+                    <option>Francés</option>
+                  </select>
+                  <div class="caret" aria-hidden="true"></div>
+                </div>
+              </div>
+
+              <div class="actions">
+                <button class="btn" id="submit">Entregar</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lógica original del componente Matching sin cambios funcionales (solo se protege el acceso a la barra) -->
+  <script>
+    (function () {
+      const wrap = document.querySelector('.comp-wrap');
+      const id = wrap.getAttribute('data-component-id') || 'match-component';
+      const pairs = Array.from(document.querySelectorAll('.pair'));
+      const submit = document.getElementById('submit');
+      const feedback = document.getElementById('feedback');
+      const bar = document.getElementById('bar'); // puede ser null al eliminar la barra
+      const content = document.getElementById('content');
+
+      function post(pct) {
+        try {
+          window.parent && window.parent.postMessage({
+            type: 'componentProgress',
+            componentId: id,
+            progress: pct,
+            completed: pct >= 95
+          }, '*');
+        } catch (e) { }
+      }
+
+      function getFilledCount() {
+        return pairs.reduce((n, p) => n + (p.querySelector('select').value ? 1 : 0), 0);
+      }
+
+      function updateProgress(finalize = false) {
+        const total = pairs.length;
+        const filled = getFilledCount();
+        const pct = finalize ? 100 : Math.round((filled / total) * 100 * 0.9);
+
+        if (bar) {
+          bar.style.width = pct + '%';
+        }
+        post(pct);
+      }
+
+      pairs.forEach(p => {
+        const sel = p.querySelector('select');
+        sel.addEventListener('change', () => updateProgress(false));
+      });
+
+      function showFeedback() {
+        feedback.style.display = 'block';
+        if (content && content.scrollTo) {
+          content.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }
+
+      function grade() {
+        const total = pairs.length;
+        const filled = getFilledCount();
+
+        pairs.forEach(p => {
+          p.classList.remove('correct', 'incorrect');
+        });
+
+        if (filled < total) {
+          showFeedback();
+          feedback.className = 'feedback incorrect';
+          feedback.textContent = 'Asegúrate de seleccionar una opción en cada lista.';
+          updateProgress(false);
+          return;
+        }
+
+        let ok = true;
+        pairs.forEach(p => {
+          const ans = (p.dataset.answer || '').trim();
+          const val = (p.querySelector('select').value || '').trim();
+          if (ans === val) {
+            p.classList.add('correct');
+          } else {
+            p.classList.add('incorrect');
+            ok = false;
+          }
+        });
+
+        showFeedback();
+        if (ok) {
+          feedback.className = 'feedback correct';
+          feedback.textContent = '¡Correcto! Todas las coincidencias son válidas.';
+        } else {
+          feedback.className = 'feedback incorrect';
+          feedback.textContent = 'Algunas respuestas no coinciden. Revisa tus respuestas e inténtalo de nuevo.';
+        }
+        updateProgress(true);
+      }
+
+      submit.addEventListener('click', grade);
+
+      window.Match = {
+        setTitle(t) { document.querySelector('h1').textContent = t; },
+        setPrompt(html) { document.querySelector('.desc').innerHTML = html; },
+        setPairs(arr) {
+          const container = document.getElementById('content');
+          const nodes = container.querySelectorAll('.pair');
+          nodes.forEach(n => n.remove());
+          arr.forEach((p, i) => {
+            const wrap = document.createElement('div');
+            wrap.className = 'pair';
+            wrap.dataset.id = 'p' + (i + 1);
+            wrap.dataset.answer = p.answer;
+            wrap.innerHTML = '<div class="q">' + p.question + '</div>' +
+              '<div class="select-wrap"><select><option value="" selected disabled>Seleccione una opción</option>' +
+              p.options.map(o => '<option>' + o + '</option>').join('') +
+              '</select><div class="caret" aria-hidden="true"></div></div>';
+            container.insertBefore(wrap, document.querySelector('.actions'));
+          });
+          Array.from(document.querySelectorAll('.pair select')).forEach(s => s.addEventListener('change', () => updateProgress(false)));
+          updateProgress(false);
+        }
+      };
+
+      updateProgress(false);
+    })();
+  </script>
+</body>
+
+</html>
