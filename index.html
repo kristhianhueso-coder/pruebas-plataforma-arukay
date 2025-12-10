@@ -1,452 +1,408 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Juego de Categorización – Continentes</title>
-  <link rel="stylesheet" href="component-styles.css">
+  <title>Drag and Complete the Text</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="component-styles.css" />
   <style>
-
-  .layout {
-    flex: 1;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    min-height: 0;
-  }
-
-  .stats {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-  }
-
-  .stat-pill {
-    padding: 4px 10px;
-    border-radius: var(--radius-pill);
-    background: #f3f4f6;
-    font-weight: 600;
-    font-size: 1rem;
-    color: var(--text-main);
-  }
-
-  .legend {
-    display: flex;
-    gap: 6px;
-    justify-content: flex-end;
-    font-size: 1rem;
-    color: var(--text-muted);
-  }
-
-  .left-column {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    min-height: 0;
-  }
-
-  .left-card {
-    background: #ffffff;
-    border-radius: 14px;
-    border: 1px solid var(--border);
-    padding: 12px 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
-  }
-
-  .card-title{
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--accent);
-  }
-
-  .left-card-description {
-    font-size: 1rem;
-    color: var(--text-muted);
-    line-height: 1.4;
-  }
-
-  .pool {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 4px 0;
-  }
-
-  .chip {
-    user-select: none;
-    cursor: grab;
-    padding: 6px 12px;
-    border-radius: var(--radius-pill);
-    background: var(--fondo);
-    border: 1px solid var(--accent);
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-main);
-    box-shadow: var(--shadow-chip);
-    transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
-  }
-
-  .chip:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(15, 23, 42, 0.15);
-    background: #f3e8ff;
-  }
-
-  .chip:active {
-    cursor: grabbing;
-    transform: translateY(0);
-  }
-
-  .chip.correct {
-    background: #ECFDF5;
-    border-color: var(--success);
-    color: #166534;
-    pointer-events: none;
-  }
-
-  .right-column {
-    background: #ffffff;
-    border-radius: 14px;
-    border: 1px solid var(--border);
-    padding: 12px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
-  }
-
-  .right-title {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--accent);
-  }
-
-  .boards-wrap {
-    flex: 1;
-    overflow-y: auto;
-    /* Fixed content, no scroll override from below */
-    overflow: hidden !important;
-  }
-
-  .boards {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    /* 3 columns to save vertical space */
-    gap: 6px;
-  }
-
-  .board {
-    background: var(--card-bg);
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    padding: 5px;
-    /* Reduced padding */
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    transition: all 0.2s ease;
-  }
-
-  .board-header {
-    display: flex;
-    justify-content: center;
-    /* Center the title */
-    align-items: center;
-    margin-bottom: 4px;
-  }
-
-  .board-name {
-    font-weight: 700;
-    font-size: 0.9rem;
-    color: var(--accent);
-    text-align: center;
-  }
-
-  .dropzone {
-    flex: 1;
-    min-height: 40px;
-    /* Reduced min-height */
-    border-radius: 8px;
-    background: #ffffff;
-    border: 1px dashed #cbd5e1;
-    padding: 4px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    align-content: flex-start;
-  }
-
-  .controls {
-    display: flex;
-    gap: 8px;
-  }
-
-  .btn {
-    appearance: none;
-    border: 1px solid var(--accent);
-    border-radius: var(--radius-pill);
-    padding: 6px 14px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    background: var(--fondo);
-    color: var(--text-main);
-    box-shadow: var(--shadow-chip);
-    transition: all 0.1s ease;
-  }
-
-  .btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(15, 23, 42, 0.15);
-    background: #f3e8ff;
-  }
-
-  .btn:active {
-    transform: translateY(0);
-  }
-
-  .btn.secondary {
-    background: #ffffff;
-    border-color: var(--border);
-    color: var(--text-muted);
-  }
-
-  .btn.secondary:hover {
-    background: #f9fafb;
-  }
-
-  /* Hide Progress Bar */
-  .progress-wrap {
-    display: none !important;
-  }
-
-  /* Toast */
-  .toast {
-    position: absolute;
-    left: 50%;
-    bottom: 20px;
-    transform: translateX(-50%);
-    padding: 8px 16px;
-    border-radius: var(--radius-pill);
-    background: rgba(17, 24, 39, 0.96);
-    color: #fff;
-    font-size: 0.85rem;
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.35);
-    display: none;
-    z-index: 50;
-    white-space: nowrap;
-  }
-
-  .toast.show {
-    display: block;
-    animation: toast-pop 0.28s ease-out;
-  }
-
-  @keyframes toast-pop {
-    from {
-      opacity: 0;
-      transform: translate(-50%, 10px);
-    }
-    to {
-      opacity: 1;
-      transform: translate(-50%, 0);
-    }
-  }
-
-  /* Iframe / Embedded Mode */
-  html.embedded-mode,
-  html.embedded-mode body {
-    display: block !important;
-    padding: 0 !important;
-    background: transparent !important;
-    width: 100% !important;
-    height: 100% !important;
-    overflow: hidden !important;
-  }
-
-  html.embedded-mode .app-root {
-    max-width: none !important;
-    max-height: none !important;
-    padding: 0 !important;
-    height: 100vh !important;
-    width: 100vw !important;
-  }
-
-  html.embedded-mode .frame {
-    border-radius: var(--radius-frame) !important;
-    /* Restore exterior curves */
-    box-shadow: none !important;
-    padding: 10px !important;
-  }
-
-  @media screen and (max-width: 700px) {
-    .top-bar {
-      padding: 4px;
+    .nav-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 48px;
+      height: 56px;
+      background: var(--accent);
+      border-radius: 4px;
+      border: none;
+      color: #ffffff;
+      font: 700 20px;
+      cursor: pointer;
+      opacity: .95;
+      z-index: 2;
     }
 
-    .frame {
-      overflow: hidden !important;
-      display: flex !important;
-      flex-direction: column !important;
+    .nav-arrow--prev {
+      left: 10px;
     }
 
-    .inner-card {
-      display: flex !important;
-      flex-direction: column !important;
-      overflow: hidden !important;
+    .nav-arrow--next {
+      right: 10px;
     }
 
-    .app-content {
-      flex: 1 !important;
-      display: flex !important;
-      flex-direction: column !important;
-      overflow: hidden !important;
-      padding-bottom: 0 !important;
-      width: 100%;
-      padding: 0;
+    .nav-arrow--disabled {
+      opacity: 0.35;
+      cursor: default;
     }
 
-    /* HUD: Hide text "Arrastra para jugar", Show Controls */
-    .legend-text {
-      display: none !important;
-    }
+    /* SLIDES */
 
-    /* GRID LAYOUT: 2 columns, 2 rows */
-    .layout {
-      display: grid !important;
-      grid-template-columns: 1fr 1fr !important;
-      grid-template-rows: auto auto !important;
-      gap: 8px !important;
-      flex: 1 !important;
-      overflow: hidden !important;
-    }
-
-    /* Left column (Countries) - Top Left (1,1) */
-    .left-column {
-      grid-column: 1 !important;
-      grid-row: 1 !important;
-      display: flex !important;
-      flex-direction: column !important;
-      gap: 8px !important;
-      min-height: 0 !important;
-    }
-
-    /* Show controls card - Bottom Left (1,2) */
-    .original-controls {
-      display: flex !important;
-      flex-direction: column !important;
-      grid-column: 1 !important;
-      grid-row: 2 !important;
-    }
-
-    /* Pool card */
-    .left-column>.left-card:first-child {
-      flex: 1 !important;
+    #slideContainer {
+      width: 90%;
+      padding: 20px 40px 26px;
+      margin: auto;
       display: flex;
-      flex-direction: column !important;
-      align-items: flex-start !important;
-      gap: 2px !important;
-      background: #fff !important;
-      border-radius: 12px !important;
-      overflow: hidden !important;
+      flex-direction: column;
     }
 
-    .left-card {
-      padding: 8px;
+    .slide {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
 
-    .left-card-description {
-      display: none !important;
+    .top-bar.with-title .slide-title {
+      font-size: var(--size-h2);
+      font-weight: 700;
+      color: var(--accent);
     }
 
-    .left-card-title {
-      margin-bottom: 0 !important;
-      margin-right: 10px !important;
-      white-space: nowrap !important;
-      font-size: 0.9rem !important;
+    .divider {
+      height: 1px;
+      width: 100%;
+      background: #d1d5db;
+      margin-bottom: 20px;
+      flex-shrink: 0;
     }
 
-    .pool {
-      width: 100% !important;
-      justify-content: flex-start !important;
-      padding: 0 !important;
-      flex-wrap: wrap !important;
-      overflow-x: visible !important;
-      white-space: normal !important;
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    /* INTRO SLIDE */
+
+    .intro-title {
+      font-size: var(--size-h1);
+      line-height: 1.15;
+      margin: 6px 0 10px;
+      color: var(--accent);
+    }
+
+    .intro-subtitle {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    .btn-main {
+      min-width: 210px;
+      padding: 12px 28px;
+      border-radius: 32px;
+      border: 2px solid #803AFF;
+      background: #803AFF;
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: var(--shadow-chip);
+      transition: transform 0.08s ease, box-shadow 0.1s ease,
+        background 0.12s ease;
+    }
+
+    .btn-main:hover {
+      background: #6E1EFF;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.24);
+    }
+
+    .btn-main:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+    }
+
+    /* QUESTION SLIDE */
+
+    .slide-question .slide-body {
+      align-items: stretch;
+      justify-content: flex-start;
+      text-align: left;
+    }
+
+    .sentence-box {
+      background: transparent;
+      border-radius: 12px;
+      padding: 12px 6px 10px;
+      font-size: 0.98rem;
+      color: var(--text-color);
+      line-height: 1.8;
+      min-height: 120px;
+    }
+
+    .sentence-box p {
+      margin: 0;
+    }
+
+    .blank {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 90px;
+      min-height: 30px;
+      padding: 2px 6px;
+      margin: 0 3px;
+      border-bottom: 2px dashed #c4b5fd;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.15s ease, border-color 0.15s ease,
+        box-shadow 0.15s ease;
+    }
+
+    .blank.highlight {
+      background: #ede9fe;
+      border-color: #7c3aed;
+      box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.4);
+    }
+
+    .blank.correct {
+      border-color: var(--success);
+      background: #ecfdf3;
+    }
+
+    .blank.incorrect {
+      border-color: var(--error);
+      background: #fef2f2;
+    }
+
+    .blank .chip {
+      margin: 0;
+    }
+
+    .correct-word {
+      margin-top: 2px;
+      font-size: 0.78rem;
+      color: #111827;
+    }
+
+    .word-bank {
+      margin-top: 26px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      min-height: 60px;
     }
 
     .chip {
-      flex-shrink: 0 !important;
+      user-select: none;
+      cursor: grab;
+      padding: 6px 14px;
+      border-radius: 10px;
+      background: var(--fondo);
+      border: 1px solid var(--border);
+      font-size: 0.95rem;
+      color: #2a3956;
+      box-shadow: var(--shadow-chip);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.08s ease, box-shadow 0.12s ease,
+        background 0.12s ease;
     }
 
-    /* Right column (Boards) - Entire right side, spanning both rows */
-    .right-column {
-      grid-column: 2 !important;
-      grid-row: 1 / 3 !important;
-      /* Span from row 1 to row 3 (2 rows) */
-      display: flex !important;
-      flex-direction: column !important;
-      min-height: 0 !important;
-      overflow: hidden !important;
+    .chip::before {
+      content: "▦";
+      font-size: 0.8rem;
+      opacity: 0.9;
     }
 
-    .right-title {
-      flex-shrink: 0 !important;
-      margin-bottom: 6px !important;
-      font-size: 0.9rem !important;
+    .chip:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
     }
 
-    .boards-wrap {
-      flex: 1 !important;
-      min-height: 0 !important;
-      overflow-y: auto !important;
+    .chip:active {
+      cursor: grabbing;
+      transform: translateY(0);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
     }
 
-    .boards {
-      grid-template-columns: repeat(2, 1fr) !important;
-      gap: 4px !important;
-      padding-bottom: 6px;
+    .chip.correct-chip {
+      border-color: var(--success);
+      color: #15803d;
+      background: #dcfce7;
     }
 
-    .board {
-      padding: 4px !important;
+    .chip.wrong-chip {
+      border-color: var(--error);
+      color: #b91c1c;
+      text-decoration: line-through;
+      background: #fee2e2;
     }
 
-    .board-name {
-      font-size: 0.8rem !important;
-      margin-bottom: 2px !important;
+    .question-footer {
+      margin-top: auto;
+      padding-top: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 18px;
     }
 
-    .dropzone {
-      min-height: 50px !important;
-      padding: 3px !important;
-      gap: 3px !important;
+    .icon-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      border: 1px solid #9ca3af;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #4b5563;
+      font-size: 0.8rem;
+      transition: background 0.12s ease, border-color 0.12s ease,
+        transform 0.08s ease;
     }
 
-    /* Chips inside dropzones should be smaller to fit */
-    .dropzone .chip {
-      font-size: 0.7rem !important;
-      padding: 3px 8px !important;
-      max-width: 100% !important;
-      white-space: nowrap !important;
-      overflow: hidden !important;
-      text-overflow: ellipsis !important;
+    .icon-btn:hover {
+      background: #e5e7eb;
+      transform: translateY(-1px);
     }
-  }
-</style>
+
+    .btn-submit {
+      min-width: 120px;
+      padding: 8px 24px;
+      border-radius: 24px;
+      border: none;
+      background: #803AFF;
+      color: #f9fafb;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.08s ease, box-shadow 0.12s ease,
+        background 0.12s ease;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.18);
+    }
+
+    .btn-submit:hover {
+      background: #6E1EFF;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.24);
+    }
+
+    .btn-submit:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+    }
+
+    .feedback-message {
+      position: absolute;
+      left: 50%;
+      bottom: 16px;
+      transform: translateX(-50%);
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(17, 24, 39, 0.92);
+      color: #f9fafb;
+      font-size: 0.78rem;
+      opacity: 0;
+      pointer-events: none;
+      white-space: nowrap;
+      transition: opacity 0.18s ease;
+      z-index: 3;
+    }
+
+    .feedback-message.show {
+      opacity: 1;
+    }
+
+    .feedback-message.success {
+      background: rgba(22, 163, 74, 0.95);
+    }
+
+    .feedback-message.error {
+      background: rgba(185, 28, 28, 0.95);
+    }
+
+    /* OUTRO SLIDE */
+
+    .outro-title {
+      color: var(--accent);
+      font-size: 2.3rem;
+      margin: 10px 0 14px;
+    }
+
+    .outro-text {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      max-width: 480px;
+      margin: 0 auto 24px;
+      text-align: center;
+    }
+
+    .btn-secondary {
+      min-width: 190px;
+      padding: 10px 24px;
+      border-radius: 26px;
+      border: none;
+      background: #803AFF;
+      color: #f9fafb;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.18);
+      transition: transform 0.08s ease, box-shadow 0.12s ease,
+        background 0.12s ease;
+    }
+
+    .btn-secondary:hover {
+      background: #6E1EFF;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.24);
+    }
+
+    .btn-secondary:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+    }
+
+    /* Responsive similar a component_classification */
+    @media screen and (max-width: 700px) {
+
+
+      #slideContainer {
+        padding: 14px 16px 18px !important;
+      }
+
+      .intro-title,
+      .outro-title {
+        font-size: 1.8rem !important;
+      }
+
+      .btn-main,
+      .btn-secondary {
+        min-width: 0;
+        width: 100%;
+        max-width: 260px;
+      }
+
+      .nav-arrow {
+        width: 36px;
+        height: 44px;
+      }
+    }
+
+  </style>
+
+  <!-- Script de modo embebido igual al de component_classification -->
   <script>
     (function () {
       function setEmbedded() {
         document.documentElement.classList.add('embedded-mode');
-        // Also add to body just in case CSS targets it
         if (document.body) document.body.classList.add('embedded-mode');
       }
 
@@ -458,7 +414,6 @@
         setEmbedded();
       }
 
-      // Re-check on load to be sure
       window.addEventListener('DOMContentLoaded', function () {
         try {
           if (window.self !== window.top || window.parent !== window) {
@@ -475,326 +430,379 @@
 <body>
   <div class="app-root">
     <div class="frame">
+      <button class="nav-arrow nav-arrow--prev" id="navPrev">
+        <span>&lt;</span>
+      </button>
+      <button class="nav-arrow nav-arrow--next" id="navNext">
+        <span>&gt;</span>
+      </button>
+
       <div class="inner-card">
-
-        <!-- Top Bar -->
-        <header class="top-bar">
-          <h1 class="app-title">Juego de Categorización</h1>
-        </header>
-
-        <!-- Main Content -->
-        <div class="app-content">
-          <p class="app-subtitle">
-            Arrastra cada país al continente correcto.
-          </p>
-
-          <!-- HUD -->
-          <section class="hud" aria-label="Panel de progreso">
-            <div class="stats">
-              <div class="stat-pill">✅ <b id="hits">0</b></div>
-              <div class="stat-pill">❌ <b id="misses">0</b></div>
-              <div class="stat-pill">⭐ <b id="score">0</b></div>
-            </div>
-          </section>
-
-          <!-- Two Column Layout -->
-          <main class="layout">
-            <!-- Left: Pool & Controls -->
-            <aside class="left-column">
-              <div class="left-card">
-                <div class="card-title">Países</div>
-                <div class="left-card-description">
-                  Arrastra las etiquetas hacia su continente.
-                </div>
-                <div id="pool" class="pool" role="list"></div>
-              </div>
-              <div class="left-card">
-                <div class="card-title">Controles</div>
-                <div class="controls">
-                  <button class="btn" id="shuffleBtn">🔀 Reordenar</button>
-                  <button class="btn secondary" id="resetBtn">↺ Reiniciar</button>
-                </div>
-              </div>
-            </aside>
-
-            <!-- Right: Boards -->
-            <section class="right-column">
-              <div class="card-title">Tableros</div>
-              <div class="boards-wrap">
-                <div class="boards"><!-- generado por JS --></div>
-              </div>
-            </section>
-          </main>
-        </div>
-
-        <!-- Feedback Toast -->
-        <div id="toast" class="toast" role="status" aria-live="polite"></div>
-
+        <div id="slideContainer"></div>
+        <div id="feedback" class="feedback-message"></div>
       </div>
     </div>
   </div>
 
   <script>
-    // ==============================
-    // CONFIGURACIÓN DEL JUEGO
-    // ==============================
-    const CATEGORIES = [
-      { key: "america", label: "América", hint: "Norte, Centro y Sur" },
-      { key: "europa", label: "Europa", hint: "UE, Mediterráneo" },
-      { key: "oceania", label: "Oceanía", hint: "Australia, Islas" },
-      { key: "asia", label: "Asia", hint: "Oriente" },
-      { key: "africa", label: "África", hint: "Continente madre" },
-    ];
-
-    const ITEMS = [
-      { name: "Colombia", category: "america" },
-      { name: "Canadá", category: "america" },
-      { name: "Francia", category: "europa" },
-      { name: "Alemania", category: "europa" },
-      { name: "Japón", category: "asia" },
-      { name: "China", category: "asia" },
-      { name: "Australia", category: "oceania" },
-      { name: "Nueva Zelanda", category: "oceania" },
-      { name: "Egipto", category: "africa" },
-      { name: "Nigeria", category: "africa" },
-    ];
-
-    const MESSAGES = {
-      ok: [
-        "¡Excelente! ⭐",
-        "¡Buenísimo! 🚀",
-        "¡Lo clavaste! 🎯",
-        "¡Gran acierto! 💪",
-        "¡Perfecto! 🌟",
-      ],
-      no: [
-        "Casi… 😅",
-        "Inténtalo de nuevo 🙌",
-        "Revisa el continente 😉",
-        "¡Sigue intentando! 💡",
-        "¡Tú puedes! 🔁",
-      ],
-    };
-
-    const $pool = document.getElementById("pool");
-    const $boards = document.querySelector(".boards");
-    const $toast = document.getElementById("toast");
-    const $bar = document.getElementById("progressBar");
-    const $hits = document.getElementById("hits");
-    const $misses = document.getElementById("misses");
-    const $score = document.getElementById("score");
-
-    let state = { correct: 0, wrong: 0, placed: 0 };
-
-    function randomOf(a) {
-      return a[Math.floor(Math.random() * a.length)];
-    }
-
-    function toast(msg) {
-      $toast.textContent = msg;
-      $toast.classList.add("show");
-      clearTimeout(toast._t);
-      toast._t = setTimeout(() => $toast.classList.remove("show"), 1500);
-    }
-
-    function updateHUD() {
-      $hits.textContent = state.correct;
-      $misses.textContent = state.wrong;
-      const wrong = state.wrong;
-      const computed = Math.max(0, 10 - wrong * 0.5);
-      $score.textContent = computed.toFixed(2);
-      const pct = Math.round((state.placed / ITEMS.length) * 100);
-      $bar.style.width = pct + "%";
-    }
-
-    function handleDrop(el, board, dropzone) {
-      if (!el) return;
-      const expected = board.dataset.key;
-      const given = el.dataset.category;
-
-      if (expected === given) {
-        el.classList.add("correct");
-        el.draggable = false;
-        // Remove touch listeners if placed correctly to prevent re-dragging
-        el.ontouchstart = null;
-        el.ontouchmove = null;
-        el.ontouchend = null;
-
-        dropzone.appendChild(el);
-        state.correct++;
-        state.placed++;
-        toast(randomOf(MESSAGES.ok));
-      } else {
-        state.wrong++;
-        el.classList.remove("correct");
-        el.animate(
-          [
-            { transform: "translateX(0)" },
-            { transform: "translateX(-3px)" },
-            { transform: "translateX(3px)" },
-            { transform: "translateX(0)" },
-          ],
-          { duration: 180 }
-        );
-        toast(randomOf(MESSAGES.no));
+    // ------------------------------
+    // DATA: SLIDES & SENTENCES
+    // ------------------------------
+    const QUESTIONS = [
+      {
+        id: 1,
+        title: "Complete the sentence",
+        parts: [
+          "Each person must manage their ",
+          " responsibly to contribute to the ",
+          " of the team without ",
+          "."
+        ],
+        answers: ["time", "performance", "delays"],
+        options: ["delays", "performance", "time"]
+      },
+      {
+        id: 2,
+        title: "Complete the sentence",
+        parts: [
+          "The ",
+          " of tasks beforehand prevents ",
+          ", improves ",
+          ", and allows focusing on the most important objectives."
+        ],
+        answers: ["planning", "unexpected events", "productivity"],
+        options: ["planning", "productivity", "unexpected events"]
       }
-      updateHUD();
-      checkWin();
+    ];
+
+    const SLIDES = [
+      { type: "intro" },
+      { type: "question", questionIndex: 0 },
+      { type: "question", questionIndex: 1 },
+      { type: "outro" }
+    ];
+
+    let currentSlideIndex = 0;
+
+    const slideContainer = document.getElementById("slideContainer");
+    const feedbackToast = document.getElementById("feedback");
+    const navPrev = document.getElementById("navPrev");
+    const navNext = document.getElementById("navNext");
+
+    // ------------------------------
+    // HELPERS
+    // ------------------------------
+    function showFeedback(message, type = "default") {
+      feedbackToast.textContent = message;
+      feedbackToast.className = "feedback-message show";
+      if (type === "success") feedbackToast.classList.add("success");
+      if (type === "error") feedbackToast.classList.add("error");
+
+      clearTimeout(showFeedback._timeout);
+      showFeedback._timeout = setTimeout(() => {
+        feedbackToast.className = "feedback-message";
+      }, 1600);
     }
 
-    function buildBoards() {
-      $boards.innerHTML = "";
-      CATEGORIES.forEach((cat) => {
-        const board = document.createElement("div");
-        board.className = "board";
-        board.dataset.key = cat.key;
-        board.innerHTML = `
-          <div class="board-header">
-            <span class="board-name">${cat.label}</span>
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // ------------------------------
+    // RENDER FUNCTIONS
+    // ------------------------------
+    function renderSlide() {
+      const slide = SLIDES[currentSlideIndex];
+      slideContainer.innerHTML = "";
+
+      if (slide.type === "intro") {
+        renderIntroSlide();
+      } else if (slide.type === "question") {
+        renderQuestionSlide(QUESTIONS[slide.questionIndex]);
+      } else if (slide.type === "outro") {
+        renderOutroSlide();
+      }
+
+      updateNavButtons();
+    }
+
+    function renderIntroSlide() {
+      const slideEl = document.createElement("div");
+      slideEl.className = "slide slide-intro";
+
+      slideEl.innerHTML = `
+        <header class="top-bar"></header>
+  
+        <section class="slide-body">
+          <h1 class="intro-title">Drag and<br/>complete the text</h1>
+          <p class="intro-subtitle">
+            Fill in the blanks with the correct answers by dragging the words into place.
+          </p>
+          <button class="btn-main" id="btnStart">Start</button>
+        </section>
+      `;
+
+      slideContainer.appendChild(slideEl);
+
+      slideEl.querySelector("#btnStart").addEventListener("click", () => {
+        goToSlide(1);
+      });
+    }
+
+    function renderQuestionSlide(question) {
+      const slideEl = document.createElement("div");
+      slideEl.className = "slide slide-question";
+
+      slideEl.innerHTML = `
+        <header class="top-bar with-title">
+          <div class="slide-title">${question.title}</div>
+        </header>
+        <div class="divider"></div>
+        <section class="slide-body">
+          <div class="sentence-box">
+            <p class="sentence-line"></p>
           </div>
-          <div class="dropzone" role="list" aria-label="${cat.label}"></div>
-        `;
-        $boards.appendChild(board);
+          <div class="word-bank" aria-label="Word bank"></div>
+          <div class="question-footer">
+            <button class="icon-btn" title="Reset sentence" aria-label="Reset sentence">&#8635;</button>
+            <button class="btn-submit">Send</button>
+          </div>
+        </section>
+      `;
 
-        const dropzone = board.querySelector(".dropzone");
-        dropzone.addEventListener("dragover", (e) => {
+      slideContainer.appendChild(slideEl);
+
+      const sentenceLine = slideEl.querySelector(".sentence-line");
+      const wordBank = slideEl.querySelector(".word-bank");
+      const resetBtn = slideEl.querySelector(".icon-btn");
+      const sendBtn = slideEl.querySelector(".btn-submit");
+
+      // Build sentence with blanks
+      const blanks = [];
+      for (let i = 0; i < question.answers.length; i++) {
+        sentenceLine.appendChild(document.createTextNode(question.parts[i]));
+
+        const blank = document.createElement("span");
+        blank.className = "blank";
+        blank.dataset.correct = question.answers[i];
+        blank.dataset.index = i;
+        sentenceLine.appendChild(blank);
+        blanks.push(blank);
+      }
+      sentenceLine.appendChild(
+        document.createTextNode(question.parts[question.parts.length - 1])
+      );
+
+      // Drag & drop events for blanks
+      blanks.forEach((blank) => {
+        blank.addEventListener("dragover", (e) => {
           e.preventDefault();
-          board.classList.add("highlight");
+          blank.classList.add("highlight");
         });
-        dropzone.addEventListener("dragleave", () =>
-          board.classList.remove("highlight")
-        );
-        dropzone.addEventListener("drop", (e) => {
+
+        blank.addEventListener("dragleave", () => {
+          blank.classList.remove("highlight");
+        });
+
+        blank.addEventListener("drop", (e) => {
           e.preventDefault();
-          board.classList.remove("highlight");
+          blank.classList.remove("highlight");
           const id = e.dataTransfer.getData("text/plain");
-          const el = document.getElementById(id);
-          handleDrop(el, board, dropzone);
+          const chip = slideEl.querySelector(`#${CSS.escape(id)}`);
+          if (!chip) return;
+
+          // Si el espacio ya tenía una palabra, volverla al banco
+          const existing = blank.querySelector(".chip");
+          if (existing && existing !== chip) {
+            resetChipStyles(existing);
+            wordBank.appendChild(existing);
+          }
+
+          // Mover chip a este espacio
+          blank.appendChild(chip);
+          resetBlankFeedback(blank);
         });
       });
-    }
 
-    // Touch support variables
-    let draggedItem = null;
-    let touchClone = null;
+      // Word bank drops (permitir devolver palabras)
+      wordBank.addEventListener("dragover", (e) => {
+        e.preventDefault();
+      });
+      wordBank.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const id = e.dataTransfer.getData("text/plain");
+        const chip = slideEl.querySelector(`#${CSS.escape(id)}`);
+        if (!chip) return;
+        resetChipStyles(chip);
+        wordBank.appendChild(chip);
 
-    function buildPool() {
-      $pool.innerHTML = "";
-      const shuffled = [...ITEMS].sort(() => Math.random() - 0.5);
-      shuffled.forEach((item, i) => {
-        const chip = document.createElement("div");
+        const parentBlank = chip.closest(".blank");
+        if (parentBlank) {
+          resetBlankFeedback(parentBlank);
+        }
+      });
+
+      // Build chips
+      const shuffledOptions = shuffle(question.options);
+      shuffledOptions.forEach((opt, idx) => {
+        const chip = document.createElement("button");
+        chip.type = "button";
         chip.className = "chip";
-        chip.textContent = item.name;
         chip.draggable = true;
-        const id = "chip-" + i;
-        chip.id = id;
-        chip.dataset.category = item.category;
+        chip.textContent = opt;
+        chip.id = `q${question.id}-chip-${idx}`;
+        chip.dataset.answer = opt;
 
-        // Desktop Drag Events
         chip.addEventListener("dragstart", (e) => {
-          e.dataTransfer.setData("text/plain", id);
-          document
-            .querySelectorAll(".board")
-            .forEach((b) =>
-              b.classList.toggle("highlight", b.dataset.key === item.category)
-            );
+          e.dataTransfer.setData("text/plain", chip.id);
         });
 
-        chip.addEventListener("dragend", () =>
-          document
-            .querySelectorAll(".board")
-            .forEach((b) => b.classList.remove("highlight"))
-        );
+        wordBank.appendChild(chip);
+      });
 
-        // Touch Events for Tablets/Mobile
-        chip.addEventListener("touchstart", (e) => {
-          draggedItem = chip;
-          const touch = e.touches[0];
-
-          // Create a visual clone
-          touchClone = chip.cloneNode(true);
-          touchClone.style.position = "fixed";
-          touchClone.style.left = touch.clientX + "px";
-          touchClone.style.top = touch.clientY + "px";
-          touchClone.style.zIndex = "9999";
-          touchClone.style.opacity = "0.8";
-          touchClone.style.pointerEvents = "none"; // Allow touch to pass through to check elements below
-          touchClone.style.width = chip.offsetWidth + "px";
-          document.body.appendChild(touchClone);
-
-          chip.style.opacity = "0.5";
-          e.preventDefault(); // Prevent scrolling while dragging
-        }, { passive: false });
-
-        chip.addEventListener("touchmove", (e) => {
-          if (!touchClone) return;
-          const touch = e.touches[0];
-          touchClone.style.left = touch.clientX + "px";
-          touchClone.style.top = touch.clientY + "px";
-          e.preventDefault();
-        }, { passive: false });
-
-        chip.addEventListener("touchend", (e) => {
-          if (!draggedItem) return;
-
-          // Clean up visual effects
-          if (touchClone) {
-            touchClone.remove();
-            touchClone = null;
+      // Reset sentence
+      resetBtn.addEventListener("click", () => {
+        blanks.forEach((blank) => {
+          const chip = blank.querySelector(".chip");
+          if (chip) {
+            resetChipStyles(chip);
+            wordBank.appendChild(chip);
           }
-          draggedItem.style.opacity = "1";
-
-          // Find drop target
-          const touch = e.changedTouches[0];
-          // Temporarily hide clone if it existed to find element below, but we used pointer-events: none so it's fine
-          const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-
-          if (elementBelow) {
-            const dropzone = elementBelow.closest(".dropzone");
-            if (dropzone) {
-              const board = dropzone.closest(".board");
-              if (board) {
-                handleDrop(draggedItem, board, dropzone);
-              }
-            }
-          }
-          draggedItem = null;
+          resetBlankFeedback(blank);
         });
+        showFeedback("Sentence reset. Try again!", "default");
+      });
 
-        $pool.appendChild(chip);
+      // Send / check
+      sendBtn.addEventListener("click", () => {
+        checkQuestionSlide(slideEl, question);
       });
     }
 
-    function reset() {
-      state = { correct: 0, wrong: 0, placed: 0 };
-      buildBoards();
-      buildPool();
-      updateHUD();
+    function renderOutroSlide() {
+      const slideEl = document.createElement("div");
+      slideEl.className = "slide slide-outro";
+
+      slideEl.innerHTML = `
+        <header class="top-bar"></header>
+        <section class="slide-body">
+          <h1 class="outro-title">Game completed</h1>
+          <p class="outro-text">
+            You've reached the end! Thank you for playing.<br/>
+            Keep it up and good luck on your next challenge!
+          </p>
+          <button class="btn-secondary" id="btnRestart">Play again</button>
+        </section>
+      `;
+
+      slideContainer.appendChild(slideEl);
+
+      slideEl.querySelector("#btnRestart").addEventListener("click", () => {
+        goToSlide(0);
+      });
     }
 
-    function shufflePool() {
-      const chips = Array.from($pool.children);
-      chips.sort(() => Math.random() - 0.5).forEach((c) => $pool.appendChild(c));
+    // ------------------------------
+    // CHECK QUESTION
+    // ------------------------------
+    function resetChipStyles(chip) {
+      chip.classList.remove("correct-chip", "wrong-chip");
     }
 
-    function checkWin() {
-      if (state.placed === ITEMS.length) {
+    function resetBlankFeedback(blank) {
+      blank.classList.remove("correct", "incorrect");
+      const correctWord = blank.querySelector(".correct-word");
+      if (correctWord) correctWord.remove();
+    }
+
+    function checkQuestionSlide(slideEl, question) {
+      const blanks = Array.from(slideEl.querySelectorAll(".blank"));
+
+      // Si hay espacios vacíos
+      const empty = blanks.some((b) => !b.querySelector(".chip"));
+      if (empty) {
+        showFeedback("Fill in all the blanks before sending.", "error");
+        return;
+      }
+
+      let allCorrect = true;
+
+      blanks.forEach((blank) => {
+        const chip = blank.querySelector(".chip");
+        if (!chip) return;
+
+        const expected = blank.dataset.correct;
+        const given = chip.dataset.answer;
+
+        resetChipStyles(chip);
+        resetBlankFeedback(blank);
+
+        if (expected === given) {
+          blank.classList.add("correct");
+          chip.classList.add("correct-chip");
+        } else {
+          allCorrect = false;
+          blank.classList.add("incorrect");
+          chip.classList.add("wrong-chip");
+
+          const correctDiv = document.createElement("div");
+          correctDiv.className = "correct-word";
+          correctDiv.textContent = expected;
+          blank.appendChild(correctDiv);
+        }
+      });
+
+      if (allCorrect) {
+        showFeedback("Great job! All answers are correct.", "success");
         setTimeout(() => {
-          toast(
-            `🎉 ¡Completado! Aciertos: ${state.correct} · Errores: ${state.wrong}`
-          );
-        }, 220);
+          goToSlide(currentSlideIndex + 1);
+        }, 1100);
+      } else {
+        showFeedback(
+          "Some answers are incorrect. Review the red words.",
+          "error"
+        );
       }
     }
 
-    document
-      .getElementById("shuffleBtn")
-      .addEventListener("click", shufflePool);
-    document.getElementById("resetBtn").addEventListener("click", reset);
+    // ------------------------------
+    // NAVIGATION
+    // ------------------------------
+    function updateNavButtons() {
+      navPrev.classList.toggle(
+        "nav-arrow--disabled",
+        currentSlideIndex === 0
+      );
+      navNext.classList.toggle(
+        "nav-arrow--disabled",
+        currentSlideIndex === SLIDES.length - 1
+      );
+    }
 
-    // Init
-    reset();
+    function goToSlide(index) {
+      if (index < 0 || index >= SLIDES.length) return;
+      currentSlideIndex = index;
+      renderSlide();
+    }
+
+    navPrev.addEventListener("click", () => {
+      if (currentSlideIndex > 0) goToSlide(currentSlideIndex - 1);
+    });
+
+    navNext.addEventListener("click", () => {
+      if (currentSlideIndex < SLIDES.length - 1)
+        goToSlide(currentSlideIndex + 1);
+    });
+
+    // ------------------------------
+    // INIT
+    // ------------------------------
+    renderSlide();
   </script>
 </body>
-
 </html>

@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Juego de Categorización – Continentes</title>
+  <link rel="stylesheet" href="component-styles.css">
+  <style>
+
+  .layout {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    min-height: 0;
+  }
+
+  .stats {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .stat-pill {
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    background: #f3f4f6;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-main);
+  }
+
+  .left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+  }
+
+  .left-card {
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  }
+
+  .card-title{
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .left-card-description {
+    font-size: 1rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  .pool {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 4px 0;
+  }
+
+  .chip {
+    user-select: none;
+    cursor: grab;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    background: var(--fondo);
+    border: 1px solid var(--accent);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+    box-shadow: var(--shadow-chip);
+    transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+  }
+
+  .chip:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(15, 23, 42, 0.15);
+    background: #f3e8ff;
+  }
+
+  .chip:active {
+    cursor: grabbing;
+    transform: translateY(0);
+  }
+
+  .chip.correct {
+    background: #ECFDF5;
+    border-color: var(--success);
+    color: #166534;
+    pointer-events: none;
+  }
+
+  .right-column {
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  }
+
+  .boards-wrap {
+    flex: 1;
+    overflow-y: auto;
+    /* Fixed content, no scroll override from below */
+    overflow: hidden !important;
+  }
+
+  .boards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* 3 columns to save vertical space */
+    gap: 6px;
+  }
+
+  .board {
+    background: var(--card-bg);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 5px;
+    /* Reduced padding */
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: all 0.2s ease;
+  }
+
+  .board-header {
+    display: flex;
+    justify-content: center;
+    /* Center the title */
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .board-name {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--accent);
+    text-align: center;
+  }
+
+  .dropzone {
+    flex: 1;
+    min-height: 40px;
+    /* Reduced min-height */
+    border-radius: 8px;
+    background: #ffffff;
+    border: 1px dashed #cbd5e1;
+    padding: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-content: flex-start;
+  }
+
+  .controls {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn {
+    appearance: none;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-pill);
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: var(--fondo);
+    color: var(--text-main);
+    box-shadow: var(--shadow-chip);
+    transition: all 0.1s ease;
+  }
+
+  .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(15, 23, 42, 0.15);
+    background: #f3e8ff;
+  }
+
+  .btn:active {
+    transform: translateY(0);
+  }
+
+  .btn.secondary {
+    background: #ffffff;
+    border-color: var(--border);
+    color: var(--text-muted);
+  }
+
+  .btn.secondary:hover {
+    background: #f9fafb;
+  }
+
+  /* Toast */
+  .toast {
+    position: absolute;
+    left: 50%;
+    bottom: 20px;
+    transform: translateX(-50%);
+    padding: 8px 16px;
+    border-radius: var(--radius-pill);
+    background: rgba(17, 24, 39, 0.96);
+    color: #fff;
+    font-size: 0.85rem;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.35);
+    display: none;
+    z-index: 50;
+    white-space: nowrap;
+  }
+
+  .toast.show {
+    display: block;
+    animation: toast-pop 0.28s ease-out;
+  }
+
+  @keyframes toast-pop {
+    from {
+      opacity: 0;
+      transform: translate(-50%, 10px);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }
+
+  @media screen and (max-width: 700px) {
+    .top-bar {
+      padding: 4px;
+    }
+
+    .frame {
+      overflow: hidden !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+
+    .inner-card {
+      display: flex !important;
+      flex-direction: column !important;
+      overflow: hidden !important;
+    }
+
+    .app-content {
+      flex: 1 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      overflow: hidden !important;
+      padding-bottom: 0 !important;
+      width: 100%;
+      padding: 0;
+    }
+
+    /* GRID LAYOUT: 2 columns, 2 rows */
+    .layout {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      grid-template-rows: auto auto !important;
+      gap: 8px !important;
+      flex: 1 !important;
+      overflow: hidden !important;
+    }
+
+    /* Left column (Countries) - Top Left (1,1) */
+    .left-column {
+      grid-column: 1 !important;
+      grid-row: 1 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 8px !important;
+      min-height: 0 !important;
+    }
+
+    /* Pool card */
+    .left-column>.left-card:first-child {
+      flex: 1 !important;
+      display: flex;
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 2px !important;
+      background: #fff !important;
+      border-radius: 12px !important;
+      overflow: hidden !important;
+    }
+
+    .left-card {
+      padding: 8px;
+    }
+
+    .left-card-description {
+      display: none !important;
+    }
+
+    .pool {
+      width: 100% !important;
+      justify-content: flex-start !important;
+      padding: 0 !important;
+      flex-wrap: wrap !important;
+      overflow-x: visible !important;
+      white-space: normal !important;
+    }
+
+    .chip {
+      flex-shrink: 0 !important;
+    }
+
+    /* Right column (Boards) - Entire right side, spanning both rows */
+    .right-column {
+      grid-column: 2 !important;
+      grid-row: 1 / 3 !important;
+      /* Span from row 1 to row 3 (2 rows) */
+      display: flex !important;
+      flex-direction: column !important;
+      min-height: 0 !important;
+      overflow: hidden !important;
+    }
+
+    .boards-wrap {
+      flex: 1 !important;
+      min-height: 0 !important;
+      overflow-y: auto !important;
+    }
+
+    .boards {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 4px !important;
+      padding-bottom: 6px;
+    }
+
+    .board {
+      padding: 4px !important;
+    }
+
+    .board-name {
+      font-size: 0.8rem !important;
+      margin-bottom: 2px !important;
+    }
+
+    .dropzone {
+      min-height: 50px !important;
+      padding: 3px !important;
+      gap: 3px !important;
+    }
+
+    /* Chips inside dropzones should be smaller to fit */
+    .dropzone .chip {
+      font-size: 0.7rem !important;
+      padding: 3px 8px !important;
+      max-width: 100% !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+  }
+</style>
+  <script>
+    (function () {
+      function setEmbedded() {
+        document.documentElement.classList.add('embedded-mode');
+        // Also add to body just in case CSS targets it
+        if (document.body) document.body.classList.add('embedded-mode');
+      }
+
+      try {
+        if (window.self !== window.top || window.parent !== window) {
+          setEmbedded();
+        }
+      } catch (e) {
+        setEmbedded();
+      }
+
+      // Re-check on load to be sure
+      window.addEventListener('DOMContentLoaded', function () {
+        try {
+          if (window.self !== window.top || window.parent !== window) {
+            setEmbedded();
+          }
+        } catch (e) {
+          setEmbedded();
+        }
+      });
+    })();
+  </script>
+</head>
+
+<body>
+  <div class="app-root">
+    <div class="frame">
+      <div class="inner-card">
+
+        <!-- Top Bar -->
+        <header class="top-bar">
+          <h1 class="app-title">Juego de Categorización</h1>
+        </header>
+
+        <!-- Main Content -->
+        <div class="app-content">
+          <p class="app-subtitle">
+            Arrastra cada país al continente correcto.
+          </p>
+
+          <!-- HUD -->
+          <section class="hud" aria-label="Panel de progreso">
+            <div class="stats">
+              <div class="stat-pill">✅ <b id="hits">0</b></div>
+              <div class="stat-pill">❌ <b id="misses">0</b></div>
+              <div class="stat-pill">⭐ <b id="score">0</b></div>
+            </div>
+          </section>
+
+          <!-- Two Column Layout -->
+          <main class="layout">
+            <!-- Left: Pool & Controls -->
+            <aside class="left-column">
+              <div class="left-card">
+                <div class="card-title">Países</div>
+                <div class="left-card-description">
+                  Arrastra las etiquetas hacia su continente.
+                </div>
+                <div id="pool" class="pool" role="list"></div>
+              </div>
+              <div class="left-card">
+                <div class="card-title">Controles</div>
+                <div class="controls">
+                  <button class="btn" id="shuffleBtn">🔀 Reordenar</button>
+                  <button class="btn secondary" id="resetBtn">↺ Reiniciar</button>
+                </div>
+              </div>
+            </aside>
+
+            <!-- Right: Boards -->
+            <section class="right-column">
+              <div class="card-title">Tableros</div>
+              <div class="boards-wrap">
+                <div class="boards"><!-- generado por JS --></div>
+              </div>
+            </section>
+          </main>
+        </div>
+
+        <!-- Feedback Toast -->
+        <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==============================
+    // CONFIGURACIÓN DEL JUEGO
+    // ==============================
+    const CATEGORIES = [
+      { key: "america", label: "América", hint: "Norte, Centro y Sur" },
+      { key: "europa", label: "Europa", hint: "UE, Mediterráneo" },
+      { key: "oceania", label: "Oceanía", hint: "Australia, Islas" },
+      { key: "asia", label: "Asia", hint: "Oriente" },
+      { key: "africa", label: "África", hint: "Continente madre" },
+    ];
+
+    const ITEMS = [
+      { name: "Colombia", category: "america" },
+      { name: "Canadá", category: "america" },
+      { name: "Francia", category: "europa" },
+      { name: "Alemania", category: "europa" },
+      { name: "Japón", category: "asia" },
+      { name: "China", category: "asia" },
+      { name: "Australia", category: "oceania" },
+      { name: "Nueva Zelanda", category: "oceania" },
+      { name: "Egipto", category: "africa" },
+      { name: "Nigeria", category: "africa" },
+    ];
+
+    const MESSAGES = {
+      ok: [
+        "¡Excelente! ⭐",
+        "¡Buenísimo! 🚀",
+        "¡Lo clavaste! 🎯",
+        "¡Gran acierto! 💪",
+        "¡Perfecto! 🌟",
+      ],
+      no: [
+        "Casi… 😅",
+        "Inténtalo de nuevo 🙌",
+        "Revisa el continente 😉",
+        "¡Sigue intentando! 💡",
+        "¡Tú puedes! 🔁",
+      ],
+    };
+
+    const $pool = document.getElementById("pool");
+    const $boards = document.querySelector(".boards");
+    const $toast = document.getElementById("toast");
+    const $hits = document.getElementById("hits");
+    const $misses = document.getElementById("misses");
+    const $score = document.getElementById("score");
+
+    let state = { correct: 0, wrong: 0, placed: 0 };
+
+    function randomOf(a) {
+      return a[Math.floor(Math.random() * a.length)];
+    }
+
+    function toast(msg) {
+      $toast.textContent = msg;
+      $toast.classList.add("show");
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => $toast.classList.remove("show"), 1500);
+    }
+
+    function updateHUD() {
+      $hits.textContent = state.correct;
+      $misses.textContent = state.wrong;
+      const wrong = state.wrong;
+      const computed = Math.max(0, 10 - wrong * 0.5);
+      $score.textContent = computed.toFixed(2);
+      const pct = Math.round((state.placed / ITEMS.length) * 100);
+    }
+
+    function handleDrop(el, board, dropzone) {
+      if (!el) return;
+      const expected = board.dataset.key;
+      const given = el.dataset.category;
+
+      if (expected === given) {
+        el.classList.add("correct");
+        el.draggable = false;
+        // Remove touch listeners if placed correctly to prevent re-dragging
+        el.ontouchstart = null;
+        el.ontouchmove = null;
+        el.ontouchend = null;
+
+        dropzone.appendChild(el);
+        state.correct++;
+        state.placed++;
+        toast(randomOf(MESSAGES.ok));
+      } else {
+        state.wrong++;
+        el.classList.remove("correct");
+        el.animate(
+          [
+            { transform: "translateX(0)" },
+            { transform: "translateX(-3px)" },
+            { transform: "translateX(3px)" },
+            { transform: "translateX(0)" },
+          ],
+          { duration: 180 }
+        );
+        toast(randomOf(MESSAGES.no));
+      }
+      updateHUD();
+      checkWin();
+    }
+
+    function buildBoards() {
+      $boards.innerHTML = "";
+      CATEGORIES.forEach((cat) => {
+        const board = document.createElement("div");
+        board.className = "board";
+        board.dataset.key = cat.key;
+        board.innerHTML = `
+          <div class="board-header">
+            <span class="board-name">${cat.label}</span>
+          </div>
+          <div class="dropzone" role="list" aria-label="${cat.label}"></div>
+        `;
+        $boards.appendChild(board);
+
+        const dropzone = board.querySelector(".dropzone");
+        dropzone.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          board.classList.add("highlight");
+        });
+        dropzone.addEventListener("dragleave", () =>
+          board.classList.remove("highlight")
+        );
+        dropzone.addEventListener("drop", (e) => {
+          e.preventDefault();
+          board.classList.remove("highlight");
+          const id = e.dataTransfer.getData("text/plain");
+          const el = document.getElementById(id);
+          handleDrop(el, board, dropzone);
+        });
+      });
+    }
+
+    // Touch support variables
+    let draggedItem = null;
+    let touchClone = null;
+
+    function buildPool() {
+      $pool.innerHTML = "";
+      const shuffled = [...ITEMS].sort(() => Math.random() - 0.5);
+      shuffled.forEach((item, i) => {
+        const chip = document.createElement("div");
+        chip.className = "chip";
+        chip.textContent = item.name;
+        chip.draggable = true;
+        const id = "chip-" + i;
+        chip.id = id;
+        chip.dataset.category = item.category;
+
+        // Desktop Drag Events
+        chip.addEventListener("dragstart", (e) => {
+          e.dataTransfer.setData("text/plain", id);
+          document
+            .querySelectorAll(".board")
+            .forEach((b) =>
+              b.classList.toggle("highlight", b.dataset.key === item.category)
+            );
+        });
+
+        chip.addEventListener("dragend", () =>
+          document
+            .querySelectorAll(".board")
+            .forEach((b) => b.classList.remove("highlight"))
+        );
+
+        // Touch Events for Tablets/Mobile
+        chip.addEventListener("touchstart", (e) => {
+          draggedItem = chip;
+          const touch = e.touches[0];
+
+          // Create a visual clone
+          touchClone = chip.cloneNode(true);
+          touchClone.style.position = "fixed";
+          touchClone.style.left = touch.clientX + "px";
+          touchClone.style.top = touch.clientY + "px";
+          touchClone.style.zIndex = "9999";
+          touchClone.style.opacity = "0.8";
+          touchClone.style.pointerEvents = "none"; // Allow touch to pass through to check elements below
+          touchClone.style.width = chip.offsetWidth + "px";
+          document.body.appendChild(touchClone);
+
+          chip.style.opacity = "0.5";
+          e.preventDefault(); // Prevent scrolling while dragging
+        }, { passive: false });
+
+        chip.addEventListener("touchmove", (e) => {
+          if (!touchClone) return;
+          const touch = e.touches[0];
+          touchClone.style.left = touch.clientX + "px";
+          touchClone.style.top = touch.clientY + "px";
+          e.preventDefault();
+        }, { passive: false });
+
+        chip.addEventListener("touchend", (e) => {
+          if (!draggedItem) return;
+
+          // Clean up visual effects
+          if (touchClone) {
+            touchClone.remove();
+            touchClone = null;
+          }
+          draggedItem.style.opacity = "1";
+
+          // Find drop target
+          const touch = e.changedTouches[0];
+          // Temporarily hide clone if it existed to find element below, but we used pointer-events: none so it's fine
+          const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+
+          if (elementBelow) {
+            const dropzone = elementBelow.closest(".dropzone");
+            if (dropzone) {
+              const board = dropzone.closest(".board");
+              if (board) {
+                handleDrop(draggedItem, board, dropzone);
+              }
+            }
+          }
+          draggedItem = null;
+        });
+
+        $pool.appendChild(chip);
+      });
+    }
+
+    function reset() {
+      state = { correct: 0, wrong: 0, placed: 0 };
+      buildBoards();
+      buildPool();
+      updateHUD();
+    }
+
+    function shufflePool() {
+      const chips = Array.from($pool.children);
+      chips.sort(() => Math.random() - 0.5).forEach((c) => $pool.appendChild(c));
+    }
+
+    function checkWin() {
+      if (state.placed === ITEMS.length) {
+        setTimeout(() => {
+          toast(
+            `🎉 ¡Completado! Aciertos: ${state.correct} · Errores: ${state.wrong}`
+          );
+        }, 220);
+      }
+    }
+
+    document
+      .getElementById("shuffleBtn")
+      .addEventListener("click", shufflePool);
+    document.getElementById("resetBtn").addEventListener("click", reset);
+
+    // Init
+    reset();
+  </script>
+</body>
