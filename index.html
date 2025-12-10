@@ -4,477 +4,310 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Componente – Medios de comunicación</title>
+  <title>Visor de PDFs — Dos columnas desde el título</title>
   <link rel="stylesheet" href="component-styles.css">
   <style>
+
+    /* ===== Contenedor interno del componente ===== */
+
     .app-content {
       flex: 1;
-      padding: 16px 24px 18px;
+      padding: 12px 20px 16px;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
-      /* lo que desborda se controla dentro */
-    }
-
-    .comp-wrap {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      display: grid;
-      grid-template-columns: 1.6fr 1.1fr;
-      /* izquierda media, derecha transcripción */
-      grid-template-rows: auto minmax(0, 1fr);
-      grid-template-areas:
-        "head head"
-        "media trans";
-      column-gap: 16px;
-      row-gap: 10px;
-      background: #fff;
-    }
-
-    header {
-      grid-area: head;
-      padding: 4px 2px 4px 2px;
-    }
-
-    /* Zona media: video + audio a la izquierda */
-    .media {
-      grid-area: media;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      min-height: 0;
-    }
-
-    .player {
-      width: 100%;
-      background: #c5c7cc;
-      border: 1px solid #e1e1e1;
-      border-radius: 6px;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 260px;
-    }
-
-    .player video,
-    .player iframe {
-      width: 100%;
-      height: 100%;
-      display: block;
-      object-fit: cover;
-      /* Garantiza que no se recorte */
-      background: #000;
-      border: 0;
-    }
-
-    /* Audio siempre visible con controles */
-    .media audio {
-      width: 100%;
-      min-height: 40px;
-      height: auto;
-      display: block !important;
-      position: relative !important;
-      z-index: 10;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
-      background: #f0f0f0;
-    }
-
-    /* Transcripción a la derecha, con scroll interno */
-    .transcript {
-      grid-area: trans;
-      border-radius: 6px;
-      border: 1px solid #dcdcdc;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
-
-    .trans-head {
-      background: #5B00FF;
-      color: #fff;
-      padding: 10px 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font: 700 14px Arial, Helvetica, sans-serif;
-      cursor: pointer;
-      user-select: none;
-      flex-shrink: 0;
-    }
-
-    .trans-body {
-      display: none;
-      padding: 12px 14px;
-      color: var(--muted);
-      background: #fafafa;
-      line-height: 1.5;
-      max-height: 400px;
-      /* scroll interno en desktop */
       overflow: auto;
     }
 
-    .transcript.open .trans-body {
-      display: block;
+    /* ---- Contenedor principal del visor ---- */
+   .comp-wrap-pdf {
+      width: 100%;
       height: 100%;
+      margin: 0;
+
+      border: none;
+      /* sin borde ni recuadro */
+      border-radius: 0;
+      box-shadow: none;
+      background: transparent;
+      overflow: hidden;
+
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      /* izquierda: lista / derecha: visor */
+      grid-template-rows: auto 1fr 8px;
+      /* fila de encabezado + contenido + progreso */
+      grid-template-areas:
+        "headL right"
+        "left  right"
+        "prog  prog";
+      min-height: 0;
     }
 
-    html.embedded-mode body {
-      align-items: stretch !important;
-      justify-content: center !important;
+    /* Encabezado de la columna izquierda (subtítulo + intro) */
+    header {
+      grid-area: headL;
+      padding: 16px 20px 8px 20px;
+      border-right: 1px solid #ececec;
     }
 
-    html.embedded-mode .frame {
-      box-shadow: none !important;
-      padding: 10px !important;
+    header h1 {
+      display: none;
+      /* título principal está en .app-title */
     }
 
-    /* ===== Responsive ===== */
-    @media (max-width: 700px) {
+    h1 {
+      margin: 0 0 6px;
+      font: 700 24px Arial, Helvetica, sans-serif;
+      color: var(--ink);
+    }
 
-      .frame {
-        height: 100% !important;
+    .subtitle {
+      font: 700 13px Arial, Helvetica, sans-serif;
+      color: var(--accent);
+      margin-top: 2px;
+    }
 
-      }
+    p.intro {
+      margin: 6px 0 0;
+      font: 400 12px system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      color: var(--muted);
+      line-height: 1.55;
+    }
 
+    /* Columna izquierda — lista de documentos */
+    .left {
+      grid-area: left;
+      border-right: 1px solid #ececec;
+      padding: 10px 14px 12px 20px;
+      overflow: auto;
+      min-height: 0;
+    }
+
+    .doc {
+      border: 1px solid #e5e7eb;
+      background: #fafbfc;
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin: 10px 0;
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .doc h3 {
+      margin: 0;
+      font: 700 14px Arial, Helvetica, sans-serif;
+      color: var(--ink);
+    }
+
+    .doc p {
+      margin: 2px 0 0;
+      color: var(--muted);
+      font: 400 12px system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    .doc .actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 18px;
+      padding: 8px 12px;
+      font: 700 12px Arial, Helvetica, sans-serif;
+      cursor: pointer;
+      color: #fff;
+      background: var(--accent);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font: 700 11px Arial;
+      background: #eef2f7;
+      color: #4b5563;
+      margin-left: 6px;
+    }
+
+    .done {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    /* Columna derecha — visor ocupa desde la fila superior */
+    .right {
+      grid-area: right;
+      padding: 12px 12px 12px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 0;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .toolbar .info {
+      font: 400 12px system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      color: var(--muted);
+    }
+
+    .toolbar .open-ext {
+      border: 0;
+      border-radius: 18px;
+      padding: 8px 12px;
+      font: 700 12px Arial, Helvetica, sans-serif;
+      cursor: pointer;
+      color: #fff;
+      background: #4b4e51;
+    }
+
+    .viewer {
+      flex: 1 1 auto;
+      border: 1px solid #e1e4e8;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #f1f3f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+    }
+
+    .viewer iframe,
+    .viewer embed,
+    .viewer object {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #fff;
+      display: block;
+    }
+
+    @media (max-width: 900px) {
       .app-content {
-        padding: 12px 14px 14px !important;
+        padding: 10px 14px 12px;
       }
 
-      .comp-wrap {
-        grid-template-columns: 2fr 3fr;
+      .comp-wrap-pdf {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto 1fr 8px;
+        grid-template-areas:
+          "headL"
+          "left"
+          "right"
+          "prog";
       }
 
       header {
-        padding: 0 2px 2px 2px;
+        border-right: 0;
+        border-bottom: 1px solid #ececec;
       }
 
-      .media {
-        padding: 0;
+      header {
+        padding: 0 0 12px 0;
       }
 
-      .transcript {
-        margin: 0;
+      .left {
+        width: 100%;
+        overflow: auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
       }
 
-      .app-title {
-        font-size: 16px;
-      }
-
-      .player {
-        min-height: 210px;
+      .doc {
+        width: 300px;
+        display: flex;
+        flex-direction: row;
+        align-items: start;
       }
     }
+
+
   </style>
+
 </head>
 
 <body>
   <div class="app-root">
     <div class="frame">
       <div class="inner-card">
-        <!-- TÍTULO tipo component_classification -->
         <header class="top-bar">
-          <h1 class="app-title">Medios de comunicación</h1>
+          <div class="app-title">Visor de PDFs</div>
         </header>
         <div class="divider"></div>
 
         <div class="app-content">
-          <section class="comp-wrap" data-component-id="media-001">
+          <section class="comp-wrap-pdf" data-component-id="pdf-002">
             <header>
-              <!-- Ya no usamos <h1> aquí; solo texto de apoyo -->
+              <div class="subtitle">Dos columnas desde el título</div>
               <p class="intro">
-                No te pierdas este podcast, donde exploramos los desafíos y las oportunidades de la tecnología en la
-                educación.
-                ¡Escúchalo y prepárate para estar al día con las últimas tendencias!
+                El visor ocupa toda la columna derecha desde la parte superior, incluyendo el área del título.
               </p>
-              <p class="callout">Usa los controles del audio para reproducir/pausar.</p>
             </header>
 
-            <div class="media">
-              <div class="player">
-                <video id="videoEl" muted loop playsinline preload="metadata" poster="">
-                  <source src="../Nivel_A1/podcast/A1_PODCAST.mp4" type="video/mp4" />
-                </video>
+            <aside class="left" id="list">
+              <div class="doc"
+                data-src="c:\Users\crist\Documents\Git_Arukay_2025\Certificacion_Docente\certificacion_docente_IA\public\Nivel_A1\PDF\2025_curriculo_certificacion_docente_IA_es.pdf"
+                data-title="IA y educación - UNESCO" data-size="1.2 MB">
+                <div>
+                  <h3>IA y educación - UNESCO <span class="badge">PDF</span></h3>
+                  <p>Tutorial básico del curso.</p>
+                </div>
+                <div class="actions">
+                  <button class="btn open">Abrir</button>
+                </div>
               </div>
 
-              <audio id="audioEl" controls preload="metadata">
-                <source src="../Nivel_A1/podcast/IA,_Datos_y_Derechos_Digitales__Navegando_la_Seguridad_en_Educa.m4a"
-                  type="audio/mpeg" />
-                Tu navegador no soporta audio HTML5.
-              </audio>
-            </div>
+              <div class="doc" data-src="file:///C:/Users/khues/Downloads/Sin%20dientes%20y%20a%20bocados.pdf"
+                data-title="Recomendación sobre la ética de la IA - UNESCO" data-size="850 KB">
+                <div>
+                  <h3>Recomendación sobre la ética de la IA - UNESCO <span class="badge">PDF</span></h3>
+                  <p>Cuestiones éticas de IA.</p>
+                </div>
+                <div class="actions">
+                  <button class="btn open">Abrir</button>
+                </div>
+              </div>
 
-            <section class="transcript" id="trans">
-              <div class="trans-head" id="tHead">
-                Transcripción
-                <span id="tIcon" aria-hidden="true">▼</span>
+              <div class="doc"
+                data-src="c:\Users\crist\Documents\Git_Arukay_2025\Certificacion_Docente\certificacion_docente_IA\public\Nivel_A1\PDF\2025_curriculo_certificacion_docente_IA_es.pdf"
+                data-title="Normas armonizadas en materia de IA" data-size="2.4 MB">
+                <div>
+                  <h3>Normas armonizadas en materia de IA <span class="badge">PDF</span></h3>
+                  <p>Reglamento UE.</p>
+                </div>
+                <div class="actions">
+                  <button class="btn open">Abrir</button>
+                </div>
               </div>
-              <div class="trans-body" id="tBody">
-                <p><strong>IA, datos y derechos digitales para la seguridad en Educación</strong>
-                <p><strong>Seguridad digital
-                    <br>(0:00)</strong> Saludos. Hoy vamos a meternos a fondo en varios documentos interesantes. Guías,
-                  informes, leyes, todo sobre seguridad digital, datos, inteligencia artificial.
-                  <br>Exacto. Y con un ojo puesto, sobre todo, en cómo aterriza esto en América Latina y también en el
-                  sector educativo, que es clave. Justo.
-                  <br>Tenemos material variado. Una guía del BID sobre cómo hacer el aprendizaje en línea más seguro. Un
-                  estudio de la Fundación Carolina sobre derechos digitales en Iberoamérica, que me parece fundamental.
-                  <br>Sí, muy necesario. Una guía de la UNESCO sobre IA y educación. Luego, algo más técnico, un resumen
-                  de EY sobre leyes de protección de datos en la TAM.
-                  <br>Utilísimo ese resumen, la verdad. Y una guía de anonimización. Y claro, el famoso, el reciente
-                  reglamento de IA de la Unión Europea.
-                  <br>Que va a dar que hablar, seguro. Una mezcla potente, sí, señor. Esa es la idea.
-                  <br>Ver qué sacamos en claro de toda esta mezcla. Queremos entender mejor los riesgos, claro. Pero
-                  también qué derechos tenemos.
-                  <br> Y las responsabilidades, ¿no? De quién es Caracosa. Eso. Y cómo cambian las reglas del juego con
-                  las nuevas normativas.
-                  <br> La misión es, digamos, ofrecer una brújula para navegar este mundo digital que, uf, no para de
-                  cambiar. Totalmente. Y para que no suene abstracto, pensemos en cosas concretas.
-                  <br> ¿Alguien se ha parado a pensar si los datos de los chicos están seguros en una clase online?
-                  Buena pregunta. ¿O qué pasa con la ética cuando una IA decide si te dan un crédito o no? ¿O si te
-                  admiten en un curso? Son temas que ya están aquí. Pues sí.
-                  <br> Vamos a intentar desgranar un poco todo esto hoy. Empezamos por el aula. El entorno educativo.
-                  <br> Me parece perfecto. La guía del bit que mencionamos identifica peligros muy específicos para
-                  estudiantes en Latinoamérica. Habla de hasta siete tipos de acoso y violencia en línea.
-                  <br> Siete. Sí. Y es bueno ponerles nombre.
-                </p>
-                <p><strong>Desafíos y soluciones en ciberseguridad escolar</strong>
-                  <br><strong>(1:59)</strong> Está el ciberacoso de siempre, que a veces es peor por el anonimato, ¿no?
-                  Claro. Luego, amenazas directas por correo. El flaming, esos insultos en foros públicos, que a veces
-                  increíblemente se cuelan hasta en las tareas escolares.
-                  <br> ¿En serio? Sí, sí. El outing, que es revelar cosas privadas de alguien. El phishing, suplantar
-                  identidad para robar datos, un clásico ya, acoso por gente de fuera de la escuela y hasta usurpación
-                  de identidad.
-                  <br> Y ojo, que no solo afecta a los estudiantes. Ah, ¿no? No. Las instituciones también sufren.
-                  <br> El ransomware, por ejemplo, que te secuestran los datos y pidan rescate. Imagínate el caos. Un
-                  panorama complicado.
-                  <br> Y esta guía se basa en datos reales, encuestas a profes de Brasil, Colombia, Costa Rica, México.
-                  Sí, de varios países de la región. Panamá, Perú, Uruguay también.
-                  <br> Le da bastante peso. Y frente a todo esto, ¿qué propone el BID? ¿Más antivirus? Bueno, la
-                  tecnología ayuda, pero no es la única respuesta. El énfasis, y esto es importante, está en que las
-                  escuelas necesitan protocolos claros.
-                  <br> Protocolos. ¿Te refieres a planes de acción? Exacto. Planes para saber qué hacer si pasa algo.
-                  <br> Cómo medir el impacto, a quién avisar, cómo intentar borrar datos si se filtran. Pero sobre todo,
-                  insisten mucho en la prevención. Prevenir antes que curar.
-                  <br> Eso. Y ahí sí entra la parte técnica, como fomentar contraseñas fuertes, que no sean 1, 2, 3, 4 o
-                  password. Que todavía se ve, ¿eh? Todavía.
-                  <br> Y usar la autenticación de dos factores o doble factor. Ese código extra que te llega al móvil,
-                  por ejemplo, es una barrera más. Parece básico, pero fundamental.
-                  <br> Totalmente. Y un detalle interesante de la guía del BID. Desaconsejan usar datos biométricos en
-                  las escuelas.
-                  <br> Ah, ¿sí? Ni huellas ni reconocimiento facial. No lo ven proporcionado para los fines educativos.
-                  Y eso abre un debate interesante sobre qué tecnología es adecuada y cuál quizá es excesiva en ese
-                  contexto.
-                </p>
-                <p><strong>Protección en el aula digital</strong>
-                  <br><strong>(4:02)</strong> Tiene lógica, sí. La proporcionalidad. Y también hablan de configurar bien
-                  las herramientas, ¿no? Las de videoconferencia, por ejemplo.
-                  <br> Claro. Cosas que a veces, por las prisas, se olvidan. Poner contraseña a las reuniones.
-                  <br> Usar la sala de espera para controlar quién entra. No publicar el enlace de la reunión en redes
-                  sociales, por favor. Sí, eso ha pasado.
-                  <br> Y limitar quién puede compartir pantalla. Son como medidas básicas de seguridad. Como cerrar bien
-                  la puerta de casa.
-                  <br> Entendido. Y más allá de lo técnico, ¿qué más recomiendan? Que es outing dentro de esa comunidad
-                  educativa. Y qué consecuencias tiene.
-                  <br> Establecer las reglas del juego previamente. Exacto. Y ligado a eso, la transparencia.
-                  <br> Explicar a las familias, a los estudiantes, qué datos se recogen, para qué, cuándo se borran.
-                  Comunicación constante. Y formación, me imagino.
-                  <br> Fundamental. Para todos. Directivos, profes, estudiantes.
-                  <br> Incluso hacer sesiones para los padres y madres. La guía del BIT hasta trae anexos prácticos con
-                  herramientas, guías de contraseñas, un modelo de carta para avisarse hay un problema. Bastante
-                  completa.
-                  <br> Vaya. Que proteger el aula digital es mucho más que un software. Requiera política interna,
-                  procedimientos, comunicación.
-                  <br> Exacto. Es un enfoque integral. Y eso nos lleva, casi naturalmente, a pensar más allá del
-                  colegio.
-                  <br> ¿Qué derechos tenemos en general en el mundo digital? El informe de la Fundación Carolina
-                  profundice en esto. Sí. Ese informe es muy bueno, porque recuerda algo básico.
-                  <br> Los derechos digitales no son algo nuevo y raro. Son los derechos humanos de toda la vida, pero
-                  aplicados a este entorno. O sea, el derecho a la privacidad, a la libertad de expresión.
-                  <br> Pero en versión digital. Precisamente. Y pone mucho el foco en la protección de datos personales
-                  como una defensa de la dignidad de la persona, frente a cómo se usan nuestros datos, ¿no? Y menciona
-                  algunas iniciativas pioneras en Iberoamérica.
-                  <br> Sí. Destaca, por ejemplo, el marco civil de Internet en Brasil, que ya tiene sus años. Es de
-                  2014.
-                </p>
-                <p><strong>Avances y desafíos en neuroderechos y protección de datos para Iberoamérica</strong>
-                  <br><strong>(6:07)</strong> Pero fue muy avanzado en su momento. Ajá. También el debate
-                  superinteresante que hay en Chile sobre los neuroderechos.
-                  <br> Neuroderechos. Eso es una ciencia ficción casi. Pues ya se está debatiendo.
-                  <br> Y también la Carta Iberoamericana de Principios y Derechos en Entornos Digitales, que es más
-                  reciente, de 2023, y busca crear un marco común. Cuando decimos proteger datos personales, ¿a qué nos
-                  referimos exactamente? ¿Solo a cosas muy íntimas, como la salud? No. Y eso es clave entenderlo.
-                  <br> Protege cualquier dato sobre una persona identificada o que se pueda identificar. Tu nombre, tu
-                  DNI, tu email, una foto tuya, dónde estás. Incluso datos que ya sean públicos.
-                  <br> Ah, incluso si son públicos. Sí, porque lo importante es el tratamiento que se les da. Si se usan
-                  sin transparencia, sin seguridad, de forma que te perjudiquen, ahí se pueden vulnerar derechos como la
-                  privacidad, la intimidad o incluso llevar a discriminación.
-                  <br> Entiendo. Por eso son tan importantes las leyes y que haya organismos que vigilen que se cumplan.
-                  La guía de EOI nos da una foto de cómo está Latinoamérica en esto.
-                  <br> Correcto. Esa guía de EOI es muy útil para ver el panorama regional. Muestra que muchos países ya
-                  tienen leyes específicas.
-                  <br> Argentina, Brasil, Chile, Colombia, Costa Rica, Ecuador, México, Panamá, Perú, República
-                  Dominicana, Uruguay. O sea, la mayoría. Sí, aunque, ojo, con niveles muy distintos de desarrollo de la
-                  ley, de detalle y, sobre todo, de cómo se aplica en la práctica y quién la supervisa.
-                  <br> Paraguay, por ejemplo, tiene ley pero más centrada en datos de crédito.Así que el mapa es
-                  variado. Pero la tendencia es a regular más.
-                  <br> Sí, los famosos datos sensibles. Suelen ser los que revelan origen racial o étnico. Opiniones
-                  políticas, creencias religiosas, afiliación sindical, datos de salud, vida sexual.
-                </p>
-                <p><strong>Protección de datos, IA y desafíos Éticos en Iberoamérica</strong>
-                  <br> La lista varía un poquito. Chile, por ejemplo, incluye hábitos personales. Y para tratar estos
-                  datos, la norma general es que se necesita el consentimiento explícito de la persona y medidas de
-                  seguridad mucho más fuertes.
-                  <br> Exacto. Tiene que ser claro, informado y específico para ese uso. Ese es otro tema gordo.
-                  <br> Las transferencias internacionales de datos. La mayoría de leyes en la TAM ponen condiciones.
-                  Normalmente piden que el país de destino tenga un nivel de protección adecuado, parecido al del país
-                  de origen.
-                  <br> ¿Y si no lo tiene? Pues se necesitan otras garantías. O bien el consentimiento explícito de la
-                  persona para esa transferencia concreta. O usar cláusulas contractuales especiales aprobadas por la
-                  autoridad de control.
-                  <br> La guía de EY detalla los requisitos por país y varían. No hay una regla única para toda la
-                  región. Complejo.
-                  <br> ¿Y si las empresas no cumplen? ¿Hay multas? ¿Sanciones? Sí las hay, pero también varían
-                  muchísimo. Desde simples advertencias hasta multas económicas que pueden ser altas, en Colombia por
-                  ejemplo hasta 2.000 salarios mínimos. O incluso llegar a suspender el tratamiento de datos o cerrar
-                  bases de datos.
-                  <br> O sea que las leyes tienen dientes, aunque de diferente tamaño según el país. Algo así. Al menos
-                  en el papel.
-                  <br> Luego la aplicación real es otro cantar a veces. Bueno, ¿y si ya la protección de datos es
-                  compleja? Cuando metemos la inteligencia artificial en la ecuación que vive de datos, la cosa se
-                  complica más, ¿no? La guía Unesco y el reglamento europeo entran ahí.Totalmente.
-                  <br> La guía ya está por todas partes. En el buscador que usamos, el traductor, ayudando a médicos. Y
-                  en educación, como dice la Unesco, el potencial es, bueno, enorme.
-                  <br> ¿En qué sentido? Pues mira, podría automatizar tareas de gestión como admisiones, horarios.
-                  Liberar tiempo. Analizar cómo aprenden los estudiantes para detectar pronto si alguien necesita ayuda.
-                  <br> ¿Como un sistema de alerta temprana? Algo así. Mencionan uno en Reino Unido, OUYU Analyze.
-                  También los chatbots educativos.
-                  <br> Tutores virtuales que responden dudas a cualquier hora. Como ADA o Dikingini. E incluso robots
-                  para ayudar a estudiantes con necesidades especiales, como en el espectro autista.
-                  <br> Suena muy bien, la verdad.Pero siempre hay un pero. Los riesgos, la ética.
-                  <br> Exacto. Ahí es donde tanto la Unesco como el reglamento de la UE ponen la lupa. Vuelve a salir la
-                  privacidad.
-                </p>
-                <p><strong>Desafíos éticos y regulatorios de la Inteligencia Artificial en la sociedad</strong>
-                  <br>¿De quién son los datos del aprendizaje? ¿Puede un menor dar consentimiento informado para que una
-                  IA analice cómo estudia? Complicado. Y luego el gran fantasma de los sesgos. Si la IA aprende de datos
-                  del pasado que reflejan nuestros prejuicios, de género, raciales, económicos, puede acabar
-                  repitiéndolos.
-                  <br> O peor, amplificándolos. Y tomar decisiones injustas. Discriminación algorítmica, que se llama.
-                  <br> Justo. Y ligado a eso, el problema de la caja negra. Que no sabemos cómo funciona por dentro.
-                  <br> Exacto. Con muchas IAs, sobre todo las de aprendizaje profundo, es muy difícil saber por qué
-                  tomaron una decisión. ¿Cómo la cuestionas si no entiendes el proceso? La Unesco menciona aquí la
-                  paradoja de Moravec, que es curiosa.
-                  <br> ¿Cuál es? Que la IA es genial para tareas que a nosotros nos cuestan un montón, como ver patrones
-                  en millones de datos. Pero torpísima para cosas que nos parecen obvias, como el sentido común o
-                  entender el contexto. Curioso, sí.
-                  <br> Y ante todo esto, llega la Unión Europea con su reglamento de IA. Que es como el primer gran
-                  intento de poner orden, ¿no? Y probablemente influirá en otros sitios. Sin duda.
-                  <br> Es un marco pionero y muy ambicioso. Adopta un enfoque basado en el riesgo, que es interesante.
-                  No mete a toda la IA en el mismo saco.
-                  <br> ¿Y qué hace? ¿Prohíbe cosas? Sí, de hecho prohíbe directamente algunas prácticas que considera
-                  inaceptables, que van contra los derechos fundamentales. Por ejemplo. Por ejemplo, sistemas que
-                  manipulen a la gente de forma subliminal o engañosa y causen daño, o que exploten las vulnerabilidades
-                  de ciertos (12:38) grupos, niños, personas con discapacidad, etcétera.
-                  <br> Entiendo. También prohíbe los sistemas de puntuación social generalizada por parte de gobiernos,
-                  como se ha oído de China. Y muy importante.
-                  <br> Restringe muchísimo el uso de identificación biométrica remota en tiempo real, reconocimiento
-                  facial masivo en espacios públicos por la policía, solo en casos superexcepcionales y con permiso
-                  judicial. Vale. Hay líneas rojas claras.
-                  <br> ¿Y el resto de las IAs? Pues las clasifica. La categoría clave es la de alto riesgo. Ahí es donde
-                  pone requisitos muy estrictos.
-                  <br>¿Y qué entra en alto riesgo? Pues áreas muy sensibles. Educación, piensa en sistemas de admisión o
-                  evaluación. Empleo, selección de personal, ascensos.
-                  <br> Acceso a servicios básicos públicos y privados. Créditos, ayudas sociales, seguros. Justicia y
-                  policía.
-                  <br> Evaluar riesgo de reincidencia, analizar pruebas. Y también gestión de migraciones y fronteras.
-                  Áreas donde una decisión errónea de la IA puede tener un impacto enorme en la vida de la gente.
-                  <br> Clarísimo. ¿Y si una IA es de alto riesgo? ¿Qué le exigen? Me imagino que la lista es larga. Lo
-                  es y busca asegurar que sean sistemas seguros, fiables y justos.
-                  <br> A ver, puntos clave. Necesitan una gestión de riesgos continua. Los datos que usan para
-                  entrenarse y probarse tienen que ser de alta calidad, pertinentes, representativos y, muy importante,
-                  lo más libres de sesgos posible.
-                </p>
-                <p><strong>Uso responsable de la Inteligencia Artificial y los datos personales</strong>
-                  <br><strong>(14:10)</strong> Un reto enorme. Me imagino. ¿Requieren documentación técnica súper
-                  detallada? ¿Tienen que poder registrar lo que hacen, logs para auditorías? ¿Deben ser transparentes?
-                  ¿Hay que informar al usuario cómo funcionan y cómo usarlas? ¿Tienen que permitir siempre una
-                  supervisión humana efectiva? ¿No pueden ir por libre en decisiones críticas? Que siempre hay una
-                  persona detrás o al lado.
-                  <br> Eso es. Y, claro, ¿tienen que ser precisas, robustas frente a errores o ataques y seguras desde
-                  el punto de vista de la ciberseguridad? Uf, son bastantes requisitos. Muy exigente.
-                  <br> ¿Y dice algo de los modelos grandes, tipo chat GPT? Sí, también. Introduce obligaciones para los
-                  modelos de IA de propósito general, sobre todo los que considera de riesgo sistémico,por su tamaño o
-                  impacto. Les pide más documentación, evaluar riesgos,ciberseguridad y, ojo, transparencia sobre los
-                  datos de entrenamiento.
-                  <br> ¿Qué datos usaron? Exacto. Tienen que publicar un resumen del contenido que usaron y explicar
-                  cómo respetan los derechos de autor de ese contenido. Un tema súper polémico ahora mismo.
-                  <br> Vaya.Que usar o crear IA va a requerir pensárselo dos veces y hacer las cosas bien. Pero
-                  volviendo a lo práctico, al día a día con los datos.
-                  <br>Si manejamos datos personales y queremos usarlos para análisis pero protegiendo la privacidad,
-                  ¿qué hacemos? Ahí entra la guía de anonimización, ¿no? Justo. Esa guía básica de anonimización, basada
-                  en una de Singapur, da técnicas para transformar los datos de forma que, en teoría, ya no puedas
-                  identificar a nadie.Se trata de reducir el riesgo de reidentificación.
-                  <br> ¿Y cómo se hace? ¿Borro el nombre y ya está? Ojalá fuera tan fácil. Borrar el nombre, el DNI, es
-                  el primer paso, obvio,pero no suele bastar.La guía explica varias técnicas.
-                  <br> A ver.La supresión, quitar filas o columnas enteras, drástico, pierdes info, el enmascaramiento,
-                  tapar parte del dato, como calle falsa 123, que sea calle falsa XXX, o los últimos números del
-                  teléfono.OK, eso lo he visto.
-                  <br> La generalización, dar menos detalle. En vez de edad 37, poner rango 3039.En vez de cardiólogo,
-                  poner médico especialista.
-                  <br> Bajar la resolución, digamos. Algo así.La perturbación, añadir un poquito de ruido aleatorio,
-                  sumar o restar un poco a un sueldo, redondear cifras.
-                  <br> Y una más compleja, la k-anonimidad. La idea es que cada persona en los datos sea indistinguible
-                  de al menos otras k menos una personas, mirando ciertos datos como edad, código postal, ocupación. Se
-                  consigue modificando los datos hasta lograrlo.
-                  <br> Suena complicado.¿Y eso garantiza el anonimato? Ahí está el quiz. La anonimización reduce mucho
-                  el riesgo, pero casi nunca lo elimina del todo.
-                  <br> A veces, cruzando con otros datos, se puede reidentificar a alguien. Por eso, la guía dice,
-                  evalúa el riesgo que queda, incluso después de anonimizar, y protege bien esos datos anonimizados. No
-                  es magia, es gestión de riesgos.
-                  <br> Entendido. Es una herramienta más, no una solución definitiva.Y junto a estas técnicas, volvemos
-                  a lo básico, ¿no? Las medidas de seguridad que todos deberíamos tomar.
-                  <br> Fundamentales. La primera barrera, lo que decía la guía del BID, contraseñas fuertes y únicas. No
-                  usar la misma para todo.
-                  <br> Cierto. Cambiarlas cada cierto tiempo. Activar la doble autentificación siempre que se pueda.
-                  <br> Cada vez más servicios la ofrecen y es de verdad muy útil.Sí, marca la diferencia. Y ser
-                  conscientes de nuestra huella digital.
-                  <br> Borrar historial, cookies, si hace falta. Y las instituciones, colegios, empresas, tienen que
-                  ayudar, ¿no? Dando herramientas seguras, formando a la gente.Sin duda.
-                  <br> La formación y la concienciación son tan importantes como poner un firewall. A veces, más. Bueno,
-                  creo que hemos tocado muchos palos.
-                  <br> Si intentamos resumir, vemos un mundo digital lleno de posibilidades, ¿no? La IA en educación,
-                  por ejemplo. Pero que exige estar mucho más alerta.Alerta con nuestros datos, con la ética de las
-                  tecnologías nuevas y defender nuestros derechos online.
-                  <br> Hay como una tensión ahí. ¿Tensión entre qué? Entre la innovación, que va rapidísimo, y la
-                  necesidad de proteger derechos fundamentales. Y esa tensión nos obliga a todos a estar atentos.
-                  <br> A todos. Individuos, empresas, gobiernos. A todos.
-                </p>
-                <p><strong>La responsabilidad compartida en un mundo digital en evolución</strong>
-                  <br><strong>(18:52)</strong> Es una responsabilidad compartida. Nosotros como usuarios, las
-                  instituciones que usan datos, los que crean la tecnología y los gobiernos poniendo las reglas y
-                  vigilando.Nadie se puede lavar las manos.
-                  <br> Una responsabilidad compartida en un terreno que cambia constantemente. Y para terminar, ¿alguna
-                  reflexión final? ¿Algo para que la gente se quede pensando? Pues mira, conectando todo esto, sobre
-                  todo el informe de derechos digitales y esa mención a los neuroderechos en Chile o Brasil, me
-                  pregunto, ¿a medida que la IA sea más y más potente, y quizás veamos avances en interfaces
-                  cerebromáquina u otras tecnologías que tocan lo más íntimo de nosotros, ¿nos van a bastar los marcos
-                  legales y éticos que tenemos ahora, que son básicamente adaptar los derechos humanos de siempre al
-                  mundo digital? Buena pregunta.O quizás, quizás vamos a necesitar pensar en principios nuevos o incluso
-                  reconocer formalmente nuevos derechos digitales, como esos neuroderechos, para asegurar que la
-                  dignidad, la autonomía, la libertad de las personas sigan siendo lo más importante en un futuro que va
-                  a estar supermediado por la tecnología.
-                  <br> Nuevos derechos para una nueva era. Quizás. Es una pregunta abierta, ¿eh? No tengo la respuesta.
-                  <br> Pero creo que es fundamental que empecemos a hacérnosla. Ya mismo.
-                </p>
+            </aside>
+
+            <main class="right">
+              <div class="toolbar">
+                <div class="info" id="info">Sin documento cargado</div>
+                <button class="open-ext" id="openExt" title="Abrir en nueva pestaña" disabled>
+                  Abrir en pestaña
+                </button>
               </div>
-            </section>
-          </section>
+              <div class="viewer" id="viewer" aria-label="Visor de documento PDF">
+                <div style="font:700 12px Arial; color:#9aa1a9;">Selecciona un PDF de la lista</div>
+              </div>
+            </main>
         </div>
+        </section>
       </div>
     </div>
+  </div>
   </div>
 
   <!-- Marca modo embebido si está dentro de un iframe -->
@@ -490,66 +323,69 @@
     })();
   </script>
 
-  <!-- Lógica del componente -->
   <script>
     (function () {
-      const wrap = document.querySelector('.comp-wrap');
-      const id = wrap.getAttribute('data-component-id') || 'media-component';
-      const audio = document.getElementById('audioEl');
-      const video = document.getElementById('videoEl');
+      const wrap = document.querySelector('.comp-wrap-pdf');
+      const id = wrap.getAttribute('data-component-id') || 'pdf-viewer-component';
+      const list = document.getElementById('list');
+      const viewer = document.getElementById('viewer');
+      const info = document.getElementById('info');
+      const openExt = document.getElementById('openExt');
       const bar = document.getElementById('bar');
 
-      const trans = document.getElementById('trans');
-      const tHead = document.getElementById('tHead');
-      const tBody = document.getElementById('tBody');
-      const tIcon = document.getElementById('tIcon');
+      const visited = new Set();
 
-      // Toggle transcript
-      tHead.addEventListener('click', () => {
-        trans.classList.toggle('open');
-        tIcon.textContent = trans.classList.contains('open') ? '▲' : '▼';
+      function loadPDF(src, title, size) {
+        viewer.innerHTML = '';
+        const iframe = document.createElement('iframe');
+        iframe.src = src ? src + '#zoom=page-width' : '';
+        iframe.title = title || 'Documento PDF';
+        iframe.setAttribute('loading', 'lazy');
+        viewer.appendChild(iframe);
+
+        info.textContent = (title || 'Documento') + (size ? ' · ' + size : '');
+        openExt.disabled = !src;
+        openExt.onclick = () => { if (src) window.open(src, '_blank'); };
+
+        visited.add(src || title || Math.random().toString(36).slice(2));
+      }
+
+      list.addEventListener('click', (e) => {
+        const btn = e.target.closest('.open');
+        if (!btn) return;
+        const item = btn.closest('.doc');
+        const src = item.dataset.src || '';
+        const title = item.dataset.title || item.querySelector('h3')?.textContent || 'Documento';
+        const size = item.dataset.size || '';
+        item.querySelector('.badge')?.classList.add('done');
+        loadPDF(src, title, size);
       });
 
-      // --- Sincronización: audio principal controla el video de fondo ---
-      function syncPlay() {
-        if (video) {
-          video.play().catch(() => { });
+      // API pública opcional
+      window.PDFViewer = {
+        setDocs(docs) {
+          list.innerHTML = '';
+          (docs || []).forEach(d => {
+            const el = document.createElement('div');
+            el.className = 'doc';
+            el.dataset.src = d.src || '';
+            el.dataset.title = d.title || 'Documento';
+            el.dataset.size = d.size || '';
+            el.innerHTML =
+              '<div><h3>' + (d.title || 'Documento') + ' <span class="badge">PDF</span></h3>' +
+              (d.subtitle ? '<p>' + d.subtitle + '</p>' : '<p></p>') +
+              '</div><div class="actions"><button class="btn open">Abrir</button></div>';
+            list.appendChild(el);
+          });
+          visited.clear();
+        },
+        openAt(i) {
+          const el = list.querySelectorAll('.doc')[i];
+          if (el) {
+            loadPDF(el.dataset.src, el.dataset.title, el.dataset.size);
+          }
         }
-      }
-      function syncPause() {
-        if (video) { video.pause(); }
-      }
-      function syncEnd() {
-        if (video) {
-          video.pause();
-          try { video.currentTime = 0; } catch (e) { }
-        }
-      }
-
-      audio.addEventListener('play', syncPlay);
-      audio.addEventListener('pause', syncPause);
-      audio.addEventListener('ended', syncEnd);
-
-      // --- Progreso basado en AUDIO ---
-      function tick() {
-        const d = Number.isFinite(audio.duration) ? audio.duration : 0;
-        const c = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
-        const pct = d > 0 ? Math.min(100, Math.round((c / d) * 100)) : 0;
-        bar.style.width = pct + '%';
-        post(pct);
-      }
-
-      ['timeupdate', 'seeked', 'playing', 'pause', 'loadedmetadata', 'ended'].forEach(ev => {
-        audio.addEventListener(ev, tick);
-      });
-
-      ['timeupdate', 'playing', 'pause', 'loadedmetadata', 'ended'].forEach(ev => {
-        video.addEventListener(ev, tick);
-      });
-
-      if (!audio.paused) syncPlay();
-
-      tick();
+      };
     })();
   </script>
 </body>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Componente – Control deslizante</title>
+  <link rel="stylesheet" href="component-styles.css">
+
+  <style>
+    /* Contenedor interno del componente */
+    .app-content {
+      flex: 1;
+      padding: 12px 20px 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    header {
+      grid-area: head;
+      padding: 0px 12px 8px 12px;
+      border-bottom: 1px solid rgba(148, 163, 184, .15);
+      background: #ffffff;
+    }
+
+    .prompt {
+      font: 700 14px Arial, Helvetica, sans-serif;
+      color: var(--accent);
+      margin: 8px 0 10px;
+    }
+
+    .content {
+      grid-area: content;
+      height: 100%;
+      overflow: auto;
+      padding: 0 18px 16px;
+      min-height: 0;
+    }
+
+    /* Escala con marcas 1-10 */
+    .scale {
+      position: relative;
+      margin: 30px 24px 16px;
+      padding-top: 20px;
+      border-bottom: 3px solid #333;
+      height: 48px;
+    }
+
+    .tick {
+      position: absolute;
+      bottom: -3px;
+      width: 2px;
+      height: 10px;
+      background: #333;
+      transform: translateX(-50%);
+    }
+
+    .num {
+      position: absolute;
+      top: 0;
+      transform: translateX(-50%);
+      font: 400 12px Arial, Helvetica, sans-serif;
+      color: #2f3136;
+    }
+
+    .bubble {
+      position: absolute;
+      left: 0;
+      top: -26px;
+      transform: translateX(-50%);
+      background: #4A00C9;
+      border-radius: 16px;
+      padding: 4px 10px;
+      font: 700 15px Arial, Helvetica, sans-serif;
+      color: #ffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .2);
+    }
+
+    /* Slider nativo estilizado */
+    .slider-wrap {
+      margin: 12px 0px 16px;
+      border-radius: 10px;
+      padding: 8px 10px;
+      background: #F9FAFB;
+      border: 1px solid #E5E7EB;
+      transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+
+    .slider-wrap.correct {
+      border-color: #10b981;
+      background: #ecfdf5;
+    }
+
+    .slider-wrap.incorrect {
+      border-color: #ef4444;
+      background: #fef2f2;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 14px;
+      border-radius: 7px;
+      background: #f2f3f5;
+      outline: none;
+      box-shadow: inset 0 2px 3px rgba(0, 0, 0, .08);
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 0;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, .25);
+      margin-top: -7px;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--teal);
+      border: 0;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, .25);
+    }
+
+    /* Acciones y feedback */
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      /* píldora */
+      padding: 8px 20px;
+      font: 700 14px Arial, Helvetica, sans-serif;
+      cursor: pointer;
+      color: #fff;
+      background: var(--accent);
+    }
+
+    .feedback {
+      margin: 8px 0 10px;
+      display: none;
+      border-radius: 6px;
+      border: 1px solid #5B00FF;
+      background: #5B00FF;
+      padding: 10px 12px;
+      font: 400 12px "Proxima Nova", "ProximaNova", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      color: #ffffff;
+      line-height: 1.6;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .feedback::before {
+      content: "⚠️";
+      display: inline-block;
+      margin-right: 6px;
+    }
+
+    .feedback.correct {
+      border-color: #5B00FF;
+      box-shadow: inset 0 0 0 2px #ffffff33;
+      background: #5B00FF;
+    }
+
+    .feedback.incorrect {
+      border-color: #5B00FF;
+      box-shadow: inset 0 0 0 2px #ffffff33;
+      background: #5B00FF;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-root">
+    <div class="frame">
+      <div class="inner-card">
+
+        <header class="top-bar">
+          <div class="app-title">Control deslizante</div>
+        </header>
+        <div class="divider"></div>
+
+        <div class="app-content">
+          <!-- Componente original -->
+          <section class="comp-wrap" data-component-id="slider-001" data-correct="7">
+            <header>
+              <p class="desc">
+                Se cree que la memoria de trabajo es responsable de nuestra capacidad de retener y manipular información
+                temporalmente, pero según Miller (1956), ¿qué “número mágico” describe su capacidad?
+              </p>
+              <div class="prompt">
+                Arrastre el control deslizante para hacer su elección y seleccione Enviar.
+              </div>
+            </header>
+
+            <div class="content" id="content">
+              <div class="feedback" id="feedback"></div>
+
+              <div class="scale" id="scale">
+                <div class="bubble" id="bubble">1</div>
+                <!-- ticks y números 1–10 se generan por JS -->
+              </div>
+
+              <div class="slider-wrap" aria-label="Selecciona un número del 1 al 10">
+                <input id="range" type="range" min="1" max="10" step="1" value="1" />
+              </div>
+
+              <div class="actions">
+                <button class="btn" id="submit">Entregar</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Marca modo embebido si está dentro de un iframe -->
+  <script>
+    (function markEmbeddedMode() {
+      try {
+        if (window.self !== window.top) {
+          document.documentElement.classList.add("embedded-mode");
+        }
+      } catch (e) {
+        /* ignore */
+      }
+    })();
+  </script>
+
+  <script>
+    (function () {
+      const wrap = document.querySelector('.comp-wrap');
+      const id = wrap.getAttribute('data-component-id') || 'slider-component';
+      const correct = parseInt(wrap.getAttribute('data-correct') || '7', 10);
+      const scale = document.getElementById('scale');
+      const bubble = document.getElementById('bubble');
+      const range = document.getElementById('range');
+      const submit = document.getElementById('submit');
+      const feedback = document.getElementById('feedback');
+      const bar = document.getElementById('bar');
+      const content = document.getElementById('content');
+      const sliderWrap = document.querySelector('.slider-wrap');
+
+      let moved = false, submitted = false;
+
+      // Crear marcas 1–10
+      for (let i = 1; i <= 10; i++) {
+        const tick = document.createElement('div');
+        tick.className = 'tick';
+        tick.style.left = ((i - 1) / 9 * 100) + '%';
+        scale.appendChild(tick);
+
+        const num = document.createElement('div');
+        num.className = 'num';
+        num.style.left = ((i - 1) / 9 * 100) + '%';
+        num.textContent = i;
+        scale.appendChild(num);
+      }
+
+      function setBubble() {
+        const val = parseInt(range.value, 10);
+        const pct = (val - 1) / 9;
+        bubble.textContent = val;
+        bubble.style.left = (pct * 100) + '%';
+      }
+
+      range.addEventListener('input', () => {
+        moved = true;
+        setBubble();
+      });
+
+      function showFeedback() {
+        feedback.style.display = 'block';
+        if (content && content.scrollTo) {
+          content.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }
+
+      function grade() {
+        submitted = true;
+        const val = parseInt(range.value, 10);
+
+        // limpiar estados previos
+        if (sliderWrap) {
+          sliderWrap.classList.remove('correct', 'incorrect');
+        }
+
+        if (val === correct) {
+          feedback.className = 'feedback correct';
+          feedback.textContent = '¡Correcto! El número mágico de Miller es 7 (±2).';
+          if (sliderWrap) sliderWrap.classList.add('correct');
+        } else {
+          feedback.className = 'feedback incorrect';
+          feedback.textContent = 'No es correcto. Revisa tu respuesta e inténtalo de nuevo.';
+          if (sliderWrap) sliderWrap.classList.add('incorrect');
+        }
+        showFeedback();
+      }
+
+      submit.addEventListener('click', grade);
+
+      // API simple
+      window.SliderQ = {
+        setTitle(t) { document.querySelector('.app-title').textContent = t; },
+        setDesc(html) { document.querySelector('.desc').innerHTML = html; },
+        setCorrect(n) { wrap.setAttribute('data-correct', String(n)); },
+        setRange(min, max, step, initial) {
+          range.min = min;
+          range.max = max;
+          range.step = step;
+          range.value = initial;
+          moved = false;
+          submitted = false;
+          bar.style.width = '0%';
+          if (sliderWrap) sliderWrap.classList.remove('correct', 'incorrect');
+          setBubble();
+          post(0);
+        }
+      };
+      // Inicial      
+    })();
+  </script>
+</body>
+
+</html>
