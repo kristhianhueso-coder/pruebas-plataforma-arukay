@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Drag and Complete the Text</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="component-styles.css" />
+  <style>
+    .nav-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 48px;
+      height: 56px;
+      background: var(--accent);
+      border-radius: 4px;
+      border: none;
+      color: #ffffff;
+      font: 700 20px;
+      cursor: pointer;
+      opacity: .95;
+      z-index: 2;
+    }
+
+    .nav-arrow--prev {
+      left: 10px;
+    }
+
+    .nav-arrow--next {
+      right: 10px;
+    }
+
+    .nav-arrow--disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    /* SLIDES */
+
+    #slideContainer {
+      width: 90%;
+      padding: 20px 40px 26px;
+      margin: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .slide {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .top-bar.with-title .slide-title {
+      font-size: var(--size-h2);
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .divider {
+      height: 1px;
+      width: 100%;
+      background: #d1d5db;
+      margin-bottom: 20px;
+      flex-shrink: 0;
+    }
+
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    /* INTRO SLIDE */
+
+    .intro-title {
+      font-size: var(--size-h1);
+      line-height: 1.15;
+      margin: 6px 0 10px;
+      color: var(--accent);
+    }
+
+    .intro-subtitle {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    .btn-main {
+      min-width: 210px;
+      padding: 12px 28px;
+      border-radius: 32px;
+      border: 2px solid #803AFF;
+      background: #803AFF;
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: var(--shadow-chip);
+      transition: transform 0.08s ease, box-shadow 0.1s ease,
+        background 0.12s ease;
+    }
+
+    .btn-main:hover {
+      background: #6E1EFF;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.24);
+    }
+
+    .btn-main:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+    }
+
+    /* QUESTION SLIDE */
+
+    .slide-question .slide-body {
+      align-items: stretch;
+      justify-content: flex-start;
+      text-align: left;
+    }
+
+    .sentence-box {
+      background: transparent;
+      border-radius: 12px;
+      padding: 12px 6px 10px;
+      font-size: 0.98rem;
+      color: var(--text-color);
+      line-height: 1.8;
+      min-height: 120px;
+    }
+
+    .sentence-box p {
+      margin: 0;
+    }
+
+    .blank {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 90px;
+      min-height: 30px;
+      padding: 2px 6px;
+      margin: 0 3px;
+      border-bottom: 2px dashed #c4b5fd;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.15s ease, border-color 0.15s ease,
+        box-shadow 0.15s ease;
+    }
+
+    .blank.highlight {
+      background: #ede9fe;
+      border-color: #7c3aed;
+      box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.4);
+    }
+
+    .blank.correct {
+      border-color: var(--success);
+      background: #ecfdf3;
+    }
+
+    .blank.incorrect {
+      border-color: var(--error);
+      background: #fef2f2;
+    }
+
+    .blank .chip {
+      margin: 0;
+    }
+
+    .correct-word {
+      margin-top: 2px;
+      font-size: 0.78rem;
+      color: #111827;
+    }
+
+    .word-bank {
+      margin-top: 26px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      min-height: 60px;
+    }
+
+    .chip {
+      user-select: none;
+      cursor: grab;
+      padding: 6px 14px;
+      border-radius: 10px;
+      background: var(--fondo);
+      border: 1px solid var(--border);
+      font-size: 0.95rem;
+      color: #2a3956;
+      box-shadow: var(--shadow-chip);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.08s ease, box-shadow 0.12s ease,
+        background 0.12s ease;
+    }
+
+    .chip::before {
+      content: "▦";
+      font-size: 0.8rem;
+      opacity: 0.9;
+    }
+
+    .chip:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
+    }
+
+    .chip:active {
+      cursor: grabbing;
+      transform: translateY(0);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+    }
+
+    .chip.correct-chip {
+      border-color: var(--success);
+      color: #15803d;
+      background: #dcfce7;
+    }
+
+    .chip.wrong-chip {
+      border-color: var(--error);
+      color: #b91c1c;
+      text-decoration: line-through;
+      background: #fee2e2;
+    }
+
+    .question-footer {
+      margin-top: auto;
+      padding-top: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 18px;
+    }
+
+    .icon-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      border: 1px solid #9ca3af;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #4b5563;
+      font-size: 0.8rem;
+      transition: background 0.12s ease, border-color 0.12s ease,
+        transform 0.08s ease;
+    }
+
+    .icon-btn:hover {
+      background: #e5e7eb;
+      transform: translateY(-1px);
+    }
+
+    .btn-submit {
+      min-width: 120px;
+      padding: 8px 24px;
+      border-radius: 24px;
+      border: none;
+      background: #803AFF;
+      color: #f9fafb;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.08s ease, box-shadow 0.12s ease,
+        background 0.12s ease;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.18);
+    }
+
+    .btn-submit:hover {
+      background: #6E1EFF;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.24);
+    }
+
+    .btn-submit:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+    }
+
+    .feedback-message {
+      position: absolute;
+      left: 50%;
+      bottom: 16px;
+      transform: translateX(-50%);
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(17, 24, 39, 0.92);
+      color: #f9fafb;
+      font-size: 0.78rem;
+      opacity: 0;
+      pointer-events: none;
+      white-space: nowrap;
+      transition: opacity 0.18s ease;
+      z-index: 3;
+    }
+
+    .feedback-message.show {
+      opacity: 1;
+    }
+
+    .feedback-message.success {
+      background: rgba(22, 163, 74, 0.95);
+    }
+
+    .feedback-message.error {
+      background: rgba(185, 28, 28, 0.95);
+    }
+
+    /* OUTRO SLIDE */
+
+    .outro-title {
+      color: var(--accent);
+      font-size: 2.3rem;
+      margin: 10px 0 14px;
+    }
+
+    .outro-text {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      max-width: 480px;
+      margin: 0 auto 24px;
+      text-align: center;
+    }
+
+    .btn-secondary {
+      min-width: 190px;
+      padding: 10px 24px;
+      border-radius: 26px;
+      border: none;
+      background: #803AFF;
+      color: #f9fafb;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.18);
+      transition: transform 0.08s ease, box-shadow 0.12s ease,
+        background 0.12s ease;
+    }
+
+    .btn-secondary:hover {
+      background: #6E1EFF;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.24);
+    }
+
+    .btn-secondary:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+    }
+
+    /* Responsive similar a component_classification */
+    @media screen and (max-width: 700px) {
+
+
+      #slideContainer {
+        padding: 14px 16px 18px !important;
+      }
+
+      .intro-title,
+      .outro-title {
+        font-size: 1.8rem !important;
+      }
+
+      .btn-main,
+      .btn-secondary {
+        min-width: 0;
+        width: 100%;
+        max-width: 260px;
+      }
+
+      .nav-arrow {
+        width: 36px;
+        height: 44px;
+      }
+    }
+
+  </style>
+
+  <!-- Script de modo embebido igual al de component_classification -->
+  <script>
+    (function () {
+      function setEmbedded() {
+        document.documentElement.classList.add('embedded-mode');
+        if (document.body) document.body.classList.add('embedded-mode');
+      }
+
+      try {
+        if (window.self !== window.top || window.parent !== window) {
+          setEmbedded();
+        }
+      } catch (e) {
+        setEmbedded();
+      }
+
+      window.addEventListener('DOMContentLoaded', function () {
+        try {
+          if (window.self !== window.top || window.parent !== window) {
+            setEmbedded();
+          }
+        } catch (e) {
+          setEmbedded();
+        }
+      });
+    })();
+  </script>
+</head>
+
+<body>
+  <div class="app-root">
+    <div class="frame">
+      <button class="nav-arrow nav-arrow--prev" id="navPrev">
+        <span>&lt;</span>
+      </button>
+      <button class="nav-arrow nav-arrow--next" id="navNext">
+        <span>&gt;</span>
+      </button>
+
+      <div class="inner-card">
+        <div id="slideContainer"></div>
+        <div id="feedback" class="feedback-message"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ------------------------------
+    // DATA: SLIDES & SENTENCES
+    // ------------------------------
+    const QUESTIONS = [
+      {
+        id: 1,
+        title: "Complete the sentence",
+        parts: [
+          "Each person must manage their ",
+          " responsibly to contribute to the ",
+          " of the team without ",
+          "."
+        ],
+        answers: ["time", "performance", "delays"],
+        options: ["delays", "performance", "time"]
+      },
+      {
+        id: 2,
+        title: "Complete the sentence",
+        parts: [
+          "The ",
+          " of tasks beforehand prevents ",
+          ", improves ",
+          ", and allows focusing on the most important objectives."
+        ],
+        answers: ["planning", "unexpected events", "productivity"],
+        options: ["planning", "productivity", "unexpected events"]
+      }
+    ];
+
+    const SLIDES = [
+      { type: "intro" },
+      { type: "question", questionIndex: 0 },
+      { type: "question", questionIndex: 1 },
+      { type: "outro" }
+    ];
+
+    let currentSlideIndex = 0;
+
+    const slideContainer = document.getElementById("slideContainer");
+    const feedbackToast = document.getElementById("feedback");
+    const navPrev = document.getElementById("navPrev");
+    const navNext = document.getElementById("navNext");
+
+    // ------------------------------
+    // HELPERS
+    // ------------------------------
+    function showFeedback(message, type = "default") {
+      feedbackToast.textContent = message;
+      feedbackToast.className = "feedback-message show";
+      if (type === "success") feedbackToast.classList.add("success");
+      if (type === "error") feedbackToast.classList.add("error");
+
+      clearTimeout(showFeedback._timeout);
+      showFeedback._timeout = setTimeout(() => {
+        feedbackToast.className = "feedback-message";
+      }, 1600);
+    }
+
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // ------------------------------
+    // RENDER FUNCTIONS
+    // ------------------------------
+    function renderSlide() {
+      const slide = SLIDES[currentSlideIndex];
+      slideContainer.innerHTML = "";
+
+      if (slide.type === "intro") {
+        renderIntroSlide();
+      } else if (slide.type === "question") {
+        renderQuestionSlide(QUESTIONS[slide.questionIndex]);
+      } else if (slide.type === "outro") {
+        renderOutroSlide();
+      }
+
+      updateNavButtons();
+    }
+
+    function renderIntroSlide() {
+      const slideEl = document.createElement("div");
+      slideEl.className = "slide slide-intro";
+
+      slideEl.innerHTML = `
+        <header class="top-bar"></header>
+  
+        <section class="slide-body">
+          <h1 class="intro-title">Drag and<br/>complete the text</h1>
+          <p class="intro-subtitle">
+            Fill in the blanks with the correct answers by dragging the words into place.
+          </p>
+          <button class="btn-main" id="btnStart">Start</button>
+        </section>
+      `;
+
+      slideContainer.appendChild(slideEl);
+
+      slideEl.querySelector("#btnStart").addEventListener("click", () => {
+        goToSlide(1);
+      });
+    }
+
+    function renderQuestionSlide(question) {
+      const slideEl = document.createElement("div");
+      slideEl.className = "slide slide-question";
+
+      slideEl.innerHTML = `
+        <header class="top-bar with-title">
+          <div class="slide-title">${question.title}</div>
+        </header>
+        <div class="divider"></div>
+        <section class="slide-body">
+          <div class="sentence-box">
+            <p class="sentence-line"></p>
+          </div>
+          <div class="word-bank" aria-label="Word bank"></div>
+          <div class="question-footer">
+            <button class="icon-btn" title="Reset sentence" aria-label="Reset sentence">&#8635;</button>
+            <button class="btn-submit">Send</button>
+          </div>
+        </section>
+      `;
+
+      slideContainer.appendChild(slideEl);
+
+      const sentenceLine = slideEl.querySelector(".sentence-line");
+      const wordBank = slideEl.querySelector(".word-bank");
+      const resetBtn = slideEl.querySelector(".icon-btn");
+      const sendBtn = slideEl.querySelector(".btn-submit");
+
+      // Build sentence with blanks
+      const blanks = [];
+      for (let i = 0; i < question.answers.length; i++) {
+        sentenceLine.appendChild(document.createTextNode(question.parts[i]));
+
+        const blank = document.createElement("span");
+        blank.className = "blank";
+        blank.dataset.correct = question.answers[i];
+        blank.dataset.index = i;
+        sentenceLine.appendChild(blank);
+        blanks.push(blank);
+      }
+      sentenceLine.appendChild(
+        document.createTextNode(question.parts[question.parts.length - 1])
+      );
+
+      // Drag & drop events for blanks
+      blanks.forEach((blank) => {
+        blank.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          blank.classList.add("highlight");
+        });
+
+        blank.addEventListener("dragleave", () => {
+          blank.classList.remove("highlight");
+        });
+
+        blank.addEventListener("drop", (e) => {
+          e.preventDefault();
+          blank.classList.remove("highlight");
+          const id = e.dataTransfer.getData("text/plain");
+          const chip = slideEl.querySelector(`#${CSS.escape(id)}`);
+          if (!chip) return;
+
+          // Si el espacio ya tenía una palabra, volverla al banco
+          const existing = blank.querySelector(".chip");
+          if (existing && existing !== chip) {
+            resetChipStyles(existing);
+            wordBank.appendChild(existing);
+          }
+
+          // Mover chip a este espacio
+          blank.appendChild(chip);
+          resetBlankFeedback(blank);
+        });
+      });
+
+      // Word bank drops (permitir devolver palabras)
+      wordBank.addEventListener("dragover", (e) => {
+        e.preventDefault();
+      });
+      wordBank.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const id = e.dataTransfer.getData("text/plain");
+        const chip = slideEl.querySelector(`#${CSS.escape(id)}`);
+        if (!chip) return;
+        resetChipStyles(chip);
+        wordBank.appendChild(chip);
+
+        const parentBlank = chip.closest(".blank");
+        if (parentBlank) {
+          resetBlankFeedback(parentBlank);
+        }
+      });
+
+      // Build chips
+      const shuffledOptions = shuffle(question.options);
+      shuffledOptions.forEach((opt, idx) => {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "chip";
+        chip.draggable = true;
+        chip.textContent = opt;
+        chip.id = `q${question.id}-chip-${idx}`;
+        chip.dataset.answer = opt;
+
+        chip.addEventListener("dragstart", (e) => {
+          e.dataTransfer.setData("text/plain", chip.id);
+        });
+
+        wordBank.appendChild(chip);
+      });
+
+      // Reset sentence
+      resetBtn.addEventListener("click", () => {
+        blanks.forEach((blank) => {
+          const chip = blank.querySelector(".chip");
+          if (chip) {
+            resetChipStyles(chip);
+            wordBank.appendChild(chip);
+          }
+          resetBlankFeedback(blank);
+        });
+        showFeedback("Sentence reset. Try again!", "default");
+      });
+
+      // Send / check
+      sendBtn.addEventListener("click", () => {
+        checkQuestionSlide(slideEl, question);
+      });
+    }
+
+    function renderOutroSlide() {
+      const slideEl = document.createElement("div");
+      slideEl.className = "slide slide-outro";
+
+      slideEl.innerHTML = `
+        <header class="top-bar"></header>
+        <section class="slide-body">
+          <h1 class="outro-title">Game completed</h1>
+          <p class="outro-text">
+            You've reached the end! Thank you for playing.<br/>
+            Keep it up and good luck on your next challenge!
+          </p>
+          <button class="btn-secondary" id="btnRestart">Play again</button>
+        </section>
+      `;
+
+      slideContainer.appendChild(slideEl);
+
+      slideEl.querySelector("#btnRestart").addEventListener("click", () => {
+        goToSlide(0);
+      });
+    }
+
+    // ------------------------------
+    // CHECK QUESTION
+    // ------------------------------
+    function resetChipStyles(chip) {
+      chip.classList.remove("correct-chip", "wrong-chip");
+    }
+
+    function resetBlankFeedback(blank) {
+      blank.classList.remove("correct", "incorrect");
+      const correctWord = blank.querySelector(".correct-word");
+      if (correctWord) correctWord.remove();
+    }
+
+    function checkQuestionSlide(slideEl, question) {
+      const blanks = Array.from(slideEl.querySelectorAll(".blank"));
+
+      // Si hay espacios vacíos
+      const empty = blanks.some((b) => !b.querySelector(".chip"));
+      if (empty) {
+        showFeedback("Fill in all the blanks before sending.", "error");
+        return;
+      }
+
+      let allCorrect = true;
+
+      blanks.forEach((blank) => {
+        const chip = blank.querySelector(".chip");
+        if (!chip) return;
+
+        const expected = blank.dataset.correct;
+        const given = chip.dataset.answer;
+
+        resetChipStyles(chip);
+        resetBlankFeedback(blank);
+
+        if (expected === given) {
+          blank.classList.add("correct");
+          chip.classList.add("correct-chip");
+        } else {
+          allCorrect = false;
+          blank.classList.add("incorrect");
+          chip.classList.add("wrong-chip");
+
+          const correctDiv = document.createElement("div");
+          correctDiv.className = "correct-word";
+          correctDiv.textContent = expected;
+          blank.appendChild(correctDiv);
+        }
+      });
+
+      if (allCorrect) {
+        showFeedback("Great job! All answers are correct.", "success");
+        setTimeout(() => {
+          goToSlide(currentSlideIndex + 1);
+        }, 1100);
+      } else {
+        showFeedback(
+          "Some answers are incorrect. Review the red words.",
+          "error"
+        );
+      }
+    }
+
+    // ------------------------------
+    // NAVIGATION
+    // ------------------------------
+    function updateNavButtons() {
+      navPrev.classList.toggle(
+        "nav-arrow--disabled",
+        currentSlideIndex === 0
+      );
+      navNext.classList.toggle(
+        "nav-arrow--disabled",
+        currentSlideIndex === SLIDES.length - 1
+      );
+    }
+
+    function goToSlide(index) {
+      if (index < 0 || index >= SLIDES.length) return;
+      currentSlideIndex = index;
+      renderSlide();
+    }
+
+    navPrev.addEventListener("click", () => {
+      if (currentSlideIndex > 0) goToSlide(currentSlideIndex - 1);
+    });
+
+    navNext.addEventListener("click", () => {
+      if (currentSlideIndex < SLIDES.length - 1)
+        goToSlide(currentSlideIndex + 1);
+    });
+    // ------------------------------
+    // INIT
+    // ------------------------------
+    renderSlide();
+  </script>
+</body>
+</html>

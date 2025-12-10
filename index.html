@@ -1,405 +1,276 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
-  <meta charset="UTF-8" />
-  <title>Drag and Complete the Text</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Componente – Tarjetas de vocabulario</title>
   <link rel="stylesheet" href="component-styles.css" />
+
   <style>
-    .nav-arrow {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 48px;
-      height: 56px;
-      background: var(--accent);
-      border-radius: 4px;
-      border: none;
-      color: #ffffff;
-      font: 700 20px;
-      cursor: pointer;
-      opacity: .95;
-      z-index: 2;
-    }
-
-    .nav-arrow--prev {
-      left: 10px;
-    }
-
-    .nav-arrow--next {
-      right: 10px;
-    }
-
-    .nav-arrow--disabled {
-      opacity: 0.35;
-      cursor: default;
-    }
-
-    /* SLIDES */
-
-    #slideContainer {
-      width: 90%;
-      padding: 20px 40px 26px;
-      margin: auto;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .slide {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .top-bar.with-title .slide-title {
-      font-size: var(--size-h2);
-      font-weight: 700;
-      color: var(--accent);
-    }
-
-    .divider {
-      height: 1px;
-      width: 100%;
-      background: #d1d5db;
-      margin-bottom: 20px;
-      flex-shrink: 0;
-    }
-
-    .slide-body {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+    /* Header estilo juego de categorización */
+    header {
+      grid-area: head;
+      padding: 14px 18px 10px;
+      border-bottom: 1px solid #e5e7eb;
       text-align: center;
     }
 
-    /* INTRO SLIDE */
-
-    .intro-title {
-      font-size: var(--size-h1);
-      line-height: 1.15;
-      margin: 6px 0 10px;
-      color: var(--accent);
+    p.intro {
+      display: none;
     }
 
-    .intro-subtitle {
-      font-size: 1.2rem;
-      color: var(--text-muted);
-      margin-bottom: 40px;
+    /* Content Grid */
+    .content {
+      grid-area: content;
+      padding: 0 18px 16px;
+      height: 100%;
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 22px;
     }
 
-    .btn-main {
-      min-width: 210px;
-      padding: 12px 28px;
-      border-radius: 32px;
-      border: 2px solid #803AFF;
-      background: #803AFF;
-      color: #ffffff;
-      font-weight: 600;
-      font-size: 1rem;
-      cursor: pointer;
-      box-shadow: var(--shadow-chip);
-      transition: transform 0.08s ease, box-shadow 0.1s ease,
-        background 0.12s ease;
-    }
-
-    .btn-main:hover {
-      background: #6E1EFF;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.24);
-    }
-
-    .btn-main:active {
-      transform: translateY(0);
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
-    }
-
-    /* QUESTION SLIDE */
-
-    .slide-question .slide-body {
-      align-items: stretch;
-      justify-content: flex-start;
-      text-align: left;
-    }
-
-    .sentence-box {
-      background: transparent;
-      border-radius: 12px;
-      padding: 12px 6px 10px;
-      font-size: 0.98rem;
-      color: var(--text-color);
-      line-height: 1.8;
-      min-height: 120px;
-    }
-
-    .sentence-box p {
-      margin: 0;
-    }
-
-    .blank {
-      display: inline-flex;
+    /* Card Styles */
+    .stage {
+      display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-width: 90px;
-      min-height: 30px;
-      padding: 2px 6px;
-      margin: 0 3px;
-      border-bottom: 2px dashed #c4b5fd;
-      cursor: pointer;
       position: relative;
-      transition: background 0.15s ease, border-color 0.15s ease,
-        box-shadow 0.15s ease;
+      overflow: hidden;
+      padding: 8px 0 0;
     }
 
-    .blank.highlight {
-      background: #ede9fe;
-      border-color: #7c3aed;
-      box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.4);
+    .card {
+      width: 400px;
+      height: 320px;
+      perspective: 1000px;
+      position: relative;
+      cursor: pointer;
     }
 
-    .blank.correct {
-      border-color: var(--success);
-      background: #ecfdf3;
-    }
-
-    .blank.incorrect {
-      border-color: var(--error);
-      background: #fef2f2;
-    }
-
-    .blank .chip {
-      margin: 0;
-    }
-
-    .correct-word {
-      margin-top: 2px;
-      font-size: 0.78rem;
-      color: #111827;
-    }
-
-    .word-bank {
-      margin-top: 26px;
-      padding-top: 20px;
-      border-top: 1px solid #e5e7eb;
+    .card .face {
+      position: absolute;
+      inset: 0;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow-frame);
       display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      backface-visibility: hidden;
+      transition: transform .5s ease, box-shadow .2s ease;
+      text-align: center;
+    }
+
+    .face img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: cover;
+    }
+
+    /* Front matches h2 style */
+    .card .front {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1.25;
+    }
+
+    /* Back matches body style */
+    .card .back {
+      transform: rotateY(180deg);
+      font-size: 16px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .card.flip .front {
+      transform: rotateY(180deg);
+    }
+
+    .card.flip .back {
+      transform: rotateY(360deg);
+    }
+
+    /* Buttons */
+    .actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 12px;
       justify-content: center;
       flex-wrap: wrap;
-      gap: 10px;
-      min-height: 60px;
     }
 
-    .chip {
-      user-select: none;
-      cursor: grab;
-      padding: 6px 14px;
-      border-radius: 10px;
-      background: var(--fondo);
-      border: 1px solid var(--border);
-      font-size: 0.95rem;
-      color: #2a3956;
-      box-shadow: var(--shadow-chip);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: transform 0.08s ease, box-shadow 0.12s ease,
-        background 0.12s ease;
+    .btn {
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff !important;
+      background: var(--accent);
+      border: 0px;
+      border-radius: 18px;
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: opacity 0.2s;
     }
 
-    .chip::before {
-      content: "▦";
-      font-size: 0.8rem;
+    .btn:hover {
       opacity: 0.9;
     }
 
-    .chip:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
-    }
-
-    .chip:active {
-      cursor: grabbing;
-      transform: translateY(0);
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
-    }
-
-    .chip.correct-chip {
-      border-color: var(--success);
-      color: #15803d;
-      background: #dcfce7;
-    }
-
-    .chip.wrong-chip {
-      border-color: var(--error);
-      color: #b91c1c;
-      text-decoration: line-through;
-      background: #fee2e2;
-    }
-
-    .question-footer {
-      margin-top: auto;
-      padding-top: 20px;
+    /* Sidebar / Panel */
+    .side {
+      background: #eeeeee;
+      border-radius: 6px;
+      padding: 14px;
+      overflow-y: auto;
       display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 18px;
+      flex-direction: column;
+      gap: 16px;
     }
 
-    .icon-btn {
-      width: 28px;
-      height: 28px;
-      border-radius: 999px;
-      border: none;
-      background: transparent;
-      border: 1px solid #9ca3af;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      color: #4b5563;
-      font-size: 0.8rem;
-      transition: background 0.12s ease, border-color 0.12s ease,
-        transform 0.08s ease;
+    .stat {
+      background: #fff;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #e1e1e1;
     }
 
-    .icon-btn:hover {
-      background: #e5e7eb;
-      transform: translateY(-1px);
+    .stat h3 {
+      margin: 0 0 6px;
+      font-size: 18px;
     }
 
-    .btn-submit {
-      min-width: 120px;
-      padding: 8px 24px;
-      border-radius: 24px;
-      border: none;
-      background: #803AFF;
-      color: #f9fafb;
-      font-weight: 600;
-      font-size: 0.95rem;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.08s ease, box-shadow 0.12s ease,
-        background 0.12s ease;
-      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.18);
+    .stat p {
+      margin: 0;
     }
 
-    .btn-submit:hover {
-      background: #6E1EFF;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.24);
+    .list {
+      flex: 1 1 auto;
+      overflow: auto;
+      margin-top: 8px;
     }
 
-    .btn-submit:active {
-      transform: translateY(0);
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
-    }
-
-    .feedback-message {
-      position: absolute;
-      left: 50%;
-      bottom: 16px;
-      transform: translateX(-50%);
-      padding: 6px 14px;
-      border-radius: 999px;
-      background: rgba(17, 24, 39, 0.92);
-      color: #f9fafb;
-      font-size: 0.78rem;
-      opacity: 0;
-      pointer-events: none;
-      white-space: nowrap;
-      transition: opacity 0.18s ease;
-      z-index: 3;
-    }
-
-    .feedback-message.show {
-      opacity: 1;
-    }
-
-    .feedback-message.success {
-      background: rgba(22, 163, 74, 0.95);
-    }
-
-    .feedback-message.error {
-      background: rgba(185, 28, 28, 0.95);
-    }
-
-    /* OUTRO SLIDE */
-
-    .outro-title {
+    .chip {
+      display: inline-block;
+      margin: 4px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: rgba(91, 0, 255, 0.08);
       color: var(--accent);
-      font-size: 2.3rem;
-      margin: 10px 0 14px;
-    }
-
-    .outro-text {
-      font-size: 0.95rem;
-      color: var(--text-muted);
-      max-width: 480px;
-      margin: 0 auto 24px;
-      text-align: center;
-    }
-
-    .btn-secondary {
-      min-width: 190px;
-      padding: 10px 24px;
-      border-radius: 26px;
-      border: none;
-      background: #803AFF;
-      color: #f9fafb;
+      font-size: 12px;
       font-weight: 600;
-      font-size: 0.95rem;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.18);
-      transition: transform 0.08s ease, box-shadow 0.12s ease,
-        background 0.12s ease;
     }
 
-    .btn-secondary:hover {
-      background: #6E1EFF;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.24);
+    /* Barra de progreso oculta */
+    .progress {
+      display: none;
     }
 
-    .btn-secondary:active {
-      transform: translateY(0);
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+    .progress .bar {
+      width: 0;
     }
 
-    /* Responsive similar a component_classification */
+    /* Animations */
+    .anim-correct {
+      animation: pop .35s ease;
+    }
+
+    .anim-again {
+      animation: shake .35s ease;
+    }
+
+    @keyframes pop {
+      0% {
+        transform: scale(1);
+      }
+
+      60% {
+        transform: scale(1.06);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @keyframes shake {
+
+      10%,
+      90% {
+        transform: translateX(-1px);
+      }
+
+      20%,
+      80% {
+        transform: translateX(2px);
+      }
+
+      30%,
+      50%,
+      70% {
+        transform: translateX(-4px);
+      }
+
+      40%,
+      60% {
+        transform: translateX(4px);
+      }
+    }
+
+    /* Responsive similar al classification + ajuste flashcards */
+
+    /* Breakpoint extra móvil */
     @media screen and (max-width: 700px) {
 
-
-      #slideContainer {
-        padding: 14px 16px 18px !important;
+      .frame {
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
       }
 
-      .intro-title,
-      .outro-title {
-        font-size: 1.8rem !important;
+      .inner-card {
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
       }
 
-      .btn-main,
-      .btn-secondary {
-        min-width: 0;
+      .comp-wrap {
+        grid-template-rows: auto 1fr;
+      }
+
+      .content {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 0 10px 10px;
+      }
+
+      .card {
         width: 100%;
-        max-width: 260px;
+        height: 260px;
       }
 
-      .nav-arrow {
-        width: 36px;
-        height: 44px;
+      .actions {
+        margin-top: 8px;
+      }
+
+      .side {
+        background: none;
+        padding: 0;
+        align-items: center;
+        text-align: center;
+      }
+
+      .stat {
+        border: none;
+        overflow: hidden;
       }
     }
-
   </style>
 
-  <!-- Script de modo embebido igual al de component_classification -->
   <script>
+    /* Script de modo embebido tomado de component_clasification */
     (function () {
       function setEmbedded() {
         document.documentElement.classList.add('embedded-mode');
@@ -430,379 +301,262 @@
 <body>
   <div class="app-root">
     <div class="frame">
-      <button class="nav-arrow nav-arrow--prev" id="navPrev">
-        <span>&lt;</span>
-      </button>
-      <button class="nav-arrow nav-arrow--next" id="navNext">
-        <span>&gt;</span>
-      </button>
-
       <div class="inner-card">
-        <div id="slideContainer"></div>
-        <div id="feedback" class="feedback-message"></div>
+        <!-- Mantengo el wrapper original con data-component-id -->
+        <section class="comp-wrap" data-component-id="flash-001">
+          <header>
+            <h1 class="template">Tarjetas de vocabulario</h1>
+            <h2>Toca para voltear. Marca “Lo sé” o “Repasar”.</h2>
+            <p class="intro">Juego de tarjetas educativas para aprender vocabulario con animaciones y seguimiento del
+              progreso.</p>
+          </header>
+
+          <div class="content">
+            <div class="stage">
+              <div class="card" id="card" aria-live="polite" tabindex="0">
+                <div class="face front" id="front">
+                  <img id="frontImg" src="" alt="" style="display:none;">
+                  <span id="frontText"></span>
+                </div>
+                <div class="face back" id="back">
+                  <img id="backImg" src="" alt="" style="display:none;">
+                  <span id="backText"></span>
+                </div>
+              </div>
+              <div class="actions">
+                <button class="btn flip" id="flip">Voltear</button>
+                <button class="btn again" id="again">Repasar</button>
+                <button class="btn good" id="good">Lo sé</button>
+              </div>
+            </div>
+
+            <aside class="side">
+              <div class="stat">
+                <h3>Progreso</h3>
+                <p><strong id="mastered">0</strong> dominadas de <strong id="total">0</strong> (<span
+                    id="pct">0</span>%)</p>
+              </div>
+              <div class="stat">
+                <h3>Siguientes en cola</h3>
+                <div class="list" id="queue"></div>
+              </div>
+            </aside>
+          </div>
+
+          <!-- Barra de progreso oculta manteniendo la estructura para el script -->
+          <div class="progress" aria-hidden="true">
+            <div class="bar" id="bar"></div>
+          </div>
+        </section>
       </div>
     </div>
   </div>
 
   <script>
-    // ------------------------------
-    // DATA: SLIDES & SENTENCES
-    // ------------------------------
-    const QUESTIONS = [
-      {
-        id: 1,
-        title: "Complete the sentence",
-        parts: [
-          "Each person must manage their ",
-          " responsibly to contribute to the ",
-          " of the team without ",
-          "."
-        ],
-        answers: ["time", "performance", "delays"],
-        options: ["delays", "performance", "time"]
-      },
-      {
-        id: 2,
-        title: "Complete the sentence",
-        parts: [
-          "The ",
-          " of tasks beforehand prevents ",
-          ", improves ",
-          ", and allows focusing on the most important objectives."
-        ],
-        answers: ["planning", "unexpected events", "productivity"],
-        options: ["planning", "productivity", "unexpected events"]
-      }
-    ];
+    (function () {
+      const wrap = document.querySelector('.comp-wrap');
+      const id = wrap.getAttribute('data-component-id') || 'flashcards-component';
 
-    const SLIDES = [
-      { type: "intro" },
-      { type: "question", questionIndex: 0 },
-      { type: "question", questionIndex: 1 },
-      { type: "outro" }
-    ];
+      // ======= DECK por defecto (igual que el original) =======
+      let deck = [
+        {
+          term: '¿Qué es Flamming?',
+          def: 'Un tipo de ciberacoso que consiste en insultos en foros públicos, que a veces se infiltran incluso en tareas escolares.'
+        },
+        { term: "apple", imgFront: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Playing_card_spade_A.svg/1638px-Playing_card_spade_A.svg.png", def: "manzana" },
+        { term: "Homer is hiding", imgBack: "https://educa3-0.b-cdn.net/wp-content/uploads/2019/06/homer.gif", def: "bananafasdas" },
+        {
+          term: '¿Qué es Outing?',
+          def: 'Un tipo de ciberacoso que consiste en revelar información privada de alguien sin su consentimiento.'
+        },
 
-    let currentSlideIndex = 0;
+        {
+          term: '¿Qué es Phishing?',
+          def: 'Un tipo de ciberataque que consiste en suplantar la identidad para robar datos.'
+        },
 
-    const slideContainer = document.getElementById("slideContainer");
-    const feedbackToast = document.getElementById("feedback");
-    const navPrev = document.getElementById("navPrev");
-    const navNext = document.getElementById("navNext");
+        {
+          term: '¿Qué es el ransomware en instituciones educativas?',
+          def: 'Un ciberataque que secuestra los datos de la institución y exige un rescate para liberarlos.'
+        },
 
-    // ------------------------------
-    // HELPERS
-    // ------------------------------
-    function showFeedback(message, type = "default") {
-      feedbackToast.textContent = message;
-      feedbackToast.className = "feedback-message show";
-      if (type === "success") feedbackToast.classList.add("success");
-      if (type === "error") feedbackToast.classList.add("error");
+        {
+          term: '¿Qué son los neuroderechos?',
+          def: 'Un concepto legal y ético, debatido en países como Chile, que busca proteger la actividad cerebral y la integridad mental frente a las tecnologías.'
+        },
 
-      clearTimeout(showFeedback._timeout);
-      showFeedback._timeout = setTimeout(() => {
-        feedbackToast.className = "feedback-message";
-      }, 1600);
-    }
+        {
+          term: '¿Qué es un dato personal?',
+          def: 'Cualquier dato sobre una persona identificada o identificable, como nombre, DNI, email, foto o ubicación.'
+        },
 
-    function shuffle(array) {
-      const arr = [...array];
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-      return arr;
-    }
+        {
+          term: '¿Qué es la discriminación algorítmica?',
+          def: 'Decisiones injustas o perjudiciales tomadas por una IA debido a sesgos en datos de entrenamiento o en su algoritmo.'
+        },
 
-    // ------------------------------
-    // RENDER FUNCTIONS
-    // ------------------------------
-    function renderSlide() {
-      const slide = SLIDES[currentSlideIndex];
-      slideContainer.innerHTML = "";
+        {
+          term: '¿Cuál es la paradoja de Moravec?',
+          def: 'La IA es muy buena en tareas difíciles para humanos (cálculo, patrones), pero muy torpe en cosas obvias (sentido común, contexto).'
+        },
 
-      if (slide.type === "intro") {
-        renderIntroSlide();
-      } else if (slide.type === "question") {
-        renderQuestionSlide(QUESTIONS[slide.questionIndex]);
-      } else if (slide.type === "outro") {
-        renderOutroSlide();
-      }
+        {
+          term: '¿Qué es la supresión en anonimización?',
+          def: 'Técnica que elimina filas o columnas completas de un conjunto de datos para proteger identidades.'
+        },
 
-      updateNavButtons();
-    }
+        {
+          term: '¿Qué es el enmascaramiento en anonimización?',
+          def: 'Técnica que tapa u oculta parte de un dato, como los últimos dígitos de un número telefónico.'
+        },
 
-    function renderIntroSlide() {
-      const slideEl = document.createElement("div");
-      slideEl.className = "slide slide-intro";
-
-      slideEl.innerHTML = `
-        <header class="top-bar"></header>
-  
-        <section class="slide-body">
-          <h1 class="intro-title">Drag and<br/>complete the text</h1>
-          <p class="intro-subtitle">
-            Fill in the blanks with the correct answers by dragging the words into place.
-          </p>
-          <button class="btn-main" id="btnStart">Start</button>
-        </section>
-      `;
-
-      slideContainer.appendChild(slideEl);
-
-      slideEl.querySelector("#btnStart").addEventListener("click", () => {
-        goToSlide(1);
-      });
-    }
-
-    function renderQuestionSlide(question) {
-      const slideEl = document.createElement("div");
-      slideEl.className = "slide slide-question";
-
-      slideEl.innerHTML = `
-        <header class="top-bar with-title">
-          <div class="slide-title">${question.title}</div>
-        </header>
-        <div class="divider"></div>
-        <section class="slide-body">
-          <div class="sentence-box">
-            <p class="sentence-line"></p>
-          </div>
-          <div class="word-bank" aria-label="Word bank"></div>
-          <div class="question-footer">
-            <button class="icon-btn" title="Reset sentence" aria-label="Reset sentence">&#8635;</button>
-            <button class="btn-submit">Send</button>
-          </div>
-        </section>
-      `;
-
-      slideContainer.appendChild(slideEl);
-
-      const sentenceLine = slideEl.querySelector(".sentence-line");
-      const wordBank = slideEl.querySelector(".word-bank");
-      const resetBtn = slideEl.querySelector(".icon-btn");
-      const sendBtn = slideEl.querySelector(".btn-submit");
-
-      // Build sentence with blanks
-      const blanks = [];
-      for (let i = 0; i < question.answers.length; i++) {
-        sentenceLine.appendChild(document.createTextNode(question.parts[i]));
-
-        const blank = document.createElement("span");
-        blank.className = "blank";
-        blank.dataset.correct = question.answers[i];
-        blank.dataset.index = i;
-        sentenceLine.appendChild(blank);
-        blanks.push(blank);
-      }
-      sentenceLine.appendChild(
-        document.createTextNode(question.parts[question.parts.length - 1])
-      );
-
-      // Drag & drop events for blanks
-      blanks.forEach((blank) => {
-        blank.addEventListener("dragover", (e) => {
-          e.preventDefault();
-          blank.classList.add("highlight");
-        });
-
-        blank.addEventListener("dragleave", () => {
-          blank.classList.remove("highlight");
-        });
-
-        blank.addEventListener("drop", (e) => {
-          e.preventDefault();
-          blank.classList.remove("highlight");
-          const id = e.dataTransfer.getData("text/plain");
-          const chip = slideEl.querySelector(`#${CSS.escape(id)}`);
-          if (!chip) return;
-
-          // Si el espacio ya tenía una palabra, volverla al banco
-          const existing = blank.querySelector(".chip");
-          if (existing && existing !== chip) {
-            resetChipStyles(existing);
-            wordBank.appendChild(existing);
-          }
-
-          // Mover chip a este espacio
-          blank.appendChild(chip);
-          resetBlankFeedback(blank);
-        });
-      });
-
-      // Word bank drops (permitir devolver palabras)
-      wordBank.addEventListener("dragover", (e) => {
-        e.preventDefault();
-      });
-      wordBank.addEventListener("drop", (e) => {
-        e.preventDefault();
-        const id = e.dataTransfer.getData("text/plain");
-        const chip = slideEl.querySelector(`#${CSS.escape(id)}`);
-        if (!chip) return;
-        resetChipStyles(chip);
-        wordBank.appendChild(chip);
-
-        const parentBlank = chip.closest(".blank");
-        if (parentBlank) {
-          resetBlankFeedback(parentBlank);
+        {
+          term: '¿Qué es la K-anonimidad?',
+          def: "Una técnica de anonimización compleja que busca modificar un conjunto de datos para que cada individuo sea indistinguible de al menos 'k-1' otros individuos dentro del mismo conjunto de datos."
         }
-      });
+      ];
 
-      // Build chips
-      const shuffledOptions = shuffle(question.options);
-      shuffledOptions.forEach((opt, idx) => {
-        const chip = document.createElement("button");
-        chip.type = "button";
-        chip.className = "chip";
-        chip.draggable = true;
-        chip.textContent = opt;
-        chip.id = `q${question.id}-chip-${idx}`;
-        chip.dataset.answer = opt;
+      // Estado
+      let index = 0;                   // índice en la cola actual
+      let mastered = new Set();        // ids dominados
+      let queue = deck.map((d, i) => i); // cola de índices
+      let flipped = false;
 
-        chip.addEventListener("dragstart", (e) => {
-          e.dataTransfer.setData("text/plain", chip.id);
-        });
+      // UI refs
+      const card = document.getElementById('card');
+      const front = document.getElementById('front');
+      const back = document.getElementById('back');
+      const flipBtn = document.getElementById('flip');
+      const goodBtn = document.getElementById('good');
+      const againBtn = document.getElementById('again');
+      const qDiv = document.getElementById('queue');
+      const masteredEl = document.getElementById('mastered');
+      const totalEl = document.getElementById('total');
+      const pctEl = document.getElementById('pct');
+      const bar = document.getElementById('bar');
+      const frontImg = document.getElementById('frontImg');
+      const frontText = document.getElementById('frontText');
+      const backImg = document.getElementById('backImg');
+      const backText = document.getElementById('backText');
 
-        wordBank.appendChild(chip);
-      });
-
-      // Reset sentence
-      resetBtn.addEventListener("click", () => {
-        blanks.forEach((blank) => {
-          const chip = blank.querySelector(".chip");
-          if (chip) {
-            resetChipStyles(chip);
-            wordBank.appendChild(chip);
-          }
-          resetBlankFeedback(blank);
-        });
-        showFeedback("Sentence reset. Try again!", "default");
-      });
-
-      // Send / check
-      sendBtn.addEventListener("click", () => {
-        checkQuestionSlide(slideEl, question);
-      });
-    }
-
-    function renderOutroSlide() {
-      const slideEl = document.createElement("div");
-      slideEl.className = "slide slide-outro";
-
-      slideEl.innerHTML = `
-        <header class="top-bar"></header>
-        <section class="slide-body">
-          <h1 class="outro-title">Game completed</h1>
-          <p class="outro-text">
-            You've reached the end! Thank you for playing.<br/>
-            Keep it up and good luck on your next challenge!
-          </p>
-          <button class="btn-secondary" id="btnRestart">Play again</button>
-        </section>
-      `;
-
-      slideContainer.appendChild(slideEl);
-
-      slideEl.querySelector("#btnRestart").addEventListener("click", () => {
-        goToSlide(0);
-      });
-    }
-
-    // ------------------------------
-    // CHECK QUESTION
-    // ------------------------------
-    function resetChipStyles(chip) {
-      chip.classList.remove("correct-chip", "wrong-chip");
-    }
-
-    function resetBlankFeedback(blank) {
-      blank.classList.remove("correct", "incorrect");
-      const correctWord = blank.querySelector(".correct-word");
-      if (correctWord) correctWord.remove();
-    }
-
-    function checkQuestionSlide(slideEl, question) {
-      const blanks = Array.from(slideEl.querySelectorAll(".blank"));
-
-      // Si hay espacios vacíos
-      const empty = blanks.some((b) => !b.querySelector(".chip"));
-      if (empty) {
-        showFeedback("Fill in all the blanks before sending.", "error");
-        return;
+      function post(pct) {
+        try {
+          window.parent && window.parent.postMessage({
+            type: 'componentProgress',
+            componentId: id,
+            progress: pct,
+            completed: pct >= 95,
+            stats: { mastered: mastered.size, total: deck.length }
+          }, '*');
+        } catch (e) { }
       }
 
-      let allCorrect = true;
-
-      blanks.forEach((blank) => {
-        const chip = blank.querySelector(".chip");
-        if (!chip) return;
-
-        const expected = blank.dataset.correct;
-        const given = chip.dataset.answer;
-
-        resetChipStyles(chip);
-        resetBlankFeedback(blank);
-
-        if (expected === given) {
-          blank.classList.add("correct");
-          chip.classList.add("correct-chip");
+      function render() {
+        if (queue.length === 0) {
+          frontText.textContent = '¡Completado!';
+          frontImg.style.display = "none";
+          backText.textContent = 'Has dominado todas las tarjetas.';
+          backImg.style.display = "none";
+          card.classList.add('flip'); // mostrar mensaje final en el reverso
+          flipBtn.disabled = true; againBtn.disabled = true; goodBtn.disabled = true;
+          updateStats();
+          return;
+        }
+        const cur = deck[queue[index]];
+        // FRONT side
+        if (cur.imgFront) {
+          frontImg.src = cur.imgFront;
+          frontImg.style.display = "block";
+          frontText.style.display = "none";
         } else {
-          allCorrect = false;
-          blank.classList.add("incorrect");
-          chip.classList.add("wrong-chip");
-
-          const correctDiv = document.createElement("div");
-          correctDiv.className = "correct-word";
-          correctDiv.textContent = expected;
-          blank.appendChild(correctDiv);
+          frontText.textContent = cur.term;
+          frontImg.style.display = "none";
+          frontText.style.display = "block";
         }
+
+        // BACK side
+        if (cur.imgBack) {
+          backImg.src = cur.imgBack;
+          backImg.style.display = "block";
+          backText.style.display = "none";
+        } else {
+          backText.textContent = cur.def;
+          backImg.style.display = "none";
+          backText.style.display = "block";
+        }
+
+        card.classList.toggle('flip', flipped);
+        // queue preview
+        qDiv.innerHTML = queue.slice(index, index + 6).map(i => '<span class="chip">' + deck[i].term + '</span>').join('');
+        updateStats();
+      }
+
+      function updateStats() {
+        const pct = Math.round((mastered.size / deck.length) * 100);
+        masteredEl.textContent = mastered.size;
+        totalEl.textContent = deck.length;
+        pctEl.textContent = pct;
+        if (bar) {
+          bar.style.width = pct + '%';
+        }
+        post(pct);
+      }
+
+      function flip() { flipped = !flipped; card.classList.toggle('flip', flipped); }
+
+      function nextCard(animClass) {
+        card.classList.add(animClass);
+        setTimeout(() => card.classList.remove(animClass), 380);
+
+        flipped = false;
+        index = (index + 1) % queue.length;
+        render();
+      }
+
+      goodBtn.addEventListener('click', () => {
+        const curId = queue[index];
+        mastered.add(curId);
+        queue.splice(index, 1);
+        if (queue.length === 0) { render(); return; }
+        if (index >= queue.length) index = 0;
+        nextCard('anim-correct');
       });
 
-      if (allCorrect) {
-        showFeedback("Great job! All answers are correct.", "success");
-        setTimeout(() => {
-          goToSlide(currentSlideIndex + 1);
-        }, 1100);
-      } else {
-        showFeedback(
-          "Some answers are incorrect. Review the red words.",
-          "error"
-        );
-      }
-    }
+      againBtn.addEventListener('click', () => {
+        const curId = queue[index];
+        if (queue.length > 1) {
+          queue.push(curId);
+          queue.splice(index, 1);
+          if (index >= queue.length) index = 0;
+        }
+        nextCard('anim-again');
+      });
 
-    // ------------------------------
-    // NAVIGATION
-    // ------------------------------
-    function updateNavButtons() {
-      navPrev.classList.toggle(
-        "nav-arrow--disabled",
-        currentSlideIndex === 0
-      );
-      navNext.classList.toggle(
-        "nav-arrow--disabled",
-        currentSlideIndex === SLIDES.length - 1
-      );
-    }
+      flipBtn.addEventListener('click', flip);
+      card.addEventListener('click', flip);
+      card.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); } });
 
-    function goToSlide(index) {
-      if (index < 0 || index >= SLIDES.length) return;
-      currentSlideIndex = index;
-      renderSlide();
-    }
-
-    navPrev.addEventListener("click", () => {
-      if (currentSlideIndex > 0) goToSlide(currentSlideIndex - 1);
-    });
-
-    navNext.addEventListener("click", () => {
-      if (currentSlideIndex < SLIDES.length - 1)
-        goToSlide(currentSlideIndex + 1);
-    });
-
-    // ------------------------------
-    // INIT
-    // ------------------------------
-    renderSlide();
+      // API pública para el orquestador
+      window.Flashcards = {
+        setDeck(arr) {
+          if (!Array.isArray(arr) || !arr.length) return;
+          deck = arr;
+          index = 0;
+          mastered = new Set();
+          queue = deck.map((_, i) => i);
+          flipped = false;
+          render();
+        },
+        shuffle() {
+          for (let i = queue.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));[queue[i], queue[j]] = [queue[j], queue[i]];
+          }
+          index = 0; render();
+        }
+      };
+      // Inicial
+      render();
+    })();
   </script>
 </body>
 </html>
