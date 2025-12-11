@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Componente – Entrada de texto</title>
+  <link rel="stylesheet" href="component-styles.css">
+  <style>
+    .btn {
+      color: #fff !important;
+      background: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    header {
+      grid-area: head;
+      padding: 14px 20px 10px;
+      text-align: center;
+    }
+
+    h1 {
+      color: var(--accent);
+      margin: 0 0 4px;
+    }
+
+    p.intro {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .content {
+      grid-area: content;
+      padding: 0 18px 16px;
+      height: 100%;
+    }
+
+    .stage {
+      display: grid;
+      grid-template-columns: 1.2fr .9fr;
+      gap: 22px;
+      height: 100%;
+      align-items: stretch;
+    }
+
+    /* Panel izquierdo - contenido de texto */
+    .panel {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 18px;
+      overflow-y: auto;
+      box-shadow: var(--shadow-frame);
+    }
+
+    .panel p {
+      margin: 0 0 10px;
+    }
+
+    /* Input y controles */
+    .input-wrap {
+      margin: 8px 0 16px;
+    }
+
+    .prompt {
+      font: 700 14px system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      color: var(--accent);
+      margin: 0 0 10px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      font: 400 14px system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      color: #2f3136;
+      border: 3px solid var(--accent);
+      border-radius: 6px;
+      outline: none;
+    }
+
+    input[type="text"]::placeholder {
+      color: #9aa0a6;
+    }
+
+    /* Botones */
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      /* forma de píldora como en la imagen */
+      padding: 8px 20px;
+      font: 700 14px;
+      cursor: pointer;
+    }
+
+    /* Feedback */
+    .feedback {
+      margin-top: 12px;
+      display: none;
+      border-radius: 6px;
+      border: 1px solid #e4e6ea;
+      background: #fafafa;
+      padding: 10px 12px;
+      font: 400 12px system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .feedback.correct {
+      border-color: #10b98155;
+      box-shadow: inset 0 0 0 2px #10b98133;
+    }
+
+    .feedback.incorrect {
+      border-color: #ef444455;
+      box-shadow: inset 0 0 0 2px #ef444433;
+    }
+
+    /* Media placeholder a la derecha - TAMAÑO FIJO */
+    .media {
+      width: 100%;
+      height: 360px;
+      /* ALTURA FIJA */
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      /* Importante para contener la imagen */
+      box-shadow: var(--shadow-frame);
+    }
+
+    .media img,
+    .media iframe,
+    .media video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      /* Mantiene la proporción sin recortar */
+      border: 0;
+      border-radius: var(--radius-card);
+      display: block;
+    }
+
+    /* Responsive - Mobile/Small Screens */
+    @media screen and (max-width:700px) {
+
+      .comp-wrap {
+        width: 100%;
+        margin: 0;
+      }
+
+      header {
+        padding: 12px 14px 0;
+      }
+
+      .content {
+        padding: 0 10px 12px;
+      }
+
+      .stage {
+        grid-template-columns: 1fr 1fr;
+        /* Mantener dos columnas */
+        gap: 12px;
+      }
+
+      .panel {
+        min-height: auto;
+        padding: 10px;
+      }
+
+      .panel p.desc {
+        font-size: 12px;
+        margin-bottom: 6px;
+      }
+
+      .prompt {
+        font-size: 11px !important;
+      }
+
+      input[type="text"] {
+        padding: 8px 10px;
+        font-size: 12px;
+      }
+
+      .media {
+        height: 100%;
+        /* Se ajusta a la altura del contenido */
+        min-height: 180px;
+      }
+
+      .actions {
+        gap: 6px;
+      }
+
+      .btn {
+        padding: 6px 14px;
+        font-size: 12px;
+      }
+
+      .feedback {
+        font-size: 11px;
+        padding: 8px 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-root">
+    <div class="frame">
+      <section class="comp-wrap" data-component-id="textq-001">
+        <header>
+          <h1>Entrada de texto</h1>
+          <p class="intro">El componente de entrada de texto permite a los estudiantes responder preguntas abiertas y
+            recibir retroalimentación inmediata.</p>
+          <p class="intro">Este componente evalúa la comprensión mediante respuestas escritas por el usuario.</p>
+        </header>
+
+
+        <div class="content">
+          <div class="stage">
+
+            <div class="panel">
+              <p class="desc">¿Cuál es el nombre de la empresa para la que trabajas?</p>
+
+              <div class="prompt">Ingrese su respuesta y seleccione Enviar.</div>
+
+              <div class="input-wrap">
+                <input type="text" id="answer" placeholder="Ingrese la respuesta aquí" autocomplete="off" />
+              </div>
+
+              <div class="actions">
+                <button class="btn" id="submit">Entregar</button>
+              </div>
+
+              <div class="feedback" id="feedback"></div>
+            </div>
+
+            <div class="media" id="media">
+              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQa_yQF8PJuT3lfNUJdAZBrTbsXlb8yjreXAA&s"
+                alt="Plataforma de aprendizaje Adapt">
+            </div>
+
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // Embedded mode detection
+    (function () {
+      function setEmbedded() {
+        document.documentElement.classList.add('embedded-mode');
+        if (document.body) document.body.classList.add('embedded-mode');
+      }
+
+      try {
+        if (window.self !== window.top || window.parent !== window) {
+          setEmbedded();
+        }
+      } catch (e) {
+        setEmbedded();
+      }
+
+      window.addEventListener('DOMContentLoaded', function () {
+        try {
+          if (window.self !== window.top || window.parent !== window) {
+            setEmbedded();
+          }
+        } catch (e) {
+          setEmbedded();
+        }
+      });
+    })();
+
+    // Component logic
+    (function () {
+      const input = document.getElementById('answer');
+      const submit = document.getElementById('submit');
+      const feedback = document.getElementById('feedback');
+
+      // Lista de respuestas válidas (edita)
+      let valid = ['arukay', 'Arukay', 'ARUKAY'];
+
+      let typed = false, submitted = false;
+
+      input.addEventListener('input', () => {
+        typed = input.value.trim().length > 0;
+      });
+
+      // Permitir enviar con Enter
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' || e.keyCode === 13) {
+          e.preventDefault();
+          grade();
+        }
+      });
+
+      function normalize(s) { return s.trim().toLowerCase().replace(/\s+/g, ' '); }
+
+      function grade() {
+        if (!typed) {
+          feedback.style.display = 'block'; feedback.className = 'feedback incorrect';
+          feedback.textContent = 'Escribe una respuesta antes de enviar.'; return;
+        }
+        submitted = true;
+        const ans = normalize(input.value);
+        const ok = valid.some(v => normalize(v) === ans || ans.includes(normalize(v)) || normalize(v).includes(ans));
+        feedback.style.display = 'block';
+        if (ok) {
+          feedback.className = 'feedback correct';
+          feedback.textContent = '¡Correcto!';
+        } else {
+          feedback.className = 'feedback incorrect';
+          feedback.textContent = 'Respuesta incorrecta, inténtalo de nuevo.';
+        }
+      }
+
+      submit.addEventListener('click', grade);
+
+      // API mínima para reconfigurar desde el padre
+      window.TextQ = {
+        setTitle(t) { document.querySelector('h1').textContent = t; },
+        setPrompt(html) { document.querySelector('.desc').innerHTML = html; },
+        setValidAnswers(arr) { valid = Array.isArray(arr) ? arr : valid; },
+        setMediaImage(src, alt = '') { const m = document.getElementById('media'); m.innerHTML = ''; const img = new Image(); img.src = src; img.alt = alt; m.appendChild(img); },
+        setMediaIframe(src, title = '') { const m = document.getElementById('media'); m.innerHTML = ''; const f = document.createElement('iframe'); f.src = src; f.title = title; f.loading = 'lazy'; m.appendChild(f); }
+      };
+    })();
+  </script>
+</body>
+
+</html>

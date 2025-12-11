@@ -2,392 +2,531 @@
 <html lang="es">
 
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Visor de PDFs — Dos columnas desde el título</title>
-  <link rel="stylesheet" href="component-styles.css">
-  <style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Plantilla de Curso — Módulos con detalles (ajustada 450px)</title>
+    <link rel="stylesheet" href="component-styles.css" />
+    <style>
+ 
 
-    /* ===== Contenedor interno del componente ===== */
+        header {
+            padding: 14px 16px 8px 16px;
+            border-bottom: 1px solid var(--border);
+            flex: 0 0 auto;
+        }
 
-    .app-content {
-      flex: 1;
-      padding: 12px 20px 16px;
-      display: flex;
-      flex-direction: column;
-      overflow: auto;
-    }
+        .content {
+            position: relative;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            padding: 10px 12px 12px 12px;
+            overflow: hidden;
+            flex: 0 1 auto;
+        }
 
-    /* ---- Contenedor principal del visor ---- */
-   .comp-wrap-pdf {
-      width: 100%;
-      height: 100%;
-      margin: 0;
+        .modules-scroll {
+            overflow: scroll;
+            padding-right: 6px;
+            scrollbar-width: thin;
+            scrollbar-color: #ebebeb rgba(255, 255, 255, 0);
+        }
 
-      border: none;
-      /* sin borde ni recuadro */
-      border-radius: 0;
-      box-shadow: none;
-      background: transparent;
-      overflow: hidden;
+        .module {
+            background: #F9FAFB;
+            border: 1px solid rgba(148, 163, 184, .18);
+            border-radius: 12px;
+            padding: 12px 12px;
+            margin: 5px 0;
+            position: relative;
+            transition: box-shadow .18s ease, border-color .18s ease, transform .18s ease;
+        }
 
-      display: grid;
-      grid-template-columns: 0.95fr 1.05fr;
-      /* izquierda: lista / derecha: visor */
-      grid-template-rows: auto 1fr 8px;
-      /* fila de encabezado + contenido + progreso */
-      grid-template-areas:
-        "headL right"
-        "left  right"
-        "prog  prog";
-      min-height: 0;
-    }
+        .module:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .08);
+            border-color: rgba(148, 163, 184, .35);
+        }
 
-    /* Encabezado de la columna izquierda (subtítulo + intro) */
-    header {
-      grid-area: headL;
-      padding: 16px 20px 8px 20px;
-      border-right: 1px solid #ececec;
-    }
+        .module__row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 34px;
+        }
 
-    header h1 {
-      display: none;
-      /* título principal está en .app-title */
-    }
+        .module__title {
+            font-weight: 650;
+            font-size: 16px;
+            color: var(--accent);
+        }
 
-    h1 {
-      margin: 0 0 6px;
-      font: 700 24px Arial, Helvetica, sans-serif;
-      color: var(--ink);
-    }
+        /* Alineación: Capítulo + duración a la derecha */
+        .module__row .muted:first-of-type {
+            margin-left: auto;
+        }
 
-    .subtitle {
-      font: 700 13px Arial, Helvetica, sans-serif;
-      color: var(--accent);
-      margin-top: 2px;
-    }
+        /* Paneles desplegables */
+        .panel {
+            display: none;
+        }
 
-    p.intro {
-      margin: 6px 0 0;
-      font: 400 12px system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-      color: var(--muted);
-      line-height: 1.55;
-    }
+        .panel.open {
+            display: block;
+            margin-top: 8px;
+        }
 
-    /* Columna izquierda — lista de documentos */
-    .left {
-      grid-area: left;
-      border-right: 1px solid #ececec;
-      padding: 10px 14px 12px 20px;
-      overflow: auto;
-      min-height: 0;
-    }
+        .panel__inner ul {
+            padding-left: 18px;
+            margin: 8px 0;
+        }
 
-    .doc {
-      border: 1px solid #e5e7eb;
-      background: #fafbfc;
-      border-radius: 10px;
-      padding: 10px 12px;
-      margin: 10px 0;
-      display: flex;
-      flex-direction: row;
-      gap: 10px;
-      align-items: center;
-      justify-content: space-between;
-    }
+        .panel__inner strong {
+            color: var(--cuerpo-texto);
+            font-weight: 700;
+        }
 
-    .doc h3 {
-      margin: 0;
-      font: 700 14px Arial, Helvetica, sans-serif;
-      color: var(--ink);
-    }
+        .details-btn {
+            margin-left: 12px;
+            appearance: none;
+            border: 0;
+            background: transparent;
+            color: var(--accent);
+            font-weight: 600;
+            cursor: pointer;
+            padding: 6px 8px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background .18s ease;
+        }
 
-    .doc p {
-      margin: 2px 0 0;
-      color: var(--muted);
-      font: 400 12px system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-    }
+        .details-btn:focus-visible {
+            outline: 3px solid var(--ring);
+        }
 
-    .doc .actions {
-      display: flex;
-      gap: 8px;
-    }
+        .details-btn:hover {
+            background: rgba(91, 0, 255, .08);
+        }
 
-    .btn {
-      border: 0;
-      border-radius: 18px;
-      padding: 8px 12px;
-      font: 700 12px Arial, Helvetica, sans-serif;
-      cursor: pointer;
-      color: #fff;
-      background: var(--accent);
-    }
+        .chev {
+            width: 16px;
+            height: 16px;
+            transition: transform .18s ease;
+            flex: 0 0 auto;
+        }
 
-    .badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 12px;
-      font: 700 11px Arial;
-      background: #eef2f7;
-      color: #4b5563;
-      margin-left: 6px;
-    }
+        .details-btn[aria-expanded="true"] .chev {
+            transform: rotate(90deg);
+        }
 
-    .done {
-      background: #d1fae5;
-      color: #065f46;
-    }
+        /* Botones de acción / CTA */
+        .cta {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            background: var(--accent);
+            border: 1px dashed rgba(91, 0, 255, .25);
+            padding: 10px 12px;
+            border-radius: 10px;
+            margin: 6px 0 2px;
+            flex: 0 0 auto;
+            color: #ffffff;
+        }
 
-    /* Columna derecha — visor ocupa desde la fila superior */
-    .right {
-      grid-area: right;
-      padding: 12px 12px 12px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      min-height: 0;
-    }
+        /* Asegurar texto blanco dentro de cajas de acento */
+        .bg-accent *,
+        .on-accent *,
+        [style*="background:#5B00FF"] * {
+            color: #fff !important;
+        }
 
-    .toolbar {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      justify-content: space-between;
-    }
+        .muted {
+            color: var(--muted);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-    .toolbar .info {
-      font: 400 12px system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-      color: var(--muted);
-    }
+        .clock {
+            width: 16px;
+            height: 16px;
+            vertical-align: middle;
+        }
 
-    .toolbar .open-ext {
-      border: 0;
-      border-radius: 18px;
-      padding: 8px 12px;
-      font: 700 12px Arial, Helvetica, sans-serif;
-      cursor: pointer;
-      color: #fff;
-      background: #4b4e51;
-    }
+        .badge {
+            width: 36px;
+            height: 36px;
+            border-radius: 9px;
+            background: rgba(91, 0, 255, .1);
+            display: grid;
+            place-items: center;
+        }
 
-    .viewer {
-      flex: 1 1 auto;
-      border: 1px solid #e1e4e8;
-      border-radius: 10px;
-      overflow: hidden;
-      background: #f1f3f6;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 0;
-    }
+        .hr {
+            border: 0;
+            border-top: 1px solid rgba(148, 163, 184, .35);
+            margin: 8px 0;
+        }
 
-    .viewer iframe,
-    .viewer embed,
-    .viewer object {
-      width: 100%;
-      height: 100%;
-      border: 0;
-      background: #fff;
-      display: block;
-    }
+        .course-details-container {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            margin-right: 4px;
+        }
 
-    @media (max-width: 900px) {
-      .app-content {
-        padding: 10px 14px 12px;
-      }
+        .course-details {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-      .comp-wrap-pdf {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto 1fr 8px;
-        grid-template-areas:
-          "headL"
-          "left"
-          "right"
-          "prog";
-      }
+        @media (prefers-reduced-motion: reduce) {
 
-      header {
-        border-right: 0;
-        border-bottom: 1px solid #ececec;
-      }
+            .details-btn,
+            .side-drawer {
+                transition: none;
+            }
+        }
 
-      header {
-        padding: 0 0 12px 0;
-      }
+        @media(max-width: 600px) {
+            .course-details-container {
+                display: flex;
+                flex-direction: column;
+                align-items: start;
+                margin-right: 4px;
+            }
 
-      .left {
-        width: 100%;
-        overflow: auto;
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 12px;
-      }
+            .course-details {
+                margin-left: 1px;
+                gap: 16px;
+                align-items: start;
+                text-align: start;
+            }
 
-      .doc {
-        width: 300px;
-        display: flex;
-        flex-direction: row;
-        align-items: start;
-      }
-    }
+            .dot {
+                display: none;
+            }
+        }
 
-
-  </style>
+        @media(max-width: 400px) {
+            .dot {
+                display: none;
+            }
+        }
+    </style>
 
 </head>
 
 <body>
-  <div class="app-root">
-    <div class="frame">
-      <div class="inner-card">
-        <header class="top-bar">
-          <div class="app-title">Visor de PDFs</div>
-        </header>
-        <div class="divider"></div>
-
-        <div class="app-content">
-          <section class="comp-wrap-pdf" data-component-id="pdf-002">
+    <div class="app-root">
+        <div class="frame">
             <header>
-              <div class="subtitle">Dos columnas desde el título</div>
-              <p class="intro">
-                El visor ocupa toda la columna derecha desde la parte superior, incluyendo el área del título.
-              </p>
+                <h1 class="">Contenido del curso</h1>
+                <p class="subtitle">Domina los fundamentos, la ética y la regulación de la IA, para luego aplicar
+                    prompts básicos que optimicen su planeación educativa de manera responsable y contextualizada.</p>
             </header>
 
-            <aside class="left" id="list">
-              <div class="doc"
-                data-src="c:\Users\crist\Documents\Git_Arukay_2025\Certificacion_Docente\certificacion_docente_IA\public\Nivel_A1\PDF\2025_curriculo_certificacion_docente_IA_es.pdf"
-                data-title="IA y educación - UNESCO" data-size="1.2 MB">
-                <div>
-                  <h3>IA y educación - UNESCO <span class="badge">PDF</span></h3>
-                  <p>Tutorial básico del curso.</p>
-                </div>
-                <div class="actions">
-                  <button class="btn open">Abrir</button>
-                </div>
-              </div>
+            <div class="content overflow-auto">
 
-              <div class="doc" data-src="file:///C:/Users/khues/Downloads/Sin%20dientes%20y%20a%20bocados.pdf"
-                data-title="Recomendación sobre la ética de la IA - UNESCO" data-size="850 KB">
-                <div>
-                  <h3>Recomendación sobre la ética de la IA - UNESCO <span class="badge">PDF</span></h3>
-                  <p>Cuestiones éticas de IA.</p>
-                </div>
-                <div class="actions">
-                  <button class="btn open">Abrir</button>
-                </div>
-              </div>
+                <!-- Lista scrollable -->
+                <div class="modules-scroll" id="modules">
 
-              <div class="doc"
-                data-src="c:\Users\crist\Documents\Git_Arukay_2025\Certificacion_Docente\certificacion_docente_IA\public\Nivel_A1\PDF\2025_curriculo_certificacion_docente_IA_es.pdf"
-                data-title="Normas armonizadas en materia de IA" data-size="2.4 MB">
-                <div>
-                  <h3>Normas armonizadas en materia de IA <span class="badge">PDF</span></h3>
-                  <p>Reglamento UE.</p>
-                </div>
-                <div class="actions">
-                  <button class="btn open">Abrir</button>
-                </div>
-              </div>
-            </aside>
+                    <!-- ====== MÓDULO 1 ====== -->
+                    <section class="module" data-duration="2 horas para finalizar">
+                        <div class="module__row">
+                            <div class="course-details-container">
 
-            <main class="right">
-              <div class="toolbar">
-                <div class="info" id="info">Sin documento cargado</div>
-                <button class="open-ext" id="openExt" title="Abrir en nueva pestaña" disabled>
-                  Abrir en pestaña
-                </button>
-              </div>
-              <div class="viewer" id="viewer" aria-label="Visor de documento PDF">
-                <div style="font:700 12px Arial; color:#9aa1a9;">Selecciona un PDF de la lista</div>
-              </div>
-            </main>
+                                <div class="module__title">Fundamentos y ética de la IA</div>
+                                <div class="course-details">
+                                    <span class="muted">Capítulo 1</span>
+                                    <span class="dot" aria-hidden="true"></span>
+                                    <span class="muted">
+                                        <svg class="clock" viewBox="0 0 24 24" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8" />
+                                            <path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.8"
+                                                stroke-linecap="round" />
+                                        </svg>
+                                        <span><span class="duration">2</span> horas</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <button class="details-btn" aria-expanded="false" aria-controls="p1">
+                                <svg class="chev" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                                    aria-hidden="true">
+                                    <path d="M8 5l8 7-8 7" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                Ver detalles
+                            </button>
+                        </div>
+
+                        <!-- Panel inline oculto (no se elimina) -->
+                        <div id="p1" class="panel" role="region" aria-label="Detalles del Tema 1">
+                            <div class="panel__inner">
+                                En este capítulo, vas a explorar los fundamentos de la inteligencia artificial (IA) y el
+                                objetivo
+                                primordial es fortalecer tu pensamiento crítico ante los diversos beneficios y riesgos
+                                asociados con el
+                                uso de la inteligencia artificial en el contexto de la educación.
+                                <hr class="hr">
+                                <strong>Habilidades que obtendrás</strong>
+                                <ul>
+                                    <li>Fundamentos de la IA</li>
+                                    <li>Análisis crítico de dilemas éticos</li>
+                                    <li>Uso de IA para generar podcast educativos.</li>
+                                    <li>Elaboración de lineamientos para un uso ético de la IA.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ====== MÓDULO 2 ====== -->
+                    <section class="module" data-duration="2 horas para finalizar">
+                        <div class="module__row">
+                            <div class="course-details-container">
+                                <div class="module__title">IA y otras tecnologías digitales.</div>
+                                <div class="course-details">
+                                    <span class="muted">Capítulo 2</span>
+                                    <span class="dot" aria-hidden="true"></span>
+                                    <span class="muted">
+                                        <svg class="clock" viewBox="0 0 24 24" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8" />
+                                            <path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.8"
+                                                stroke-linecap="round" />
+                                        </svg>
+                                        <span><span class="duration">2</span> horas</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <button class="details-btn" aria-expanded="false" aria-controls="p1">
+                                <svg class="chev" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                                    aria-hidden="true">
+                                    <path d="M8 5l8 7-8 7" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                Ver detalles
+                            </button>
+                        </div>
+                        <!-- Panel inline oculto (no se elimina) -->
+                        <div id="p1" class="panel" role="region" aria-label="Detalles del Tema 1">
+                            <div class="panel__inner">
+                                En este capítulo, vas a explorar los fundamentos de la inteligencia artificial (IA) y el
+                                objetivo
+                                primordial es fortalecer tu pensamiento crítico ante los diversos beneficios y riesgos
+                                asociados con el
+                                uso de la inteligencia artificial en el contexto de la educación.
+                                <hr class="hr">
+                                <strong>Habilidades que obtendrás</strong>
+                                <ul>
+                                    <li>Material interactivo</li>
+                                    <li>Ejercicios interactivos</li>
+                                    <li>1 Proyecto</li>
+                                    <li>1 proyecto opcional</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ====== MÓDULO 3 ====== -->
+                    <section class="module" data-duration="2 horas para finalizar">
+                        <div class="module__row">
+                            <div class="course-details-container">
+                                <div class="module__title">Dilemas éticos de la IA.</div>
+                                <div class="course-details">
+                                    <span class="muted">Capítulo 3</span>
+                                    <span class="dot" aria-hidden="true"></span>
+                                    <span class="muted">
+                                        <svg class="clock" viewBox="0 0 24 24" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8" />
+                                            <path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.8"
+                                                stroke-linecap="round" />
+                                        </svg>
+                                        <span><span class="duration">3</span> horas</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <button class="details-btn" aria-expanded="false" aria-controls="p1">
+                                <svg class="chev" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                                    aria-hidden="true">
+                                    <path d="M8 5l8 7-8 7" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                Ver detalles
+                            </button>
+                        </div>
+                        <!-- Panel inline oculto (no se elimina) -->
+                        <div id="p1" class="panel" role="region" aria-label="Detalles del Tema 1">
+                            <div class="panel__inner">
+                                En este capítulo, vas a explorar los fundamentos de la inteligencia artificial (IA) y el
+                                objetivo
+                                primordial es fortalecer tu pensamiento crítico ante los diversos beneficios y riesgos
+                                asociados con el
+                                uso de la inteligencia artificial en el contexto de la educación.
+                                <hr class="hr">
+                                <strong>Habilidades que obtendrás</strong>
+                                <ul>
+                                    <li>Fundamentos de la IA</li>
+                                    <li>Análisis crítico de dilemas éticos</li>
+                                    <li>Uso de IA para generar podcast educativos.</li>
+                                    <li>Elaboración de lineamientos para un uso ético de la IA.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ====== MÓDULO 4 ====== -->
+                    <section class="module" data-duration="3 horas para finalizar">
+                        <div class="module__row">
+                            <div class="course-details-container">
+                                <div class="module__title">Práctica.</div>
+                                <div class="course-details">
+                                    <span class="muted">Capítulo 4</span>
+                                    <span class="dot" aria-hidden="true"></span>
+                                    <span class="muted">
+                                        <svg class="clock" viewBox="0 0 24 24" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8" />
+                                            <path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.8"
+                                                stroke-linecap="round" />
+                                        </svg>
+                                        <span><span class="duration">3</span> horas</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <button class="details-btn" aria-expanded="false" aria-controls="p1">
+                                <svg class="chev" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                                    aria-hidden="true">
+                                    <path d="M8 5l8 7-8 7" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                Ver detalles
+                            </button>
+                        </div>
+                        <!-- Panel inline oculto (no se elimina) -->
+                        <div id="p1" class="panel" role="region" aria-label="Detalles del Tema 1">
+                            <div class="panel__inner">
+                                En este capítulo, vas a explorar los fundamentos de la inteligencia artificial (IA) y el
+                                objetivo
+                                primordial es fortalecer tu pensamiento crítico ante los diversos beneficios y riesgos
+                                asociados con el
+                                uso de la inteligencia artificial en el contexto de la educación.
+                                <hr class="hr">
+                                <strong>Habilidades que obtendrás</strong>
+                                <ul>
+                                    <li>Material interactivo</li>
+                                    <li>Ejercicios interactivos</li>
+                                    <li>1 Proyecto</li>
+                                    <li>1 proyecto opcional</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ====== MÓDULO 5 ====== -->
+                    <section class="module" data-duration="1 horas para finalizar">
+                        <div class="module__row">
+                            <div class="course-details-container">
+                                <div class="module__title">Evaluación.</div>
+                                <div class="course-details">
+                                    <span class="muted">Capítulo 5</span>
+                                    <span class="dot" aria-hidden="true"></span>
+                                    <span class="muted">
+                                        <svg class="clock" viewBox="0 0 24 24" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8" />
+                                            <path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.8"
+                                                stroke-linecap="round" />
+                                        </svg>
+                                        <span><span class="duration">3</span> horas</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <button class="details-btn" aria-expanded="false" aria-controls="p1">
+                                <svg class="chev" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                                    aria-hidden="true">
+                                    <path d="M8 5l8 7-8 7" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                Ver detalles
+                            </button>
+                        </div>
+                        <!-- Panel inline oculto (no se elimina) -->
+                        <div id="p1" class="panel" role="region" aria-label="Detalles del Tema 1">
+                            <div class="panel__inner">
+                                En este capítulo, vas a explorar los fundamentos de la inteligencia artificial (IA) y el
+                                objetivo
+                                primordial es fortalecer tu pensamiento crítico ante los diversos beneficios y riesgos
+                                asociados con el
+                                uso de la inteligencia artificial en el contexto de la educación.
+                                <hr class="hr">
+                                <strong>Qué incluye</strong>
+                                <ul>
+                                    <li>Material interactivo</li>
+                                    <li>Ejercicios interactivos</li>
+                                    <li>1 Proyecto</li>
+                                    <li>1 proyecto opcional</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- CTA -->
+                    <div class="cta">
+                        <div class="badge" aria-hidden="true" style="font-size:25px; line-height:1">💡</div>
+                        <div>
+                            <strong>Comprueba lo que has aprendido</strong>
+                            <div class="--text-white">Hay 20 preguntas y tienes 30 minutos para responderlas. Para
+                                aprobar, debes obtener al
+                                menos 70%. </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        </section>
-      </div>
     </div>
-  </div>
-  </div>
 
-  <!-- Marca modo embebido si está dentro de un iframe -->
-  <script>
-    (function markEmbeddedMode() {
-      try {
-        if (window.self !== window.top) {
-          document.documentElement.classList.add("embedded-mode");
-        }
-      } catch (e) {
-        /* ignore */
-      }
-    })();
-  </script>
+    <script>
+        // Comportamiento tipo acordeón: la información se despliega hacia ABAJO dentro de cada módulo.
+        // Mantiene el resto del HTML intacto (no se elimina contenido ni se usa el cajón lateral).
+        document.querySelectorAll('.module').forEach((mod) => {
+            const btn = mod.querySelector('.details-btn');
+            const panel = mod.querySelector('.panel');
 
-  <script>
-    (function () {
-      const wrap = document.querySelector('.comp-wrap-pdf');
-      const id = wrap.getAttribute('data-component-id') || 'pdf-viewer-component';
-      const list = document.getElementById('list');
-      const viewer = document.getElementById('viewer');
-      const info = document.getElementById('info');
-      const openExt = document.getElementById('openExt');
-      const bar = document.getElementById('bar');
+            // Por accesibilidad, mostrar duración como tooltip si existe
+            const duration = mod.querySelector('.duration')?.textContent?.trim();
+            if (duration) mod.title = `${duration} horas de duración`;
 
-      const visited = new Set();
+            btn.addEventListener('click', () => {
+                const isOpen = panel.classList.contains('open');
 
-      function loadPDF(src, title, size) {
-        viewer.innerHTML = '';
-        const iframe = document.createElement('iframe');
-        iframe.src = src ? src + '#zoom=page-width' : '';
-        iframe.title = title || 'Documento PDF';
-        iframe.setAttribute('loading', 'lazy');
-        viewer.appendChild(iframe);
+                // Cerrar todos los demás paneles para comportamiento acordeón
+                document.querySelectorAll('.module .panel.open').forEach(p => {
+                    p.classList.remove('open');
+                    const parentModule = p.closest('.module');
+                    const itsBtn = parentModule?.querySelector('.details-btn');
+                    if (itsBtn) itsBtn.setAttribute('aria-expanded', 'false');
+                });
 
-        info.textContent = (title || 'Documento') + (size ? ' · ' + size : '');
-        openExt.disabled = !src;
-        openExt.onclick = () => { if (src) window.open(src, '_blank'); };
+                // Alternar el del módulo actual
+                if (!isOpen) {
+                    panel.classList.add('open');
+                    btn.setAttribute('aria-expanded', 'true');
+                } else {
+                    panel.classList.remove('open');
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+        });
 
-        visited.add(src || title || Math.random().toString(36).slice(2));
-      }
-
-      list.addEventListener('click', (e) => {
-        const btn = e.target.closest('.open');
-        if (!btn) return;
-        const item = btn.closest('.doc');
-        const src = item.dataset.src || '';
-        const title = item.dataset.title || item.querySelector('h3')?.textContent || 'Documento';
-        const size = item.dataset.size || '';
-        item.querySelector('.badge')?.classList.add('done');
-        loadPDF(src, title, size);
-      });
-
-      // API pública opcional
-      window.PDFViewer = {
-        setDocs(docs) {
-          list.innerHTML = '';
-          (docs || []).forEach(d => {
-            const el = document.createElement('div');
-            el.className = 'doc';
-            el.dataset.src = d.src || '';
-            el.dataset.title = d.title || 'Documento';
-            el.dataset.size = d.size || '';
-            el.innerHTML =
-              '<div><h3>' + (d.title || 'Documento') + ' <span class="badge">PDF</span></h3>' +
-              (d.subtitle ? '<p>' + d.subtitle + '</p>' : '<p></p>') +
-              '</div><div class="actions"><button class="btn open">Abrir</button></div>';
-            list.appendChild(el);
-          });
-          visited.clear();
-        },
-        openAt(i) {
-          const el = list.querySelectorAll('.doc')[i];
-          if (el) {
-            loadPDF(el.dataset.src, el.dataset.title, el.dataset.size);
-          }
-        }
-      };
-    })();
-  </script>
+        // Nota: El cajón lateral original permanece en el DOM pero no se utiliza.
+    </script>
 </body>
-
 </html>

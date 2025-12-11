@@ -7,7 +7,7 @@
   --nivel-5: #F07E31;
   --nivel-6: #2F9638;
 
-  --accent: #5B00FF;
+  --accent: #d09410;
   --success: #10B981;
   --error: #EF4444;
 
@@ -29,7 +29,7 @@
   --radius-card: 0.875rem;
   --radius-pill: 999px;
 
-  --shadow-frame: 0 0.75rem 1.875rem rgba(15, 23, 42, 0.25);
+  --shadow-frame: 0 0.6rem 1.1rem rgba(30, 41, 68, 0.183);
   --shadow-chip: 0 4px 10px rgba(15, 23, 42, 0.12);
 }
 
@@ -176,6 +176,7 @@ a {
   padding: 10px 12px;
   border-radius: 6px;
   margin: 26px 0 8px 0;
+  border-left: 3px solid var(--accent);
 }
 
 /* Texto dentro de la caja: afinamos espaciado */
@@ -190,7 +191,6 @@ a {
 
 .subtitle {
   color: var(--brand-600);
-  text-transform: uppercase;
   letter-spacing: .04em;
 }
 

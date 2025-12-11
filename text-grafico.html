@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Componente TEXTO GRAFICO</title>
+  <link rel="stylesheet" href="component-styles.css">
+  <style>
+    .comp-wrap {
+      height: 100%;
+      background: #fff;
+      border-radius: var(--radius-card);
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      grid-template-rows: auto 1fr;
+      grid-template-areas: "head head" "left right";
+      overflow: hidden;
+    }
+
+    header {
+      grid-area: head;
+      padding: 14px 18px;
+      text-align: center !important;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ===========================
+   COLUMNAS
+=========================== */
+    .left {
+      grid-area: left;
+      padding: 18px 22px;
+      color: var(--muted);
+      line-height: 1.6;
+      overflow: hidden;
+    }
+
+    .left p {
+      margin: 0 0 12px;
+    }
+
+    .right {
+      grid-area: right;
+      padding: 18px;
+      background: #f6f7f9;
+      border-left: 1px solid #ececec;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* ===========================
+   MEDIA
+=========================== */
+    .media {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #c5c7cc;
+      color: #fff;
+      font: 600 14px Arial, Helvetica, sans-serif;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .media>* {
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, .1);
+      border: 0;
+    }
+
+    .media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* ===========================
+   PANEL NARRATIVO
+=========================== */
+    .panel {
+      background: var(--fondo);
+      border-radius: 6px;
+      padding: 18px;
+    }
+
+    .panel p {
+      margin: 0 0 10px;
+    }
+
+    /* ===========================
+   HIGHLIGHT BOXES
+=========================== */
+    .highlight-box {
+      padding: 10px 12px;
+      border-radius: 6px;
+      margin: 10px 0;
+    }
+
+    .highlight-box p {
+      margin: 4px 0;
+    }
+
+    /* ===========================
+   GRID DE ELEMENTOS
+=========================== */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .tool-item {
+      background: color-mix(in srgb, var(--accent) 15%, white);
+      padding: 8px;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    /* ===========================
+   RESPONSIVE
+=========================== */
+    @media(max-width:700px) {
+      .app-root {
+        padding: 6px;
+        max-width: 100%;
+        max-height: 540px;
+      }
+
+      .frame {
+        padding: 8px;
+      }
+
+      .comp-wrap {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+        grid-template-areas: "head" "right" "left";
+      }
+
+      header {
+        padding: 10px 12px;
+      }
+
+      .left {
+        padding: 10px 12px;
+        overflow: auto;
+      }
+
+      .right {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-root">
+    <div class="frame">
+
+      <section class="comp-wrap" data-component-id="comp-001">
+
+        <header>
+          <h1 class="centered-text template">Contenido para texto e imágenes</h1>
+          <h2 class="centered-text">subtitulo de prueba</h2>
+        </header>
+
+        <article class="left">
+          <aside class="panel overflow-auto">
+
+            <p>Este es un ejemplo compacto con todos los elementos visuales.</p>
+
+            <div class="highlight-box bg-template">
+              <strong>💡 Tip para el docente:</strong>
+              <p>Consejo breve y directo para aplicar en clase.</p>
+            </div>
+
+            <div class="tools-grid">
+              <div class="tool-item">Elemento A</div>
+              <div class="tool-item">Elemento B</div>
+              <div class="tool-item">Elemento C</div>
+              <div class="tool-item">Elemento D</div>
+            </div>
+
+            <div class="highlight-box bg-template">
+              <strong>📌 Pregunta de cierre:</strong>
+              <p>¿Qué conclusión podemos sacar?</p>
+            </div>
+
+            <p><strong>Pasos principales:</strong></p>
+            <ol>
+              <li>Inicio del proceso.</li>
+              <li>Desarrollo.</li>
+              <li>Cierre.</li>
+            </ol>
+
+          </aside>
+        </article>
+
+        <aside class="right">
+          <div class="media">
+            <img src="images/component_text_grafico.webp" alt="">
+          </div>
+        </aside>
+      </section>
+
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      function setEmbedded() {
+        document.documentElement.classList.add('embedded-mode');
+        document.body.classList.add('embedded-mode');
+      }
+      window.addEventListener('DOMContentLoaded', () => {
+        try {
+          if (window.self !== window.top) setEmbedded();
+        } catch (e) { setEmbedded(); }
+      });
+    })();
+  </script>
+</body>
+
+</html>

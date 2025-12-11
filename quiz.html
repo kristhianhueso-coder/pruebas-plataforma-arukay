@@ -1,3 +1,11 @@
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Juego de agilidad mental</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="component-styles.css" />
+
 <style>
     #screen {
       width: 100%;
@@ -89,8 +97,7 @@
     .btn-main:hover {
       transform: translateY(-1px);
       box-shadow: 0 6px 14px rgba(15, 23, 42, 0.28);
-      background: #803AFF;
-      border-color: #803AFF;
+      background: color-mix(in srgb, var(--accent) 90%, white);
     }
 
     .btn-main:active {
@@ -161,7 +168,7 @@
     .progress-fill {
       height: 100%;
       width: 0%;
-      background: #5B00FF;
+      background: color-mix(in srgb, var(--accent) 80%, white);
       transition: width 0.25s ease;
     }
 
@@ -189,7 +196,7 @@
       position: absolute;
       inset: 0;
       width: 100%;
-      background: #5B00FF;
+      background: color-mix(in srgb, var(--accent) 80%, white);
       transition: width 3s linear;
     }
 

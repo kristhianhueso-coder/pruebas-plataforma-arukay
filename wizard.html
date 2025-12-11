@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Presentación interactiva de decisiones</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="component-styles.css" />
+  <style>
+    :root {
+      /* Paleta from Classification (morado) */
+
+      /* Tokens originales del wizard mapeados a la nueva paleta */
+      --blue-dark: #2b044f;
+      --blue-soft: #eef2ff;
+   }
+
+  * {
+      box-sizing: border-box;
+      /* Scrollbar: thin and light for modern browsers */
+      /* Firefox */
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 0, 0, 0.14) transparent;
+    }
+
+    /* WebKit-based browsers (Chrome, Edge, Safari) */
+    *::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+      background: transparent;
+    }
+
+    *::-webkit-scrollbar-track {
+      background: transparent;
+      border-radius: 999px;
+    }
+
+    *::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.12);
+      border-radius: 999px;
+      border: 2px solid transparent;
+      /* creates padding effect */
+      background-clip: padding-box;
+    }
+
+    *::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 0, 0, 0.18);
+    }
+
+    /* Marco exterior: equivalente a .frame del classification */
+    .card-frame {
+      position: relative;
+      width: 100%;
+      height: 540px;
+      box-shadow: var(--shadow-frame);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+    }
+
+    /* Contenedor interior equivalente a .inner-card */
+    #slideContainer {
+      position: relative;
+      margin: 0;
+      width: 100%;
+      flex: 1;
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .slide {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      animation: fadeIn 0.35s ease-out;
+            overflow: auto;
+    }
+
+    /* SOLO PRIMER SLIDE: margen inferior y separación entre imagen y texto */
+    .slide-intro {
+      padding-bottom: 52px; /* igual al alto del top-bar */
+    }
+
+    .slide-intro .intro-layout {
+      column-gap: 24px; /* separación entre imagen y panel de texto */
+    }
+
+    /* SOLO CASOS FINALES: mismo margen inferior y imagen ocupando todo el contenedor */
+    .slide-end {
+      padding-bottom: 52px; /* mismo margen inferior que el slide de presentación */
+    }
+
+    .slide-end .branch-right {
+      padding: 0;
+      align-items: stretch;
+      justify-content: stretch;
+    }
+
+    .slide-end .photo-card {
+      width: 100%;
+      height: 100%;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .top-bar {
+      height: 52px;
+      display: flex;
+      align-items: center;
+      padding: 0 28px;
+      flex-shrink: 0;
+    }
+
+    .home-btn {
+      width: 72px;
+      height: 32px;
+      border-radius: var(--radius-pill);
+      border: none;
+      background: var(--blue-soft);
+      color: var(--accent);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      cursor: pointer;
+    }
+
+    .home-btn:hover {
+      background: #dbe3ff;
+    }
+
+    /* Intro split layout */
+
+    .intro-layout {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      min-height: 0;
+    }
+
+    .intro-photo {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .intro-photo::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg, rgba(0,0,0,0.18), rgba(0,0,0,0.05)),
+        linear-gradient(135deg, #fefefe, #dbeafe);
+    }
+
+    .intro-photo::after {
+      content: "";
+      position: absolute;
+      bottom: 16px;
+      left: 18px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.74);
+      color: white;
+      font-size: 0.78rem;
+    }
+
+    .intro-text-panel {
+      background: var(--accent);
+      color: white;
+      padding: 36px 44px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .intro-text-panel h1 {
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif;
+      font-size: 1.8rem;
+      margin: 0;
+    }
+
+    .intro-text-panel p {
+      font-size: 0.92rem;
+      line-height: 1.65;
+      margin: 0;
+      color: var(--fondo);
+    }
+
+    .start-cta {
+      position: absolute;
+      left: -112px;
+      bottom: 70px;
+      display: flex;
+      align-items: stretch;
+      border-radius: 0;
+      overflow: visible;
+    }
+
+    .start-main {
+      background: var(--accent);
+      color: #ffffff;
+      border: 2px solid #ffffff;
+      border-right: none;
+      padding: 12px 36px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .start-arrow {
+      background: #0b0b3f;
+      color: #ffffff;
+      border: 2px solid #ffffff;
+      border-left: none;
+      width: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      cursor: pointer;
+    }
+
+    .start-main:hover,
+    .start-arrow:hover {
+      filter: brightness(1.05);
+    }
+
+    /* Case layout */
+
+    .case-layout {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1.15fr 1.05fr;
+      min-height: 0;
+    }
+
+    .case-left {
+      background: var(--accent);
+      color: white;
+      padding: 40px 46px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    .case-left h2 {
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif;
+      font-size: 2.4rem;
+      margin: 0;
+    }
+
+    .case-left p {
+      font-size: 0.92rem;
+      line-height: 1.7;
+      margin: 0;
+      color: var(--fondo);
+    }
+
+    .case-underline {
+      width: 110px;
+      height: 4px;
+      background: white;
+      border-radius: 999px;
+      margin: 10px auto 0; /* centrada debajo del texto */
+    }
+
+    .case-right {
+      padding: 40px 46px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 24px;
+    }
+
+    .case-right h3 {
+      font-size: 1.2rem;
+      margin: 0;
+      text-align: left;
+    }
+
+    .case-right p {
+      font-size: 0.92rem;
+      color: var(--muted);
+      margin: 0;
+      text-align: left;
+    }
+
+    .case-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px 24px;
+      margin-top: 10px;
+      justify-content: center; /* centrar filas */
+    }
+
+    /* Distribución de botones:
+       - Case A y Case B (o A1/A2) en la primera fila
+       - Case C en la segunda fila centrado (solo para slide de Case root) */
+    .case-options .pill-btn {
+      flex: 0 0 calc(50% - 12px);
+    }
+
+    .case-options .pill-btn:nth-child(3) {
+      flex: 0 0 60%;
+    }
+
+    .pill-btn {
+      border-radius: 999px;
+      border: none;
+      padding: 10px 22px;
+      background: var(--accent);
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pill-btn span.icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 2px solid #ffffff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+    }
+
+    .pill-btn:hover {
+      background: var(--blue-dark);
+    }
+
+    /* Branch / info layout */
+
+    .branch-layout {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      min-height: 0;
+    }
+
+    .branch-left {
+      padding: 40px 48px 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    .branch-tag {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--blue-dark);
+      font-weight: 600;
+    }
+
+    .branch-title {
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif;
+      font-size: 2rem;
+      margin: 0;
+    }
+
+    .branch-body {
+      font-size: 0.92rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .branch-actions {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .branch-right {
+      position: relative;
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .branch-right::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(255,255,255,0.22), transparent 60%),
+        radial-gradient(circle at 90% 90%, rgba(255,255,255,0.26), transparent 60%);
+    }
+
+    .photo-card {
+      position: relative;
+      width: 70%;
+      height: 70%;
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: 0 10px 26px rgba(15,23,42,0.48);
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-start;
+    }
+
+    .photo-card-label {
+      margin: 16px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.76);
+      color: white;
+      font-size: 0.78rem;
+    }
+
+    .restart-btn {
+      margin-top: 8px;
+      border-radius: 999px;
+      border: 1px solid var(--accent);
+      padding: 8px 18px;
+      background: #ffffff;
+      color: var(--accent);
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .restart-btn:hover {
+      background: var(--blue-soft);
+    }
+
+    html.embedded-mode #slideContainer {
+      border-radius: var(--radius-card) !important;
+    }
+
+    /* Responsive general exterior (mismo criterio que classification) */
+    @media screen and (max-width: 700px) {
+ 
+
+
+
+      #slideContainer {
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+      }
+    }
+
+    /* Responsive interno original del wizard (lo mantengo) */
+    @media (max-width: 900px) {
+      .intro-layout,
+      .branch-layout,
+      .case-layout {
+        grid-template-columns: 1fr;
+      }
+      .intro-text-panel {
+        padding: 24px;
+      }
+      .case-left, .case-right, .branch-left {
+        padding: 24px;
+      }
+      .start-cta {
+        position: static;
+        margin-top: 24px;
+      }
+      .case-options .pill-btn,
+      .case-options .pill-btn:nth-child(3) {
+        flex: 0 0 100%;
+      }
+    }
+  </style>
+
+  <!-- Script de modo embebido copiado de component_classification -->
+  <script>
+    (function() {
+      function setEmbedded() {
+        document.documentElement.classList.add('embedded-mode');
+        if (document.body) document.body.classList.add('embedded-mode');
+      }
+
+      try {
+        if (window.self !== window.top || window.parent !== window) {
+          setEmbedded();
+        }
+      } catch (e) {
+        setEmbedded();
+      }
+
+      window.addEventListener('DOMContentLoaded', function() {
+        try {
+          if (window.self !== window.top || window.parent !== window) {
+            setEmbedded();
+          }
+        } catch (e) {
+          setEmbedded();
+        }
+      });
+    })();
+  </script>
+</head>
+<body>
+  <div class="app-root">
+    <div class="card-frame">
+      <div id="slideContainer"></div>
+    </div>
+  </div>
+
+  <script>
+    // ============================
+    // DEFINICIÓN DE LA ESTRUCTURA
+    // ============================
+
+    const slides = {
+      intro: {
+        layout: "intro",
+        title: "Rutas interactivas de aprendizaje",
+        body:
+          "En esta presentación explorarás cómo una sola decisión puede llevarte por caminos de aprendizaje distintos. " +
+          "Elige casos, descubre escenarios y observa cómo cambia la experiencia según tus elecciones.",
+        next: "caseRoot"
+      },
+
+      // Slide de pregunta inicial: "Case"
+      caseRoot: {
+        layout: "case",
+        leftTitle: "Case",
+        leftBody:
+          "La primera decisión siempre marca la diferencia. A partir de una única pregunta se abren caminos y posibilidades " +
+          "que enriquecida la experiencia de aprendizaje.",
+        rightTitle: "¿Qué tipo de situación quieres explorar primero?",
+        rightBody:
+          "Elige uno de los casos para seguir un recorrido diferente. Cada decisión te llevará a un escenario con " +
+          "información y ejemplos adaptados.",
+        options: [
+          { label: "Caso A", target: "caseA" },
+          { label: "Caso B", target: "caseB" },
+          { label: "Caso C", target: "caseC" }
+        ]
+      },
+
+      // Nivel Case A/B/C (casos principales)
+      caseA: {
+        layout: "branch",
+        tag: "Caso A",
+        title: "Implementación de una nueva herramienta digital",
+        body:
+          "En este caso analizas cómo introducir una herramienta digital en el aula. " +
+          "Puedes centrarte en la fase de diagnóstico o en la fase de acompañamiento docente.",
+        options: [
+          { label: "Caso A1 ", target: "A1" },
+          { label: "Caso A2 ", target: "A2" }
+        ],
+        photoLabel: "Caso A · Aula conectada"
+      },
+      caseB: {
+        layout: "branch",
+        tag: "Caso B",
+        title: "Onboarding de nuevos estudiantes",
+        body:
+          "Aquí te centras en cómo diseñar un recorrido de bienvenida. " +
+          "Escoge si quieres analizar la comunicación previa o el seguimiento de las primeras semanas.",
+        options: [
+          { label: "Caso B1", target: "B1" },
+          { label: "Caso B2", target: "B2" }
+        ],
+        photoLabel: "Caso B · Bienvenida al curso"
+      },
+      caseC: {
+        layout: "branch",
+        tag: "Caso C",
+        title: "Simulación de toma de decisiones",
+        body:
+          "En este caso trabajarás con historias ramificadas donde cada estudiante toma decisiones. " +
+          "Elige si quieres enfatizar el diseño narrativo o la evaluación.",
+        options: [
+          { label: "Caso C1", target: "C1" },
+          { label: "Caso C2", target: "C2" }
+        ],
+        photoLabel: "Caso C · Simulación interactiva"
+      },
+
+      // Nivel A1, A2, B1, B2, C1, C2
+      A1: {
+        layout: "branch",
+        tag: "A1",
+        title: "A1 · Analizar el punto de partida",
+        body:
+          "Recopila información sobre habilidades digitales, acceso a dispositivos y necesidades de formación. " +
+          "Según la profundidad del análisis, podrás diseñar acciones más personalizadas.",
+        options: [
+          { label: "Caso A1a ", target: "A1a" },
+          { label: "Caso A1b ", target: "A1b" }
+        ],
+        photoLabel: "A1 · Mapear necesidades"
+      },
+      A2: {
+        layout: "branch",
+        tag: "A2",
+        title: "A2 · Acompañar la adopción",
+        body:
+          "Planifica sesiones de apoyo, recursos breves y canales de consulta. " +
+          "Decide si priorizarás acciones puntuales o un acompañamiento continuo.",
+        options: [
+          { label: "Caso A2a ", target: "A2a" },
+          { label: "Caso A2b ", target: "A2b" }
+        ],
+        photoLabel: "A2 · Acompañamiento docente"
+      },
+      B1: {
+        layout: "branch",
+        tag: "B1",
+        title: "B1 · Diseñar la comunicación previa",
+        body:
+          "Define qué información necesitan los nuevos estudiantes antes de comenzar: objetivos, calendario y recursos clave. " +
+          "Elige si priorizarás mensajes informativos o mensajes motivacionales.",
+        options: [
+          { label: "Caso B1a ", target: "B1a" },
+          { label: "Caso B1b ", target: "B1b" }
+        ],
+        photoLabel: "B1 · Mensajes de bienvenida"
+      },
+      B2: {
+        layout: "branch",
+        tag: "B2",
+        title: "B2 · Monitorear las primeras semanas",
+        body:
+          "Define indicadores simples para revisar participación y dudas frecuentes. " +
+          "Escoge si usarás un seguimiento automático o reuniones breves programadas.",
+        options: [
+          { label: "Caso B2a ", target: "B2a" },
+          { label: "Caso B2b ", target: "B2b" }
+        ],
+        photoLabel: "B2 · Primeras semanas"
+      },
+      C1: {
+        layout: "branch",
+        tag: "C1",
+        title: "C1 · Diseñar la narrativa ramificada",
+        body:
+          "Estructura la historia en nodos, definiendo decisiones relevantes y consecuencias visibles. " +
+          "Decide si la narrativa será lineal con desvíos o totalmente abierta.",
+        options: [
+          { label: "Caso C1a ", target: "C1a" },
+          { label: "Caso C1b ", target: "C1b" }
+        ],
+        photoLabel: "C1 · Guion interactivo"
+      },
+      C2: {
+        layout: "branch",
+        tag: "C2",
+        title: "C2 · Evaluar en función de decisiones",
+        body:
+          "Relaciona cada decisión tomada con indicadores de competencia. " +
+          "Escoge si ofrecerás feedback inmediato o un informe final consolidado.",
+        options: [
+          { label: "Caso C2a ", target: "C2a" },
+          { label: "Caso C2b ", target: "C2b" }
+        ],
+        photoLabel: "C2 · Retroalimentación"
+      },
+
+      // Nivel final A1a, A1b, ..., C2b
+      A1a: {
+        layout: "end",
+        tag: "A1.a",
+        title: "Análisis superficial, impacto limitado",
+        body:
+          "Con un diagnóstico general puedes iniciar la implementación, pero corres el riesgo de dejar necesidades sin identificar. " +
+          "Es útil cuando el tiempo es muy limitado, aunque la personalización será menor."
+      },
+      A1b: {
+        layout: "end",
+        tag: "A1.b",
+        title: "Análisis profundo, decisiones más precisas",
+        body:
+          "Al dedicar más tiempo al diagnóstico, ajustas mejor la formación y reduces resistencias. " +
+          "Este enfoque requiere más recursos, pero potencia el impacto de la herramienta."
+      },
+      A2a: {
+        layout: "end",
+        tag: "A2.a",
+        title: "Un solo taller, impulso inicial",
+        body:
+          "Un taller único genera interés y resuelve dudas básicas, pero puede no sostener el cambio en el tiempo. " +
+          "Es una buena opción para probar la herramienta y recoger primeras impresiones."
+      },
+      A2b: {
+        layout: "end",
+        tag: "A2.b",
+        title: "Comunidad de práctica, cambio sostenible",
+        body:
+          "Crear una comunidad de práctica ofrece acompañamiento continuo, intercambio de ideas y apoyo entre pares. " +
+          "Favorece la apropiación real de la herramienta en el día a día."
+      },
+      B1a: {
+        layout: "end",
+        tag: "B1.a",
+        title: "Mensajes informativos, claridad ante todo",
+        body:
+          "Los estudiantes reciben toda la información necesaria para organizarse. " +
+          "Si no cuidas el tono, pueden percibir la comunicación como fría o distante."
+      },
+      B1b: {
+        layout: "end",
+        tag: "B1.b",
+        title: "Mensajes inspiradores, conexión emocional",
+        body:
+          "Centrarse en historias, beneficios y ejemplos motiva a los estudiantes. " +
+          "Es clave combinarlo con información práctica para evitar confusiones."
+      },
+      B2a: {
+        layout: "end",
+        tag: "B2.a",
+        title: "Seguimiento automático, visión global",
+        body:
+          "Los datos de participación y progreso se recopilan de forma automática. " +
+          "Es eficiente, pero conviene sumar espacios puntuales de conversación cualitativa."
+      },
+      B2b: {
+        layout: "end",
+        tag: "B2.b",
+        title: "Encuentros breves, acompañamiento cercano",
+        body:
+          "Reuniones cortas permiten escuchar necesidades y ajustar el plan. " +
+          "Requieren más tiempo de agenda, pero refuerzan la sensación de apoyo."
+      },
+      C1a: {
+        layout: "end",
+        tag: "C1.a",
+        title: "Ruta guiada, sensación de seguridad",
+        body:
+          "El alumnado recorre un camino principal con desvíos controlados. " +
+          "Facilita el diseño y evita que se pierdan, aunque limita la exploración."
+      },
+      C1b: {
+        layout: "end",
+        tag: "C1.b",
+        title: "Ruta abierta, experiencias únicas",
+        body:
+          "Cada decisión abre posibilidades distintas y los recorridos se diversifican. " +
+          "Es más compleja de diseñar, pero favorece la autonomía y la personalización."
+      },
+      C2a: {
+        layout: "end",
+        tag: "C2.a",
+        title: "Feedback inmediato, aprendizaje en acción",
+        body:
+          "El estudiante recibe comentarios en cada decisión, lo que facilita corregir el rumbo. " +
+          "Es ideal para practicar habilidades y reflexionar durante el proceso."
+      },
+      C2b: {
+        layout: "end",
+        tag: "C2.b",
+        title: "Informe final, visión global del recorrido",
+        body:
+          "Al final de la experiencia se ofrece un resumen de decisiones y logros. " +
+          "Permite analizar el recorrido completo y planear pasos siguientes."
+      }
+    };
+
+    // ============================
+    // RENDER
+    // ============================
+
+    const container = document.getElementById("slideContainer");
+    let currentSlideId = "intro";
+
+    function goTo(id) {
+      if (!slides[id]) return;
+      currentSlideId = id;
+      renderSlide();
+    }
+
+    function renderSlide() {
+      const slide = slides[currentSlideId];
+      container.innerHTML = "";
+
+      if (slide.layout === "intro") {
+        renderIntro(slide);
+      } else if (slide.layout === "case") {
+        renderCase(slide);
+      } else if (slide.layout === "branch") {
+        renderBranch(slide);
+      } else if (slide.layout === "end") {
+        renderEnd(slide);
+      }
+    }
+
+    function renderTopBar(withHome = false) {
+      const top = document.createElement("header");
+      top.className = "top-bar";
+
+      // Espaciador izquierdo (sin logo)
+      const leftSpacer = document.createElement("div");
+      leftSpacer.style.width = "32px";
+      top.appendChild(leftSpacer);
+
+      if (withHome) {
+        const btn = document.createElement("button");
+        btn.className = "home-btn";
+        btn.innerHTML = "⌂";
+        btn.title = "Volver al inicio";
+        btn.addEventListener("click", () => goTo("intro"));
+        top.appendChild(btn);
+      } else {
+        const rightSpacer = document.createElement("div");
+        rightSpacer.style.width = "32px";
+        top.appendChild(rightSpacer);
+      }
+
+      return top;
+    }
+
+    function renderIntro(slide) {
+      const root = document.createElement("div");
+      root.className = "slide slide-intro";
+
+      const top = renderTopBar(false);
+      root.appendChild(top);
+
+      const body = document.createElement("div");
+      body.className = "slide-body intro-layout";
+
+      const left = document.createElement("div");
+      left.className = "intro-photo";
+
+      // Imagen para intro-photo
+      const introImg = document.createElement("img");
+      introImg.src = "../Nivel_A1/images/A1_intro.png";
+      introImg.alt = "Escena narrativa";
+      introImg.style.position = "absolute";
+      introImg.style.inset = "0";
+      introImg.style.width = "100%";
+      introImg.style.height = "100%";
+      introImg.style.objectFit = "cover";
+      left.appendChild(introImg);
+
+      const right = document.createElement("div");
+      right.className = "intro-text-panel";
+      right.innerHTML = `
+        <h1>${slide.title}</h1>
+        <p>${slide.body}</p>
+      `;
+
+      const cta = document.createElement("div");
+      cta.className = "start-cta";
+
+      const btnMain = document.createElement("button");
+      btnMain.className = "start-main";
+      btnMain.textContent = "Inicio";
+
+      const btnArrow = document.createElement("button");
+      btnArrow.className = "start-arrow";
+      btnArrow.innerHTML = "➜";
+
+      const start = () => goTo(slide.next);
+      btnMain.addEventListener("click", start);
+      btnArrow.addEventListener("click", start);
+
+      cta.appendChild(btnMain);
+      cta.appendChild(btnArrow);
+      right.appendChild(cta);
+
+      body.appendChild(left);
+      body.appendChild(right);
+      root.appendChild(body);
+      container.appendChild(root);
+    }
+
+    function renderCase(slide) {
+      const root = document.createElement("div");
+      root.className = "slide";
+
+      const top = renderTopBar(true);
+      root.appendChild(top);
+
+      const body = document.createElement("div");
+      body.className = "slide-body case-layout";
+
+      const left = document.createElement("div");
+      left.className = "case-left";
+      left.innerHTML = `
+        <h2>${slide.leftTitle}</h2>
+        <p>${slide.leftBody}</p>
+        <div class="case-underline"></div>
+      `;
+
+      const right = document.createElement("div");
+      right.className = "case-right";
+      right.innerHTML = `
+        <h3>${slide.rightTitle}</h3>
+        <p>${slide.rightBody}</p>
+      `;
+
+      const options = document.createElement("div");
+      options.className = "case-options";
+
+      slide.options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.className = "pill-btn";
+        btn.innerHTML = `<span class="icon">✓</span> ${opt.label}`;
+        btn.addEventListener("click", () => goTo(opt.target));
+        options.appendChild(btn);
+      });
+
+      right.appendChild(options);
+
+      body.appendChild(left);
+      body.appendChild(right);
+      root.appendChild(body);
+
+      container.appendChild(root);
+    }
+
+    function renderBranch(slide) {
+      const root = document.createElement("div");
+      root.className = "slide";
+
+      const top = renderTopBar(true);
+      root.appendChild(top);
+
+      // Casos principales A, B, C y secundarios A1, A2, B1, B2, C1, C2
+      const isMainCase =
+        slide.tag === "Caso A" ||
+        slide.tag === "Caso B" ||
+        slide.tag === "Caso C" ||
+        slide.tag === "A1" ||
+        slide.tag === "A2" ||
+        slide.tag === "B1" ||
+        slide.tag === "B2" ||
+        slide.tag === "C1" ||
+        slide.tag === "C2";
+
+      if (isMainCase) {
+        const body = document.createElement("div");
+        body.className = "slide-body case-layout";
+
+        const left = document.createElement("div");
+        left.className = "case-left";
+        left.innerHTML = `
+          <h2>${slide.tag}</h2>
+          <p>${slide.body}</p>
+          <div class="case-underline"></div>
+        `;
+
+        const right = document.createElement("div");
+        right.className = "case-right";
+        right.innerHTML = `
+          <h3>${slide.title}</h3>
+        `;
+
+        const options = document.createElement("div");
+        options.className = "case-options";
+
+        slide.options.forEach(opt => {
+          const btn = document.createElement("button");
+          btn.className = "pill-btn";
+          btn.innerHTML = `<span class="icon">•</span> ${opt.label}`;
+          btn.addEventListener("click", () => goTo(opt.target));
+          options.appendChild(btn);
+        });
+
+        right.appendChild(options);
+
+        body.appendChild(left);
+        body.appendChild(right);
+        root.appendChild(body);
+        container.appendChild(root);
+        return;
+      }
+
+      // Resto de ramas (A1a, A1b, ..., C2b)
+      const body = document.createElement("div");
+      body.className = "slide-body branch-layout";
+
+      const left = document.createElement("div");
+      left.className = "branch-left";
+      left.innerHTML = `
+        <div class="branch-tag">${slide.tag}</div>
+        <h2 class="branch-title">${slide.title}</h2>
+        <div class="branch-body">${slide.body}</div>
+      `;
+
+      const actions = document.createElement("div");
+      actions.className = "branch-actions";
+
+      if (slide.options) {
+        slide.options.forEach(opt => {
+          const btn = document.createElement("button");
+          btn.className = "pill-btn";
+          btn.innerHTML = `<span class="icon">•</span> ${opt.label}`;
+          btn.addEventListener("click", () => goTo(opt.target));
+          actions.appendChild(btn);
+        });
+      }
+
+      left.appendChild(actions);
+
+      const right = document.createElement("div");
+      right.className = "branch-right";
+      const photoCard = document.createElement("div");
+      photoCard.className = "photo-card";
+
+      // Imágenes para photo-card según el caso
+      let branchImgSrc = "../Nivel_A1/images/A1_C3_narrativo_f.png";
+      if (currentSlideId === "caseA") {
+        branchImgSrc = "../Nivel_A1/images/A1_C3_narrativo_a.png";
+      } else if (currentSlideId === "A1") {
+        branchImgSrc = "../Nivel_A1/images/A1_C3_narrativo_b.png";
+      }
+
+      const branchImg = document.createElement("img");
+      branchImg.src = branchImgSrc;
+      branchImg.alt = slide.tag || slide.title || "Escenario";
+      branchImg.style.position = "absolute";
+      branchImg.style.inset = "0";
+      branchImg.style.width = "100%";
+      branchImg.style.height = "100%";
+      branchImg.style.objectFit = "cover";
+      photoCard.appendChild(branchImg);
+
+      const label = document.createElement("div");
+      label.className = "photo-card-label";
+      label.textContent = slide.photoLabel || "Escenario";
+      photoCard.appendChild(label);
+      right.appendChild(photoCard);
+
+      body.appendChild(left);
+      body.appendChild(right);
+      root.appendChild(body);
+
+      container.appendChild(root);
+    }
+
+    function renderEnd(slide) {
+      const root = document.createElement("div");
+      root.className = "slide slide-end";
+
+      const top = renderTopBar(true);
+      root.appendChild(top);
+
+      const body = document.createElement("div");
+      body.className = "slide-body branch-layout";
+
+      const left = document.createElement("div");
+      left.className = "branch-left";
+      left.innerHTML = `
+        <div class="branch-tag">${slide.tag}</div>
+        <h2 class="branch-title">${slide.title}</h2>
+        <div class="branch-body">${slide.body}</div>
+      `;
+
+      const actions = document.createElement("div");
+      actions.className = "branch-actions";
+      const restart = document.createElement("button");
+      restart.className = "restart-btn";
+      restart.textContent = "Volver al inicio";
+      restart.addEventListener("click", () => goTo("intro"));
+      actions.appendChild(restart);
+
+      left.appendChild(actions);
+
+      const right = document.createElement("div");
+      right.className = "branch-right";
+      const photoCard = document.createElement("div");
+      photoCard.className = "photo-card";
+
+      // Imágenes para desenlaces A1a y A1b y resto con imagen por defecto
+      let endImgSrc = "../Nivel_A1/images/A1_intro.png";
+      if (slide.tag === "A1.a") {
+        endImgSrc = "../Nivel_A1/images/A1_intro.png";
+      } else if (slide.tag === "A1.b") {
+        endImgSrc = "https://firebasestorage.googleapis.com/v0/b/arukay-ls-admin.appspot.com/o/iframes%2Fes_2025_certificacion_docente_ia%2FNivel_A1%2Fimages%2Ffinal.png?alt=media&token=ae3155cb-1a3c-4846-966b-535e89e588f7";
+      } else if (slide.tag === "A2.a") {
+        endImgSrc = "https://firebasestorage.googleapis.com/v0/b/arukay-ls-admin.appspot.com/o/iframes%2Fes_2025_certificacion_docente_ia%2FNivel_A1%2Fimages%2Ffinal.png?alt=media&token=ae3155cb-1a3c-4846-966b-535e89e588f7";
+      } else if (slide.tag === "A2.b") {
+        endImgSrc = "https://firebasestorage.googleapis.com/v0/b/arukay-ls-admin.appspot.com/o/iframes%2Fes_2025_certificacion_docente_ia%2FNivel_A1%2Fimages%2Ffinal.png?alt=media&token=ae3155cb-1a3c-4846-966b-535e89e588f7";
+      } else if (slide.tag === "B1.a") {
+        endImgSrc = "https://firebasestorage.googleapis.com/v0/b/arukay-ls-admin.appspot.com/o/iframes%2Fes_2025_certificacion_docente_ia%2FNivel_A1%2Fimages%2Ffinal.png?alt=media&token=ae3155cb-1a3c-4846-966b-535e89e588f7";
+      } else if (slide.tag === "B1.b") {
+        endImgSrc = "https://firebasestorage.googleapis.com/v0/b/arukay-ls-admin.appspot.com/o/iframes%2Fes_2025_certificacion_docente_ia%2FNivel_A1%2Fimages%2Ffinal.png?alt=media&token=ae3155cb-1a3c-4846-966b-535e89e588f7";
+      } else if (slide.tag === "B2.a") {
+        endImgSrc = "https://firebasestorage.googleapis.com/v0/b/arukay-ls-admin.appspot.com/o/iframes%2Fes_2025_certificacion_docente_ia%2FNivel_A1%2Fimages%2Ffinal.png?alt=media&token=ae3155cb-1a3c-4846-966b-535e89e588f7";
+      } else if (slide.tag === "B2.b") {
+        endImgSrc = "https://firebasestorage.googleapis.com/v0/b/arukay-ls-admin.appspot.com/o/iframes%2Fes_2025_certificacion_docente_ia%2FNivel_A1%2Fimages%2Ffinal.png?alt=media&token=ae3155cb-1a3c-4846-966b-535e89e588f7";
+      } else if (slide.tag === "C1.a") {
+        endImgSrc = "https://firebasestorage.googleapis.com/v0/b/arukay-ls-admin.appspot.com/o/iframes%2Fes_2025_certificacion_docente_ia%2FNivel_A1%2Fimages%2Ffinal.png?alt=media&token=ae3155cb-1a3c-4846-966b-535e89e588f7";
+      } else if (slide.tag === "C1.b") {
+        endImgSrc = "https://firebasestorage.googleapis.com/v0/b/arukay-ls-admin.appspot.com/o/iframes%2Fes_2025_certificacion_docente_ia%2FNivel_A1%2Fimages%2Ffinal.png?alt=media&token=ae3155cb-1a3c-4846-966b-535e89e588f7";
+      } else if (slide.tag === "C2.a") {
+        endImgSrc = "https://firebasestorage.googleapis.com/v0/b/arukay-ls-admin.appspot.com/o/iframes%2Fes_2025_certificacion_docente_ia%2FNivel_A1%2Fimages%2Ffinal.png?alt=media&token=ae3155cb-1a3c-4846-966b-535e89e588f7";
+      } else if (slide.tag === "C2.b") {
+        endImgSrc = "https://firebasestorage.googleapis.com/v0/b/arukay-ls-admin.appspot.com/o/iframes%2Fes_2025_certificacion_docente_ia%2FNivel_A1%2Fimages%2Ffinal.png?alt=media&token=ae3155cb-1a3c-4846-966b-535e89e588f7";
+      }
+
+      const endImg = document.createElement("img");
+      endImg.src = endImgSrc;
+      endImg.alt = slide.tag;
+      endImg.style.position = "absolute";
+      endImg.style.inset = "0";
+      endImg.style.width = "100%";
+      endImg.style.height = "100%";
+      endImg.style.objectFit = "cover";
+      photoCard.appendChild(endImg);
+
+      const label = document.createElement("div");
+      label.className = "photo-card-label";
+      label.textContent = "Destino de la ruta";
+      photoCard.appendChild(label);
+      right.appendChild(photoCard);
+
+      body.appendChild(left);
+      body.appendChild(right);
+      root.appendChild(body);
+      container.appendChild(root);
+    }
+
+    // Inicializar
+    renderSlide();
+  </script>
+</body>
+</html>

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Componente – Cronología Interactiva</title>
+  <link rel="stylesheet" href="component-styles.css" />
+  <style>
+
+    .app-subtitle {
+      font-size: 0.96rem;
+      color: var(--text-muted);
+      margin: 0 0 8px 0;
+      text-align: center;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-chip);
+      background: #f3e8ff;
+    }
+    .btn:active { transform: translateY(0); }
+    .btn.secondary {
+      background: #ffffff;
+      border-color: var(--border);
+      color: var(--muted);
+    }
+    .btn.secondary:hover { background: #f9fafb; }
+
+    /* Toast (no se usa aquí, pero viene del componente original) */
+    .toast {
+      position: absolute;
+      left: 50%;
+      bottom: 20px;
+      transform: translateX(-50%);
+      padding: 8px 16px;
+      border-radius: var(--radius-pill);
+      background: rgba(17,24,39,0.96);
+      color: #fff;
+      font-size: 0.85rem;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.35);
+      display: none;
+      z-index: 50;
+      white-space: nowrap;
+    }
+    .toast.show {
+      display: block;
+      animation: toast-pop 0.28s ease-out;
+    }
+    @keyframes toast-pop {
+      from { opacity: 0; transform: translate(-50%, 10px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+
+    /* Responsive general del componente classification */
+    @media screen and (max-width: 700px) {
+
+    .app-subtitle {
+        font-size: 0.85rem !important;
+        padding: 0 4px;
+      }
+    }
+
+
+
+    .timeline {
+      position: relative;
+      flex: 1 1 auto;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--fondo);
+      display: grid;
+      grid-template-rows: 1fr auto;
+      padding: 8px 10px 10px;
+    }
+
+    .track {
+      position: relative;
+      padding: 18px 8px 8px;
+      overflow-x: auto;
+    }
+
+    .rail {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      top: 53px;
+      height: 2px;
+      background: var(--border);
+      transform: translateY(-50%);
+    }
+
+    .stops {
+      width: auto;
+      position: relative;
+      display: flex;
+      gap: 30px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      padding: 4px 6px 28px;
+      z-index: 1;
+    }
+
+    .stop {
+      position: relative;
+      flex: 0 0 auto;
+      width: 120px;
+      text-align: center;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .year {
+      font: 700 14px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #b8bdc4;
+      margin: 0 auto 8px;
+      border: 3px solid #fff;
+      box-shadow: 0 0 0 3px var(--border);
+    }
+
+    .stop.visited .dot {
+      background: var(--accent);
+      box-shadow: 0 0 0 3px rgba(14,124,133,.25);
+    }
+
+    .label {
+      font: 700 14px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      color: var(--cuerpo-texto);
+    }
+
+    .open-btn {
+      margin-top: 6px;
+      border: 0;
+      background: var(--accent);
+      color: var(--fondo);
+      border-radius: var(--radius-pill);
+      padding: 6px 14px;
+      font: 700 13px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      cursor: pointer;
+      box-shadow: var(--shadow-chip);
+      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+    }
+    .open-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(15,23,42,0.15);
+      background: #4b00d6;
+    }
+    .open-btn:active { transform: translateY(0); }
+    .open-btn:focus { outline: 3px solid rgba(91,0,255,0.35); }
+
+    /* Tarjeta expandible */
+    .card {
+      display: none;
+      grid-row: 2 / 3;
+      background: var(--fondo);
+      border-top: 1px solid #ececec;
+      padding: 12px 14px;
+      gap: 12px;
+      grid-template-columns: 200px auto 36px;
+      align-items: flex-start;
+    }
+    .card.open { display: grid; }
+
+    .thumb {
+      width: 160px;
+      height: 160px;
+      border-radius: 8px;
+      object-fit: cover;
+      object-position: center;
+      border: 1px solid #e5e7eb;
+      background: #f0f0f0;
+      display: block;
+    }
+
+    .close {
+      border: 0;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 999px;
+      width: 36px;
+      height: 36px;
+      font: 700 20px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-chip);
+    }
+    .close:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(15,23,42,0.15);
+      background: #4b00d6;
+    }
+    .close:active { transform: translateY(0); }
+
+    @media (max-width: 800px) {
+      .card.open {
+        grid-template-columns: auto auto 36px;
+      }
+      .thumb {
+        display: none;
+      }
+    }
+  </style>
+
+  <script>
+    (function() {
+      function setEmbedded() {
+        document.documentElement.classList.add('embedded-mode');
+        if (document.body) document.body.classList.add('embedded-mode');
+      }
+
+      try {
+        if (window.self !== window.top || window.parent !== window) {
+          setEmbedded();
+        }
+      } catch (e) {
+        setEmbedded();
+      }
+
+      window.addEventListener('DOMContentLoaded', function() {
+        try {
+          if (window.self !== window.top || window.parent !== window) {
+            setEmbedded();
+          }
+        } catch (e) {
+          setEmbedded();
+        }
+      });
+    })();
+  </script>
+</head>
+<body>
+  <div class="app-root">
+    <div class="frame">
+      <div class="inner-card">
+        <!-- Top Bar (igual que classification) -->
+        <header class="top-bar">
+          <h1 class="template">Cronología histórica</h1>
+        </header>
+
+        <!-- Contenido principal -->
+        <div class="app-content">
+          <p class="app-subtitle">
+            Explora eventos clave. Pulsa en cada hito para abrir una tarjeta con información expandible.
+          </p>
+
+          <section class="comp-wrap" data-component-id="timeline-001">
+            <div class="timeline" id="timeline">
+              <div class="track">
+                <div class="rail"></div>
+                <div class="stops" id="stops" aria-label="Línea de tiempo">
+                  <!-- ======= HITOS (se mantienen tal cual) ======= -->
+                  <div class="stop" data-idx="0" data-title="Invención de la imprenta" data-img="https://arukay.com/wp-content/uploads/2020/05/logo-arukay.png" data-body="Johannes Gutenberg populariza la imprenta de tipos móviles, transformando la difusión del conocimiento.">
+                    <div class="year">1450</div>
+                    <div class="dot" aria-hidden="true"></div>
+                    <div class="label">Imprenta</div>
+                    <button class="open-btn" aria-label="Abrir evento 1450">Ver</button>
+                  </div>
+                  <div class="stop" data-idx="1" data-title="Revolución científica" data-img="httpshttps://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQD3OyzMG9-KHfThtzw7hg-n74cmwz2zFl4IA&s" data-body="Surge un método sistemático de investigación que sienta las bases de la ciencia moderna.">
+                    <div class="year">1600</div>
+                    <div class="dot"></div>
+                    <div class="label">Ciencia</div>
+                    <button class="open-btn" aria-label="Abrir evento 1600">Ver</button>
+                  </div>
+                  <div class="stop" data-idx="2" data-title="Revolución industrial" data-img="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHV9mchMYa4ZvdO6B8FBt_Mj3pEplppwMyEjXR4v4meWnpNU9zUqgm2cUQZProU3thl4k&usqp=CAU" data-body="La mecanización y la energía de vapor cambian la producción y la sociedad.">
+                    <div class="year">1760</div>
+                    <div class="dot"></div>
+                    <div class="label">Industria</div>
+                    <button class="open-btn">Ver</button>
+                  </div>
+                  <div class="stop" data-idx="3" data-title="Era digital" data-img="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVCZSMEel8MGF6BR8_hQt-7yrIoYNwHkAi3A&s" data-body="La computación, internet y los dispositivos móviles transforman la forma en que nos comunicamos y aprendemos.">
+                    <div class="year">1970–2000</div>
+                    <div class="dot"></div>
+                    <div class="label">Digital</div>
+                    <button class="open-btn">Ver</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tarjeta expandible -->
+              <div class="card" id="card" aria-live="polite">
+                <img class="thumb" id="thumb" src="" alt="Imagen del evento" />
+                <div>
+                  <h3 id="cardTitle">Título del evento</h3>
+                  <p id="cardBody">Descripción del evento.</p>
+                </div>
+                <button class="close" id="close" aria-label="Cerrar">×</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const wrap  = document.querySelector('.comp-wrap');
+      const id    = wrap ? (wrap.getAttribute('data-component-id') || 'timeline-component') : 'timeline-component';
+      const stops = Array.from(document.querySelectorAll('.stop'));
+      const bar   = document.getElementById('bar'); // ya no existe en el HTML
+      const card  = document.getElementById('card');
+      const thumb = document.getElementById('thumb');
+      const cTitle= document.getElementById('cardTitle');
+      const cBody = document.getElementById('cardBody');
+      const close = document.getElementById('close');
+      const visited = new Set();
+
+      function openStop(el){
+        const title = el.dataset.title || '';
+        const body  = el.dataset.body  || '';
+        const img   = el.dataset.img   || '';
+
+        cTitle.textContent = title;
+        cBody.textContent  = body;
+
+        if(img && img.trim() !== ''){
+          thumb.src = img;
+          thumb.style.display = 'block';
+          thumb.alt = "Imagen: " + title;
+        } else {
+          thumb.style.display = 'none';
+        }
+
+        card.classList.add('open');
+        el.classList.add('visited');
+        visited.add(el.dataset.idx);
+        tick();
+      }
+
+      function closeCard(){
+        card.classList.remove('open');
+        thumb.src = '';
+      }
+
+      function tick(){
+        const pct = Math.round((visited.size / stops.length) * 100);
+        if (bar) {
+          bar.style.width = pct + '%';
+        }
+        try {
+          window.parent && window.parent.postMessage({
+            type:'componentProgress',
+            componentId:id,
+            progress:pct,
+            completed: pct >= 95
+          }, '*');
+        } catch(e){}
+      }
+
+      stops.forEach(s => {
+        const btn = s.querySelector('.open-btn');
+        if (btn) {
+          btn.addEventListener('click', ()=> openStop(s));
+        }
+        s.addEventListener('keydown', (e)=>{
+          if(e.key==='Enter' || e.key===' '){
+            e.preventDefault();
+            openStop(s);
+          }
+        });
+        s.tabIndex = 0;
+      });
+
+      if (close) {
+        close.addEventListener('click', closeCard);
+      }
+
+      // Inicial
+      tick();
+    })();
+  </script>
+</body>
+</html>
